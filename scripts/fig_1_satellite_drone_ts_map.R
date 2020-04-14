@@ -70,20 +70,24 @@ plot_ts_2016 <- function(site_name, veg_type){
   MODIS6_qikiqtaruk$NDVI_percent <- MODIS6_qikiqtaruk$NDVI/10000
   
   MODIS6_site <- MODIS6_qikiqtaruk %>% 
-    filter(CentrePoint == site_name & VegType == veg_type & year == 2016, SummaryQA < 3 & SummaryQA > -1) %>%
+    filter(CentrePoint == site_name & 
+             VegType == veg_type & 
+             year == 2016, 
+           SummaryQA < 3 & SummaryQA > -1) %>%
     mutate(date = format(as.Date(paste0(DOY, "/2016"), format = "%j/%Y"), "%d/%m/%Y"))
   rm(MODIS6_data, MODIS6_qikiqtaruk)
   # prep meta_data frame for MODIS
-  MODIS_meta <- data.frame(flight_id = paste0(MODIS6_site$date, "_id"),
-                           site_veg = rep(paste0(site_name, "_", veg_type), 
-                                          length(MODIS6_site$date)),
-                           site_name = rep(site_name, length(MODIS6_site$date)),
-                           veg_type = rep(veg_type, length(MODIS6_site$date)),
-                           file_path = rep(NA, length(MODIS6_site$date)),
-                           object_name = rep(NA, length(MODIS6_site$date)),
-                           mean_NDVI = MODIS6_site$NDVI_percent,
-                           date = as.Date(MODIS6_site$date, "%d/%m/%Y"),
-                           sensor = rep("MODIS", length(MODIS6_site$date))
+  MODIS_meta <- data.frame(
+    flight_id = paste0(MODIS6_site$date, "_id"),
+    site_veg = rep(paste0(site_name, "_", veg_type), 
+                   length(MODIS6_site$date)),
+    site_name = rep(site_name, length(MODIS6_site$date)),
+    veg_type = rep(veg_type, length(MODIS6_site$date)),
+    file_path = rep(NA, length(MODIS6_site$date)),
+    object_name = rep(NA, length(MODIS6_site$date)),
+    mean_NDVI = MODIS6_site$NDVI_percent,
+    date = as.Date(MODIS6_site$date, "%d/%m/%Y"),
+    sensor = rep("MODIS", length(MODIS6_site$date))
   )
   
   ### !!!!!!!!!!!!!!!! End of revsions needed !!!!!!!!!!!!!!!!!!!!!!!!!
@@ -98,12 +102,13 @@ plot_ts_2016 <- function(site_name, veg_type){
   file_names <- list.files(folder_path, pattern = "*.tif")
   
   # create meta-data df
-  drone_meta <- data.frame(flight_id = substr(file_names, 1, 13),
-                          site_veg = rep(paste0(site_name, "_", veg_type), length(file_names)),
-                          site_name = rep(site_name, length(file_names)),
-                          veg_type = rep(veg_type, length(file_names)),
-                          file_path = paste0(folder_path, "/", file_names),
-                          object_name = gsub(".tif", "", file_names))
+  drone_meta <- data.frame(
+    flight_id = substr(file_names, 1, 13),
+    site_veg = rep(paste0(site_name, "_", veg_type), length(file_names)),
+    site_name = rep(site_name, length(file_names)),
+    veg_type = rep(veg_type, length(file_names)),
+    file_path = paste0(folder_path, "/", file_names),
+    object_name = gsub(".tif", "", file_names))
   drone_meta$file_path <- as.character(drone_meta$file_path)
   drone_meta$object_name <- as.character(drone_meta$object_name)
   
@@ -121,18 +126,21 @@ plot_ts_2016 <- function(site_name, veg_type){
   sentinel_files <- list.files(sentinel_path, pattern = "ndvi.tif")
   
   # add meta_data
-  sentinel_meta <- data.frame(flight_id = gsub("*.*(2016[0-9][0-9][0-9][0-9]).*", 
-                                               "\\1", sentinel_files),
-                              site_veg = rep(paste0(site_name, "_", veg_type), length(sentinel_files)),
-                              site_name = rep(site_name, length(sentinel_files)),
-                              veg_type = rep(veg_type, length(sentinel_files)),
-                              file_path = paste0(sentinel_path, "/", sentinel_files),
-                              object_name = gsub(".tif", "", sentinel_files))
+  sentinel_meta <- data.frame(
+    flight_id = gsub("*.*(2016[0-9][0-9][0-9][0-9]).*", 
+                     "\\1", sentinel_files),
+    site_veg = rep(paste0(site_name, "_", veg_type), length(sentinel_files)),
+    site_name = rep(site_name, length(sentinel_files)),
+    veg_type = rep(veg_type, length(sentinel_files)),
+    file_path = paste0(sentinel_path, "/", sentinel_files),
+    object_name = gsub(".tif", "", sentinel_files))
   sentinel_meta$file_path <- as.character(sentinel_meta$file_path)
   sentinel_meta$object_name <- as.character(sentinel_meta$object_name)
   
   # merge drone and sentinel meta data data frames
-  sensor_id <- c(rep("sentinel", nrow(sentinel_meta)), rep("drone", nrow(drone_meta)))
+  sensor_id <- c(rep("sentinel", 
+                     nrow(sentinel_meta)), 
+                 rep("drone", nrow(drone_meta)))
   meta_data <- rbind(sentinel_meta, drone_meta)
   meta_data$sensor <- sensor_id
   
@@ -174,10 +182,12 @@ plot_ts_2016 <- function(site_name, veg_type){
   # have no calibraiton imagery and hence NDVI is inflated. 
   # Let's indicate that with a different colour in the graphs
   if (site_name == "PS1") {
-    meta_data[meta_data$date == as.Date("2016-07-30"),]$sensor <- "drone_nocalib"
+    meta_data[meta_data$date == as.Date("2016-07-30"),]$sensor <- 
+      "drone_nocalib"
     no_calib_true <- NA
   } else if (site_name == "PS2" & veg_type == "KOM") {
-    meta_data[meta_data$date == as.Date("2016-06-30"),]$sensor <- "drone_nocalib"
+    meta_data[meta_data$date == as.Date("2016-06-30"),]$sensor <- 
+      "drone_nocalib"
     no_calib_true <- NA
   } else {
     no_calib_true <- 0
@@ -307,8 +317,11 @@ plot_ts_2016 <- function(site_name, veg_type){
       panel.grid.minor = element_blank(),
       axis.line = element_line(colour = "black", size = 1.2),
       axis.title = element_text(size = 24, face = "bold"),
-      axis.text.x = element_text(hjust = 0.5, size = 20, colour = x.axis.text.colour),
-      axis.text.y = element_text(size = 20, colour = y.axis.text.colour),
+      axis.text.x = element_text(hjust = 0.5, 
+                                 size = 20, 
+                                 colour = x.axis.text.colour),
+      axis.text.y = element_text(size = 20, 
+                                 colour = y.axis.text.colour),
       axis.ticks = element_line(size = 1.2),
       axis.ticks.length = unit(0.4, "cm"),
       axis.ticks.x = element_blank(),
@@ -342,8 +355,12 @@ plot_ts_2017 <- function(site_name, veg_type){
   MODIS6_qikiqtaruk$NDVI_percent <- MODIS6_qikiqtaruk$NDVI/10000
   
   MODIS6_site <- MODIS6_qikiqtaruk %>% 
-    filter(CentrePoint == site_name & VegType == veg_type & year == 2017, SummaryQA < 3 & SummaryQA > -1) %>%
-    mutate(date = format(as.Date(paste0(DOY, "/2017"), format = "%j/%Y"), "%d/%m/%Y"))
+    filter(CentrePoint == site_name & 
+             VegType == veg_type & 
+             year == 2017, 
+           SummaryQA < 3 & SummaryQA > -1) %>%
+    mutate(date = format(as.Date(paste0(DOY, "/2017"), 
+                                 format = "%j/%Y"), "%d/%m/%Y"))
   rm(MODIS6_data, MODIS6_qikiqtaruk)
   
   # prep meta_data frame for MODIS
@@ -573,8 +590,12 @@ plot_ts_2017 <- function(site_name, veg_type){
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.line = element_line(colour = "black", size = 1.2),
-      axis.title = element_text(size = 24, face = "bold", colour = y_label_colour),
-      axis.text.x = element_text(hjust = 0.5, size = 20, colour = x.axis.text.colour),
+      axis.title = element_text(size = 24, 
+                                face = "bold", 
+                                colour = y_label_colour),
+      axis.text.x = element_text(hjust = 0.5, 
+                                 size = 20, 
+                                 colour = x.axis.text.colour),
       axis.text.y = element_text(size = 20, colour = y.axis.text.colour),
       axis.ticks = element_line(size = 1.2),
       axis.ticks.length = unit(0.4, "cm"),
@@ -645,20 +666,41 @@ label_plot <- ggplot() +
   scale_y_continuous(expand = c(0,0), limits = c(0, 3)) +
   scale_x_continuous(expand = c(0,0), 
                limits = c(0,100)) +
-  annotate("text", x = 8, y = 2, label = "MODIS", colour = "black" , fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 5, y = 2, shape = 21, colour = "black", fill = plot_scale[5], size = 15) +
+  annotate("text", x = 8, y = 2, 
+           label = "MODIS", colour = "black" , fontface = "bold", 
+           size = 15, hjust = 0) +
+  annotate("point", x = 5, y = 2, 
+           shape = 21, colour = "black", 
+           fill = plot_scale[5], size = 15) +
   
-  annotate("text", x = 33, y = 2, label = "Sentinel 2A", colour = plot_scale[3] , fontface = "bold",size = 15,  hjust = 0) +
-  annotate("point", x = 30, y = 2, shape = 21, colour = "black", fill = plot_scale[3], size = 15) +
+  annotate("text", x = 33, y = 2, 
+           label = "Sentinel 2A", colour = plot_scale[3] , 
+           fontface = "bold",size = 15,  hjust = 0) +
+  annotate("point", x = 30, y = 2,
+           shape = 21, colour = "black", 
+           fill = plot_scale[3], size = 15) +
   
-  annotate("text", x = 68, y = 2, label = "Sentinel 2B", colour = plot_scale[4] , fontface = "bold",size = 15,  hjust = 0) +
-  annotate("point", x = 65, y = 2, shape = 21, colour = "black", fill = plot_scale[4], size = 15) +
+  annotate("text", x = 68, y = 2, 
+           label = "Sentinel 2B", colour = plot_scale[4] , 
+           fontface = "bold",size = 15,  hjust = 0) +
+  annotate("point", x = 65, y = 2, 
+           shape = 21, colour = "black", 
+           fill = plot_scale[4], size = 15) +
   
-  annotate("text", x = 15, y = 1.3, label = "Drone", colour = plot_scale[1] , fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 12, y = 1.3, shape = 21, colour = "black", fill = plot_scale[1], size = 15) +
+  annotate("text", x = 15, y = 1.3, 
+           label = "Drone", colour = plot_scale[1] , 
+           fontface = "bold", size = 15, hjust = 0) +
+  annotate("point", x = 12, y = 1.3, 
+           shape = 21, colour = "black", 
+           fill = plot_scale[1], size = 15) +
   
-  annotate("text", x = 39, y = 1.3, label = "Drone, not calibrated", colour = plot_scale[2] , fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 36, y = 1.3, shape = 21, colour = "black", fill = plot_scale[2], size = 15) +
+  annotate("text", x = 39, y = 1.3, 
+           label = "Drone, not calibrated", 
+           colour = plot_scale[2] , fontface = "bold", 
+           size = 15, hjust = 0) +
+  annotate("point", x = 36, y = 1.3, 
+           shape = 21, colour = "black", 
+           fill = plot_scale[2], size = 15) +
   
   xlab("") +
   ylab("") +
@@ -675,7 +717,7 @@ label_plot <- ggplot() +
 save_plot(paste0(ts_out_path,"label_plot.png"), label_plot,
           base_aspect_ratio = 3)
 
-### 4 Make Canada map ----
+### 4 Create Canada map ----
 world <- ne_countries(scale = "large", returnclass = "sf")
 qhi_location <- data.frame(y = c(69.58), x = c(-139.05), label = "Qikiatruk") %>%
   st_as_sf(coords = c("x", "y"),crs = "+proj=longlat +datum=WGS84 +no_defs")
@@ -695,7 +737,7 @@ canada_map <- ggplot() + geom_sf(data = world, fill = "#ffffffFF", size = 0.5) +
 save_plot(canada_map, filename = "figures/fig_1_ts_plots/canada_map.png",
           base_aspect_ratio = 1, base_height = 5)  
 
-### 4 Prepare final map figure ----
+### 5 Prepare final map figure ----
 
 # Load qhi / yukon boundaries
 qhi_boundaries_shp <- readOGR("data/auxillary/yukon_bounds_utmz7.shp")
@@ -738,6 +780,7 @@ site_coords <- bind_rows(lapply(new_bounds$site_veg,expand_coords))
 # Add a veg_type coloumn to the just created data frame
 site_coords$veg_type <- substr(site_coords$site_veg,5,7)
 
+# Convert data frame into sf polygon object
 sites_coords_sf <- site_coords %>% 
   dplyr::select(site_veg, x, y) %>%
   mutate(x_1 = x, y_1 = y) %>%
@@ -747,299 +790,11 @@ sites_coords_sf <- site_coords %>%
     crs = "+proj=utm +zone=7 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")
 sites_coords_sf <- sites_coords_sf %>% summarise() %>% st_convex_hull() 
 
+# Write out shapefile for map
 st_write(sites_coords_sf, "data/site_boundaries/ps_site_bounds.shp",
          delete_dsn =  T)
-plot(sites_coords_sf)
-# Define global properties for the map figure
-plot_width <- 5000
-plot_height <- 7500
-cropping_margin <- 2500 # this defines how much exess to leave for the polygons
 
-center_x <- 582000
-center_y <- 7720750
-
-x_min <- center_x - 0.5 * plot_width - cropping_margin
-x_max <- center_x + 0.5 * plot_width + cropping_margin
-y_min <- center_y - 0.5 * plot_height - cropping_margin
-y_max <- center_y + 0.5 * plot_height + cropping_margin
-
-# Scale bar
-scale_bar_start_x <- 583400
-scale_bar_start_y <- 7717100
-scale_bar_length <- 1000
-
-# Scale breaks for axes
-scale_breaks <- data.frame(
-  x = c(seq(580000, 584000, 2000)),
-  y = c(seq(7717500,7724500, 3000))
-)
-scale_breaks <- SpatialPoints(
-  scale_breaks, 
-  proj4string = 
-    CRS("+proj=utm +zone=7 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 "))
-scale_breaks_latlong <- spTransform(
-  scale_breaks, 
-  CRS("+proj=longlat +datum=WGS84"))
-
-# Global colours
-veg_colours <- c("#1E9148FF", "#1E5C91FF")
-
-## Create plot of site locations for main panel of map
-sites_plot <- ggplot() +
-  # Add QHI boundary
-  geom_polygon(data=points_df, 
-               aes(x=x, y=y, group=group),
-               lwd = 1, 
-               colour = "black", 
-               fill = 'white') +
-  # Add Site squares
-  geom_polygon(data=site_coords, 
-               aes(x=x, y=y, 
-                   group=site_veg, 
-                   fill = veg_type),
-               lwd = 0,
-               colour = "black",
-               inherit.aes = F) +
-  # Define scales
-  scale_fill_manual(values = veg_colours) +
-  scale_colour_manual(values = veg_colours) +
-  scale_x_continuous(
-    limits = c(x_min, x_max), 
-    breaks = scale_breaks$x[1:5],
-    labels= paste0(
-      format((round(scale_breaks_latlong$x[1:5],2) * -1), 
-             digits = 6), 
-      "°W"),
-    expand = expand_scale(add = c(-cropping_margin, -cropping_margin))) +
-  scale_y_continuous(
-    limits = c(y_min, y_max), 
-    breaks = scale_breaks$y,
-    labels= paste0(round(scale_breaks_latlong$y,2), "°N"),
-    expand = expand_scale(add = c(-cropping_margin, -cropping_margin))) +
-  # Plot scale bar
-  annotate("segment", 
-           x = scale_bar_start_x, 
-           xend = scale_bar_start_x + scale_bar_length,
-           y = scale_bar_start_y,
-           yend = scale_bar_start_y,
-           colour = "black", 
-           size = 1.25)+
-  annotate("text", 
-           label = "1 km",
-           x = scale_bar_start_x + 0.5 * scale_bar_length,
-           y = scale_bar_start_y + 125,
-           size = 3,
-           hjust = 0.5) +
-  # Add a blank rectangle for some reason
-  annotate("rect", xmin = 579600 , xmax = 580300, ymin = 7719590 , ymax = 7719730, colour = NA, fill = "white", alpha = 1) +
-  # Add site labels
-  annotate("text", label = "Collinson Head", x = 583050, y = 7719650, size = 3, vjust = 0.5, hjust = 1 ) +
-  annotate("text", label = "Bowhead Ridge", x = 582250, y = 7721100, size = 3, vjust = 0.5, hjust = 0 ) +
-  annotate("text", label = "Hawk Valley", x = 580300, y = 7719650, size = 3, vjust = 0.5, hjust = 1) +
-  annotate("text", label = "Hawk Ridge", x = 580300, y = 7721550, size = 3, vjust = 0.5, hjust = 1 ) +
-  annotate("text", label = "Veg. Types:", x = 580300, y = 7717100, size = 3, colour = 'black', vjust = 0, hjust = 1) +
-  annotate("text", label = "Dryas-Vetch Tundra", x = 580400, y = 7717100, size = 3, colour = veg_colours[2], vjust = 0, hjust = 0 ) +
-  annotate("text", label = "Tussock Sedge Tundra", x = 581000, y = 7717100, size = 3, colour = veg_colours[1], vjust = 0, hjust = 0) +
-  annotate("text", label = "Qikiqtaruk - \nHerschel Island", x = center_x, y = center_y - 600, size = 4, fontface = "italic", colour = 'black', vjust = 0, hjust = 0.5 ) +
-  # Add rectangles
-  annotate("rect", xmin = 582700 , xmax = 583100, ymin = 7720350 , ymax = 7720925, colour = "black", fill = "#00000000" ) +
-  annotate("rect", xmin = 582900 , xmax = 583300, ymin = 7719800 , ymax = 7720200, colour = "black", fill = "#00000000" ) +
-  annotate("rect", xmin = 580825 , xmax = 581250, ymin = 7720550 , ymax = 7721040, colour = "black", fill = "#00000000" ) +
-  annotate("rect", xmin = 580500 , xmax = 580950, ymin = 7721060 , ymax = 7721550, colour = "black", fill = "#00000000" ) +
-  # Beatuify plot
-  xlab("") +
-  ylab("") +
-  theme_bw() +
-  theme(
-    panel.border = element_rect(colour = "black"),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.text = element_text(size = 8, colour = "black"),
-    axis.ticks = element_line(colour = "black", size = 1),
-    legend.position = "none") +
-  coord_fixed()
-
-## Genereate insert plot of QHI
-plot_width_qhi <- 21000
-plot_height_qhi <- 17000
-cropping_margin_qhi <- 2500
-center_x_qhi <- 575000
-center_y_qhi <- 7720000
-x_min_qhi <- center_x_qhi - 0.5 * plot_width_qhi - cropping_margin_qhi
-x_max_qhi <- center_x_qhi + 0.5 * plot_width_qhi + cropping_margin_qhi
-y_min_qhi <- center_y_qhi - 0.5 * plot_height_qhi - cropping_margin_qhi
-y_max_qhi <- center_y_qhi + 0.5 * plot_height_qhi + cropping_margin_qhi
-
-qhi <- ggplot() +
-  geom_polygon(data=filter(points_df, group == 58 | group == 19), #, group == 897 | group == 898), 
-               aes(x=x, y=y),
-               lwd = 1, 
-               colour = "black", 
-               fill = 'white') +
-  scale_fill_manual(values = veg_colours) +
-  scale_colour_manual(values = veg_colours) +
-  scale_x_continuous(limits = c(x_min_qhi, x_max_qhi),
-                     expand = expand_scale(add = c(-cropping_margin_qhi, -cropping_margin_qhi))) +
-  scale_y_continuous(limits = c(y_min_qhi, y_max_qhi),
-                     expand = expand_scale(add = c(-cropping_margin_qhi, -cropping_margin_qhi))) +
-  annotate("rect", 
-           xmin = x_min + cropping_margin,
-           xmax = x_max - cropping_margin, 
-           ymin = y_min + cropping_margin, 
-           ymax = y_max - cropping_margin, 
-           colour = "black",
-           fill = "#00000030" ) +
-  annotate("text", label = "Qikiqtaruk", x = center_x_qhi, y = center_y_qhi, size = 2.5, colour = 'black', vjust = -0.5, hjust = 0.6) +
-  xlab("") +
-  ylab("") +
-  theme_bw() +
-  theme(panel.border = element_rect(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        legend.position = "none",
-        plot.margin = unit(c(0,0,0,0), "cm")) +
-  coord_fixed()
-
-## Prepare final map plot
-# Set farme boxes for insert plots
-ps1_box_xmin <- 0.595
-ps1_box_width <- 0.36
-ps1_box_ymin <- 0.116
-ps1_box_height <- 0.26
-
-ps2_box_xmin <- ps1_box_xmin
-ps2_box_width <- ps1_box_width
-ps2_box_ymin <- 0.601
-ps2_box_height <- ps1_box_height
-
-ps3_box_xmin <- 0.1675
-ps3_box_width <- ps1_box_width / 2 
-ps3_box_ymin <- 0.116
-ps3_box_height <- ps1_box_height
-
-ps4_box_xmin <- 0.1675
-ps4_box_width <- ps1_box_width / 2 
-ps4_box_ymin <- 0.655
-ps4_box_height <- ps1_box_height
-
-box_buffer <- 0.0025
-
-# Load Sentinel brick
-sentinel_brick <- brick("figures/fig_1_ts_plots/L2A_QHI_20170728_cldsmskd_10m_brick.tif")
-# 5 Generate final map figure ----
-map_plot <- ggdraw() +
-  #draw_plot(sites_plot + theme(legend.justification = "bottom"), 0, 0, 1, 1) +
-  #draw_plot(qhi, x = 0.745, y = 0.82, height = 0.17, width = 0.21) +
-
-map_plot <- ggdraw() +
-  ## PS1
-  # HER
-  draw_image(paste0(ts_out_path, "/PS1_HER_2017_tsplot.png"),
-             x = 0, y = 0) +
-  draw_image(paste0(ts_out_path, "/PS1_HER_2016_tsplot.png"),
-             x = 0.5, y = 0) +
-  # KOM
-  draw_image(paste0(ts_out_path, "/PS1_KOM_2017_tsplot.png"),
-             x = 0, y = 0.5,
-             scale = 0.2) +
-  draw_image(paste0(ts_out_path, "/PS1_KOM_2016_tsplot.png"),
-             x = 0.5, y = 05)
-
-  annotate("rect", 
-           xmin = ps1_box_xmin, xmax = ps1_box_xmin + ps1_box_width,
-           ymin = ps1_box_ymin - 6 * box_buffer, ymax = ps1_box_ymin + (ps1_box_height / 2) - 2 * box_buffer, 
-           colour = veg_colours[1], fill = NA) +
-  annotate("rect", 
-           xmin = ps1_box_xmin, xmax = ps1_box_xmin + ps1_box_width,
-           ymin = ps1_box_ymin + (ps1_box_height / 2), ymax = ps1_box_ymin + ps1_box_height - 2 * box_buffer,
-           colour = veg_colours[2], fill = NA) +
-
-  ## PS2
-  annotate("rect", 
-         xmin = ps2_box_xmin, xmax = ps2_box_xmin + ps2_box_width,
-         ymin = ps2_box_ymin , ymax = ps2_box_ymin + ps2_box_height, 
-         colour = NA, fill = "white") +
-  # HER
-  draw_image(paste0(ts_out_path, "/PS2_HER_2017_tsplot.png"),
-             x = 0.35, y = 0.28,
-             scale = 0.2) +
-  draw_image(paste0(ts_out_path, "/PS2_HER_2016_tsplot.png"),
-             x = 0.20, y = 0.28,
-             scale = 0.2) +
-  # KOM
-  draw_image(paste0(ts_out_path, "/PS2_KOM_2017_tsplot.png"),
-             x = 0.35, y = 0.15,
-             scale = 0.2) +
-  draw_image(paste0(ts_out_path, "/PS2_KOM_2016_tsplot.png"),
-             x = 0.20, y = 0.15,
-             scale = 0.2)+
-  annotate("rect", 
-           xmin = ps2_box_xmin, xmax = ps2_box_xmin + ps2_box_width,
-           ymin = ps2_box_ymin - 6 * box_buffer, ymax = ps2_box_ymin + (ps2_box_height / 2) - 2 * box_buffer, 
-           colour = veg_colours[1], fill = NA) +
-  annotate("rect", 
-           xmin = ps2_box_xmin, xmax = ps2_box_xmin + ps2_box_width,
-           ymin = ps2_box_ymin + (ps2_box_height / 2), ymax = ps2_box_ymin + ps2_box_height - 2 * box_buffer,
-           colour = veg_colours[2], fill = NA) +
-  
-  # PS3
-  annotate("rect", 
-           xmin = ps3_box_xmin, xmax = ps3_box_xmin + ps3_box_width + 12* box_buffer,
-           ymin = ps3_box_ymin , ymax = ps3_box_ymin + ps3_box_height, 
-           colour = NA, fill = "white") +
-  # HER
-  draw_image(paste0(ts_out_path, "/PS3_HER_2017_tsplot.png"),
-             x = -0.2275, y = -0.205,
-             scale = 0.2) +
-  # KOM
-  draw_image(paste0(ts_out_path, "/PS3_KOM_2017_tsplot.png"),
-             x = -0.2275, y = -0.335,
-             scale = 0.2) +
-  
-  annotate("rect", 
-           xmin = ps3_box_xmin, xmax = ps3_box_xmin + ps3_box_width + 12* box_buffer,
-           ymin = ps3_box_ymin - 6 * box_buffer, ymax = ps3_box_ymin + (ps3_box_height / 2) - 2 * box_buffer, 
-           colour = veg_colours[1], fill = NA) +
-  annotate("rect", 
-           xmin = ps3_box_xmin, xmax = ps3_box_xmin + ps3_box_width + 12* box_buffer,
-           ymin = ps3_box_ymin + (ps3_box_height / 2), ymax = ps3_box_ymin + ps3_box_height - 2 * box_buffer,
-           colour = veg_colours[2], fill = NA) +
-  annotate("segment", x = 0.3, y = 0.375, xend = 0.4, yend = 0.495) +
-
- # PS 4
- annotate("rect", 
-         xmin = ps4_box_xmin, xmax = ps4_box_xmin + ps4_box_width + 12* box_buffer,
-         ymin = ps4_box_ymin , ymax = ps4_box_ymin + ps4_box_height, 
-         colour = NA, fill = "white") +
-  # HER
-  draw_image(paste0(ts_out_path, "/PS4_HER_2017_tsplot.png"),
-             x = -0.2275, y = 0.335,
-             scale = 0.2) +
-  # KOM
-  draw_image(paste0(ts_out_path, "/PS4_KOM_2017_tsplot.png"),
-             x = -0.2275, y = 0.205,
-             scale = 0.2) +
-  
-  annotate("rect", 
-           xmin = ps4_box_xmin, xmax = ps4_box_xmin + ps4_box_width + 12* box_buffer,
-           ymin = ps4_box_ymin - 6 * box_buffer, ymax = ps4_box_ymin + (ps4_box_height / 2) - 2 * box_buffer, 
-           colour = veg_colours[1], fill = NA) +
-  annotate("rect", 
-           xmin = ps4_box_xmin, xmax = ps4_box_xmin + ps4_box_width + 12* box_buffer,
-           ymin = ps4_box_ymin + (ps4_box_height / 2), ymax = ps4_box_ymin + ps4_box_height - 2 * box_buffer,
-           colour = veg_colours[2], fill = NA) +
-  
-  draw_image(paste0(ts_out_path, "/label_plot.png"),
-             x = 0.16, y = 0.405,
-             scale = 0.15) 
-
-# Save plot file  
-ggsave("figures/figure_1_satellite_drone_ts_map.png", 
-       map_plot, 
-       width = 15, 
-       height = 20, 
-       unit = "cm")
- 
+### The rest of the map figure is assembled in QGIS - 
+### See QGIS project file and layout in:
+### figures/fig_1_ts_plots/fig_1_drone_satellite_ts_map.qgz
 
