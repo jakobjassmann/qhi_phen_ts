@@ -1,6 +1,8 @@
 # Phenology Time-Series Drone and Sentinel correlation 
 # Jakob Assmann j.assmann@ed.ac.uk 4 October 2018
+# Updated 15 April 2020
 
+### Preparations ----
 # Dependencies
 library(dplyr)
 library(ggplot2)
@@ -8,15 +10,15 @@ library(raster)
 library(rasterVis)
 library(viridisLite)
 library(MCMCglmm)
+library(cowplot)
 
 # Set global parameters / load site boundaries and meta data
-data_out_path <- "data/fig_2_drone_sent_cor"
-figure_out_path <- "figures"
+data_out_path <- "data/fig_2_drone_sent_cor/"
+figure_out_path <- "figures/"
 site_boundaries <- read.csv("data/site_boundaries/ps_sent_site_bounds.csv")
 load("data/meta_data.Rda") # (created by pre_gather_meta_data.R)
 
 ### 1) Extract pixel by pixel sentinel and drone data ----
-#####
 
 # Function to create an extent object form the boundaries data.frame
 get_sent_extent <- function(site_veg_id, sent_boundaries) {
@@ -217,10 +219,8 @@ rm(pixel_combos_list)
 save(pixel_combos, file = paste0(data_out_path, "pixel_combos.Rda"))
 
 load(paste0(data_out_path, "pixel_combos.Rda"))
-#####
 
-## Plot relationship
-#####
+#### 2) Garphical exploration of relationship -----
 
 # PS4_HER on the 17 July 2017 is a big outlier let's remove it!
 pixel_combos$site_veg_date <- paste0(pixel_combos$site_veg, "_", pixel_combos$drone_date)
@@ -280,246 +280,89 @@ ggplot(pixel_combos,
                      colour = factor(diff))) + 
   geom_point()
 
-ggsave(paste0(figure_out_path, "sentinel_drone_plot_diff.png"), 
-       width = 12, height = 8)
-
 # looks nice... almost like
 # slopes are consistent within sites, satellites
-# one oultier is the PS3 HER early season site, where the slope seem to be slightly different (maybe not a linear repsonse?)
-# difference in days has a clear influence on the intercept
+# one oultier is the PS3 HER early season site, where the slope seem ing
+# to be slightly different (maybe not a linear repsonse?)
+# difference in days seems to have a clear influence on the intercept
 
-#####
+##### 3) Linear Models ----
 
-## Let's model it!
-sentinel_drone_model_simple <- MCMCglmm(drone_ndvi~ sentinel_ndvi, 
-                                 data = pixel_combos,
+# Take random subsample of 10% for each sentinel / drone data combo
+set.seed(5)
+pixel_combos_sample <- pixel_combos %>% group_by(combo_id) %>% sample_frac(0.1)
+
+# Model simple relationship
+sentinel_drone_model_simple <- MCMCglmm(sentinel_ndvi ~ drone_ndvi, 
+                                 data = as.data.frame(pixel_combos_sample),
                                  nitt = 50000,
                                  pr = T) 
 summary(sentinel_drone_model_simple)
-save(sentinel_drone_model_diff, file = paste0(data_out_path, "model_simple.rda"))
-load(paste0(data_out_path, "model_simple.rda"))
+save(sentinel_drone_model_simple, file = paste0(data_out_path, "model_simple.rda"))
 
-# Let's test whether there is an effect of doy, sentinel, veg_type + interaction and on the relationship
+# Let's test whether there is an effect of doy, sentinel, 
+# veg_type + interaction and on the relationship
 sentinel_drone_model_full <- MCMCglmm(
-  drone_ndvi~ sentinel_ndvi + 
+  sentinel_ndvi ~ drone_ndvi + 
     diff + veg_type + sentinel_id + 
-    diff:sentinel_ndvi + veg_type:sentinel_ndvi + sentinel_id:sentinel_ndvi, 
-  data = pixel_combos,
+    diff:drone_ndvi + veg_type:drone_ndvi + sentinel_id:drone_ndvi, 
+  data = as.data.frame(pixel_combos_sample),
   nitt = 50000,
   pr = T) 
 summary(sentinel_drone_model_full)
 save(sentinel_drone_model_full, file = paste0(data_out_path, "model_full.rda"))
-load(paste0(data_out_path, "model_full.rda"))
-out <- capture.output(summary(sentinel_drone_model_full))
-cat(out, file=paste0(data_out_path, "model_full.txt"), sep = "\n", append=F)
+# The date difference intercept is the only tested variable that does not have
+# a significant effect on the relationship, however it affects the slope 
+# significantly
 
-sentinel_drone_model_veg <- MCMCglmm(drone_ndvi~ sentinel_ndvi + 
-                                        veg_type + 
-                                        veg_type:sentinel_ndvi, 
-                                      data = pixel_combos,
-                                      nitt = 50000,
-                                      pr = T) 
-summary(sentinel_drone_model_veg)
-save(sentinel_drone_model_veg, file = paste0(data_out_path, "model_veg.rda"))
-load(paste0(data_out_path, "model_veg.rda"))
-out <- capture.output(summary(sentinel_drone_model_veg))
-cat(out, file=paste0(data_out_path, "model_veg.txt"), sep="\n", append=F)
-
-
-a <- 10000
-pa_prior <- list(
-  R=list(V=diag(1), nu=0.002),
-  G=list(G1=list(V=diag(1), nu=1, alpha.mu=c(0), alpha.V=diag(1)*a)))
-sentinel_drone_model_diff <- MCMCglmm(drone_ndvi~ sentinel_ndvi, 
-                                 random = ~  diff, 
-                                 data = pixel_combos,
-                                 nitt = 50000,
-                                 prior = pa_prior,
-                                 pr = T) 
-summary(sentinel_drone_model_diff)
-plot(sentinel_drone_model_diff)
-save(sentinel_drone_model_diff, file = paste0(data_out_path, "model_diff.rda"))
-
-sentinel_drone_model_sentinel_id <- MCMCglmm(drone_ndvi~ sentinel_ndvi, 
-                                      random = ~  sentinel_id, 
-                                      data = pixel_combos,
-                                      nitt = 19000,
-                                      prior = pa_prior,
-                                      pr = T) 
-summary(sentinel_drone_model_sentinel_id)
-plot(sentinel_drone_model_sentinel_id)
-a <- 10000
-pa_prior <- list(
-  R=list(V=diag(1), nu=0.002),
-  G=list(G1=list(V=diag(1), nu=1, alpha.mu=c(0), alpha.V=diag(1)*a),
-         G1=list(V=diag(1), nu=1, alpha.mu=c(0), alpha.V=diag(1)*a)))
-
-
-sentinel_drone_model_diff_n_sent_id <- sentinel_drone_model
-sentinel_drone_model_diff_n_sent_id <- MCMCglmm(drone_ndvi~ sentinel_ndvi, 
-                                 random = ~  diff + sentinel_id, 
-                                 data = pixel_combos,
-                                 nitt = 50000,
-                                 prior = pa_prior,
-                                 pr = T) 
-summary(sentinel_drone_model_diff_n_sent_id)
-plot(sentinel_drone_model_diff)
-save(sentinel_drone_model_diff_n_sent_id, 
-     file = paste0(data_out_path, "model_diff_n_sent_id.rda"))
-
-#####
+##### 4) Final plot ---- 
 
 ## Pretty plot for publication
 
-# Extract veg model predictions and confidence intervals
-load(paste0(data_out_path, "model_veg.rda"))
+# Extract model predictions and confidence intervals for simple model
+#load(paste0(data_out_path, "model_simple.rda"))
 
-# PS4_HER on the 17 July 2017 is a big outlier let's remove it!
-pixel_combos$site_veg_date <- paste0(pixel_combos$site_veg, 
-                                     "_", pixel_combos$drone_date)
-pixel_combos <- filter(pixel_combos, site_veg_date != "PS4HER_2017-07-17")
-
-preds <- predict.MCMCglmm(sentinel_drone_model_veg, 
+preds <- predict.MCMCglmm(sentinel_drone_model_simple, 
                           interval = "confidence", 
                           type = "response")
 preds <- cbind(preds, 
                data.frame(
-                 entinel_ndvi = sentinel_drone_model_veg$X[,2],
-                 veg_type = as.character(sentinel_drone_model_veg$X[,3]),
-                 interac = as.character(sentinel_drone_model_veg$X[,4]), 
+                 drone_ndvi = sentinel_drone_model_simple$X[,2],
                  stringsAsFactors = F))
-preds[preds$veg_type == "0",]$veg_type <- "HER"
-preds[preds$veg_type == "1",]$veg_type <- "KOM"
 
-sentinel_drone_plot <- ggplot(data = pixel_combos, 
-                              mapping = aes(x = sentinel_ndvi, 
-                                            y = drone_ndvi, 
-                                            colour = veg_type)) +
+sentinel_drone_plot <- ggplot(data = pixel_combos_sample, 
+                              mapping = aes(x = drone_ndvi, 
+                                            y = sentinel_ndvi)) +
   geom_abline(intercept = 0, slope = 1, 
               color="black", linetype="dashed", 
               size= 1, alpha = 1 ) +
-  geom_point(alpha = 0.5, size = 2) +
+  geom_point(size = 2, color = "black") +
   geom_line(data = preds,
-            mapping = aes(x = sentinel_ndvi,
-                          y = fit,
-                          group = veg_type,
-                          linetype = veg_type
-                          #colour = veg_type
+            mapping = aes(x = drone_ndvi,
+                          y = fit
             ),
-            colour = "black",
+            colour = "blue",
             inherit.aes = FALSE,
-            size = 2) +
-
-
+            size = 1) +
+  geom_ribbon(data = preds,
+              mapping = aes(x = drone_ndvi,
+                            ymin = lwr,
+                            ymax = upr
+              ),
+              fill = "blue",
+              alpha = 0.5,
+              inherit.aes = FALSE) + 
   scale_x_continuous(limits = c(0.28,0.9), breaks = seq(0.3,0.9,0.1)) +
   scale_y_continuous(limits = c(0.28,0.9), breaks = seq(0.3,0.9,0.1)) +
   scale_colour_manual(values = c("#1E9148FF", "#1E5C91FF")) +
   scale_fill_manual(values = c("#1E9148FF", "#1E5C91FF")) +
   scale_linetype_manual(values = c("solid", "twodash")) +
-  xlab('\nSentinel NDVI')+
-  ylab("Drone NDVI\n") +
-  annotate("text", x = 0.79, y = 0.38, 
-           label = 'Herschel', colour = "#1E9148FF", 
-           size = 12, hjust = 0) +
-  annotate("text", x = 0.79, y = 0.33, 
-           label = 'Komakuk', colour = "#1E5C91FF", 
-           size = 12, hjust = 0) +
-  annotate("line", x = c(0.73, 0.78), y = c(0.38, 0.38),
-           size = 2, linetype = "solid") +
-  annotate("line", x =  c(0.73, 0.78), y = c(0.33, 0.33),
-           size = 2, linetype = "twodash") +
-  
-  theme_bw() +
-  theme(panel.border = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(size = 28, face = "bold"),
-        axis.text.x = element_text(hjust = 0.5, size = 24, colour = "black"),
-        axis.text.y = element_text(size = 24, colour = "black"),
-        legend.position = "none") 
-sentinel_drone_plot
-save(sentinel_drone_plot, 
-     file = paste0(data_out_path,
-                   "sentinel_drone_plot_veg.Rda"))
-ggsave(paste0(figure_out_path, "sentinel_drone_plot_veg.png"), 
-       plot = sentinel_drone_plot, width = 12, height = 8)
+  xlab('Drone NDVI')+
+  ylab("Sentinel NDVI") +
+  theme_cowplot(25)
+
+save_plot(paste0(figure_out_path, "fig_2_drone_sent_cor.png"), 
+       plot = sentinel_drone_plot, base_aspect_ratio =  1.3)
        
-## Plot with dark colours for models for Isla:
-
-load(paste0(data_out_path, "pixel_combos.Rda"))
-load(paste0(data_out_path, "model_veg.rda"))
-
-# PS4_HER on the 17 July 2017 is a big outlier let's remove it!
-pixel_combos$site_veg_date <- paste0(pixel_combos$site_veg, 
-                                     "_", 
-                                     pixel_combos$drone_date)
-pixel_combos <- filter(pixel_combos, site_veg_date != "PS4HER_2017-07-17")
-
-
-preds$veg_type2 <- paste0(as.character(preds$veg_type), "_2")
-preds$veg_type2 <- factor(
-  preds$veg_type2, 
-  levels = c(unique(as.character(pixel_combos$veg_type)), 
-             unique(as.character(preds$veg_type2))))
-pixel_combos$veg_type2 <- factor(
-  as.character(pixel_combos$veg_type), 
-  levels = c(unique(as.character(pixel_combos$veg_type)), 
-             unique(as.character(preds$veg_type2))))
-levels(preds$veg_type2)
-levels(pixel_combos$veg_type2)
-
-plot_colours <- c("#1E9148FF", # Herschel Pixel Combos
-                  "#1E5C91FF", # Komakuk Pixel Combos
-                  "#004421FF",  # Herschel Predictions
-                  "#002a6dFF") # Komakuk Predictions
-names(plot_colours) <- levels(pixel_combos$veg_type2)
-plot_scale <- scale_colour_manual(name = "veg_type2",values = plot_colours)
-
-sentinel_drone_plot <- ggplot(
-  data = pixel_combos, 
-  mapping = aes(x = sentinel_ndvi, y = drone_ndvi, colour = veg_type2)) +
-  geom_abline(intercept = 0, slope = 1, 
-              color="black", linetype="dashed", 
-              size= 1.5, alpha = 1 ) +
-  geom_point(alpha = 0.5, size = 2) +
-  geom_ribbon(data = preds,
-              mapping = aes(x = sentinel_ndvi,
-                            ymin = lwr,
-                            ymax = upr, 
-                            fill = veg_type2),
-              inherit.aes = FALSE) +
-  geom_line(data = preds,
-            mapping = aes(x = sentinel_ndvi,
-                          y = fit,
-                          group = veg_type2, 
-                          colour = veg_type2
-            ),
-            inherit.aes = FALSE,
-            size = 0.5) +
-  
-  
-  scale_x_continuous(limits = c(0.28,0.9), breaks = seq(0.3,0.9,0.1)) +
-  scale_y_continuous(limits = c(0.28,0.9), breaks = seq(0.3,0.9,0.1)) +
-  scale_colour_manual(values = plot_colours, aesthetics = c("colour","fill")) +
-  xlab('\nSentinel NDVI')+
-  ylab("Drone NDVI\n") +
-  annotate("text", x = 0.75, y = 0.38, 
-           label = 'Herschel', colour = plot_colours[1], size = 12, hjust = 0) +
-  annotate("text", x = 0.75, y = 0.33, 
-           label = 'Komakuk', colour = plot_colours[2], size = 12, hjust = 0) +
-  
-  theme_bw() +
-  theme(panel.border = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(size = 28, face = "bold"),
-        axis.text.x = element_text(hjust = 0.5, size = 24, colour = "black"),
-        axis.text.y = element_text(size = 24, colour = "black"),
-        legend.position = "none") 
-sentinel_drone_plot
-ggsave(paste0(figure_out_path, "sentinel_drone_plot_veg_isla.png"), 
-       plot = sentinel_drone_plot, width = 12, height = 8)
 
 ### EOF 
