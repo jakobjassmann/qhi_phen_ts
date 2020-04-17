@@ -1,0 +1,19 @@
+
+ Iterations = 3001:49991
+ Thinning interval  = 10
+ Sample size  = 4700 
+
+ DIC: -2440.793 
+
+ R-structure:  ~units
+
+      post.mean l-95% CI u-95% CI eff.samp
+units  0.001785 0.001603 0.001981     4700
+
+ Location effects: sentinel_ndvi ~ drone_ndvi 
+
+            post.mean l-95% CI u-95% CI eff.samp  pMCMC    
+(Intercept)    0.1755   0.1516   0.2008     4899 <2e-04 ***
+drone_ndvi     0.8426   0.8008   0.8830     4907 <2e-04 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

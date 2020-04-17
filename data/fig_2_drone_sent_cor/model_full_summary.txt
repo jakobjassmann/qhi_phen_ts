@@ -1,0 +1,25 @@
+
+ Iterations = 3001:49991
+ Thinning interval  = 10
+ Sample size  = 4700 
+
+ DIC: -3026.09 
+
+ R-structure:  ~units
+
+      post.mean  l-95% CI  u-95% CI eff.samp
+units 0.0007672 0.0006956 0.0008572     4700
+
+ Location effects: sentinel_ndvi ~ drone_ndvi + diff + veg_type + sentinel_id + diff:drone_ndvi + veg_type:drone_ndvi + sentinel_id:drone_ndvi 
+
+                                  post.mean  l-95% CI  u-95% CI eff.samp    pMCMC    
+(Intercept)                        0.171048  0.135601  0.204215     4700  < 2e-04 ***
+drone_ndvi                         0.800653  0.745192  0.857945     4700  < 2e-04 ***
+diff                              -0.006196 -0.022543  0.010565     4700 0.463404    
+veg_typeKOM                       -0.076752 -0.112491 -0.042942     4700  < 2e-04 ***
+sentinel_idSentinel 2B             0.185278  0.116221  0.253598     4447  < 2e-04 ***
+drone_ndvi:diff                    0.037229  0.009070  0.063733     4700 0.007660 ** 
+drone_ndvi:veg_typeKOM             0.132686  0.076747  0.193024     4700  < 2e-04 ***
+drone_ndvi:sentinel_idSentinel 2B -0.193335 -0.305779 -0.081063     4411 0.000426 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
