@@ -87,22 +87,12 @@ PS2_KOM_sentinel <- crop(L2A_QHI_20170717_cldsmskd_10m_brick, PS2_KOM_extent)
 
 # Aggregate drone rasters to sentinel grid and resolution then resample to 
 # using nearest neighbour to match senntinel grid
-PS2_KOM_20170717_50m_red_cropped_agg <- aggregate(
-  PS2_KOM_20170717_50m_red_cropped, 
-  floor(10/res(PS2_KOM_20170717_50m_nir_cropped)[1]), 
-  expand = F,
-  fun = mean)
 PS2_KOM_20170717_50m_red_cropped_resamp <- resample(
-  PS2_KOM_20170717_50m_red_cropped_agg,
-  PS2_KOM_sentinel, method = 'ngb')
-PS2_KOM_20170717_50m_nir_cropped_agg<- aggregate(
-  PS2_KOM_20170717_50m_nir_cropped, 
-  floor(10/res(PS2_KOM_20170717_50m_nir_cropped)[1]), 
-  expand = F,
-  fun = mean)
+  PS2_KOM_20170717_50m_red_cropped,
+  PS2_KOM_sentinel, method = 'bilinear')
 PS2_KOM_20170717_50m_nir_cropped_resamp <- resample(
-  PS2_KOM_20170717_50m_nir_cropped_agg,
-  PS2_KOM_sentinel, method = 'ngb')
+  PS2_KOM_20170717_50m_nir_cropped,
+  PS2_KOM_sentinel, method = 'bilinear')
 
 # Calcuate NDVI for drone and sentinel data
 # NDVI =  (NIR - RED) / (NIR + RED)

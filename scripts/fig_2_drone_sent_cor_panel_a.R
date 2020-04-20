@@ -132,13 +132,9 @@ extract_ndvi <- function(site_name_en,
       setNames(paste0(drone_bands$object_name, "_cropped"), 
                make.names(paste0(drone_bands$object_name, "_cropped_resamp"))),
       function(x) { 
-        aggregated <- aggregate(get(x), floor(10/res(get(x))[1]), 
-                                expand = F,
-                                fun = mean)
-        resampled <- resample(aggregated,
+        resample(get(x),
                  get(paste0(sentinel_brick$object_name, "_cropped")),
-                 method = "ngb")
-        return(resampled)
+                 method = "bilinear")
       }), 
     envir = .GlobalEnv)
   
