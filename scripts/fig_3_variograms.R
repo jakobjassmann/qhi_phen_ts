@@ -10,6 +10,7 @@ library(viridisLite)
 library(usdm)
 library(parallel)
 library(gstat)
+library(cowplot)
 
 # Set global parameters / load site boundaries and meta data
 figure_out_path <- "figures/"
@@ -188,43 +189,43 @@ parallelLog <- paste0(log_path,"parallel_log.txt")
 clusterExport(cl=cl,"parallelLog")
 
 # Definte function to calculuate the variogram (ready for parallel processing)
-sample_variogram <- function(x, thin = 20 , cut_off, bin_width){ 
+sample_variogram <- function(object_spdf, thin = 20 , cut_off, bin_width){ 
   # Time the operation
   start.time <- Sys.time()
-  cat(as.character(start.time),": Starting ", x, "... \n", sep="", 
+  cat(as.character(start.time),": Starting ", object_spdf, "... \n", sep="", 
       file = parallelLog, append=TRUE)
   
   # load spdf object 
-  load(paste0(scratch_folder, object_spdf, ".Rda"))
+  load(paste0(data_out_path, object_spdf, ".Rda"))
   
   # Wrapper to access raster layer in variogram function
   raster_layer_name <- names(get(object_spdf))[1]
   
   # Sample the variogram (this can take ages)
   vario <- variogram(get(raster_layer_name) ~ 1, 
-                     get(x)[sample(nrow(get(x)) / thin),],
+                     get(object_spdf)[sample(nrow(get(object_spdf)) / thin),],
                      cutoff = cut_off,
                      width = bin_width,
                      verbose = T) 
   # Stop timer
   end.time <- Sys.time()
   time.elapsed <- end.time - start.time
-  cat(as.character(end.time), ": ... finished ", x, ".\n", sep="", 
+  cat(as.character(end.time), ": ... finished ", object_spdf, ".\n", sep="", 
       file = parallelLog, append=TRUE)
   
   # Save variogram to harddrive
   copy_of_vario <- vario
-  assign(paste0(x,"_", cut_off, "m_vario"), copy_of_vario)
+  assign(paste0(object_spdf,"_", cut_off, "m_vario"), copy_of_vario)
   local_env <- environment()
-  save(list = paste0(x,"_", cut_off, "m_vario"), 
-       file=paste0(data_out_path, x, "_", cut_off,"m_vario.Rda"), 
+  save(list = paste0(object_spdf,"_", cut_off, "m_vario"), 
+       file=paste0(data_out_path, object_spdf, "_", cut_off,"m_vario.Rda"), 
        envir = local_env)
   
   # clean memory
   gc()
   
   # Return variogram
-  return(get(paste0(x,"_", cut_off, "m_vario")))
+  return(get(paste0(object_spdf,"_", cut_off, "m_vario")))
 }
 
 # Export to cluster
@@ -251,7 +252,7 @@ list2env(
   envir = .GlobalEnv)
 meta_sub$object_45m_vario <- paste0(meta_sub$object_spdf, "_45m_vario")
 
-
+stopCluster(cl)
 # fit variogram models
 
 # Define helper function
@@ -274,7 +275,7 @@ fit_vario <- function(object_vario){
   copy_of_vario_fit <- vario_fit
   assign(paste0(object_vario,'_fit'), copy_of_vario_fit)
   save(list = paste0(object_vario, "_fit"), 
-       file=paste0(scratch_folder, object_vario, "_fit.Rda"))
+       file=paste0(data_out_path, object_vario, "_fit.Rda"))
   
   # clean memory
   gc()
@@ -285,22 +286,29 @@ fit_vario <- function(object_vario){
   return(vario_fit)
 }
 
+
 # Execute extraction in parallel
+cl <- makeCluster(3)
+clusterExport(cl=cl, "parallelLog")
+clusterExport(cl=cl, "data_out_path")
+clusterEvalQ(cl, library(gstat))
+
 clusterExport(cl=cl, varlist=meta_sub$object_15m_vario)
 list2env(
   parLapply(cl, 
             setNames(meta_sub$object_15m_vario, 
                      make.names(paste0(meta_sub$object_15m_vario , "_fit"))),
-            fit_vario,
-            envir = .GlobalEnv)
-  clusterExport(cl=cl, varlist=meta_sub$object_45m_vario)
-  list2env(
-    parLapply(cl, 
-              setNames(meta_sub$object_45m_vario, 
-                       make.names(paste0(meta_sub$object_45m_vario , "_fit"))),
-              fit_vario,
+            fit_vario),
   envir = .GlobalEnv)
 
+clusterExport(cl=cl, varlist=meta_sub$object_45m_vario)
+list2env(
+  parLapply(cl, 
+            setNames(meta_sub$object_45m_vario, 
+                     make.names(paste0(meta_sub$object_45m_vario , "_fit"))),
+            fit_vario),
+  envir = .GlobalEnv)
+# Added comment
 
 # Extract data from variograms
 varios_15m_df <- bind_rows(
@@ -412,7 +420,204 @@ varios_fits_all_df$flight_id <- factor(varios_fits_all_df$flight_id, levels = so
 
 levels(varios_all_df$flight_id)
 levels(varios_fits_all_df$flight_id)
-# Plot all data
+
+# Prepare plots
+# Set colours
+her_col <- "#1e9148FF"
+kom_col <- "#1e5c91FF"
+# Set site names
+site_names <- data.frame(
+  site_name = c("PS1", "PS2", "PS3", "PS4"),
+  site_name_full = c("Collinson Head",
+                     "Bowhead Ridge",
+                     "Hawk Valley",
+                     "Hawk Ridge")
+  )
+
+# Set overall range mean
+range_mean <- varios_fits_all_df %>% 
+  filter(max_dist == "15m") %>%
+  filter(date == as.Date("2017-07-26") |
+           date == as.Date("2017-07-28")) %>%
+  filter(site_veg != "PS3_KOM") %>%
+  pull(range) %>%
+  unique() %>%
+  mean(na.rm = T)
+
+# 1) Paired Komakuk and Herschel variograms fo PS2
+site_name <- "PS2"
+varios <- varios_all_df %>% 
+  filter(site_veg == paste0(site_name, "_HER") 
+         | site_veg == paste0(site_name, "_KOM")) %>% 
+  filter(date == as.Date("2017-07-26") |
+           date == as.Date("2017-07-28")) %>%
+  mutate(veg = ordered(substr(site_veg, 5, 8), levels = c("HER", "KOM")))
+vario_fits <- varios_fits_all_df %>% 
+  filter(site_veg == paste0(site_name, "_HER") 
+         | site_veg == paste0(site_name, "_KOM")) %>% 
+  filter(date == as.Date("2017-07-26") |
+           date == as.Date("2017-07-28")) %>%
+  mutate(veg = ordered(substr(site_veg, 5, 8), levels =c("HER", "KOM")))
+
+her_sill <- unique(round(vario_fits$sill[vario_fits$veg == "HER"], 3))
+kom_sill <- unique(round(vario_fits$sill[vario_fits$veg == "KOM"], 3))
+if(her_sill > kom_sill){
+  her_sill <- her_sill + 0.001
+  kom_sill <- kom_sill - 0.001
+}
+if(her_sill < kom_sill){
+  her_sill <- her_sill - 0.001
+  kom_sill <- kom_sill + 0.001
+}
+
+site_name_full <- site_names$site_name_full[site_names$site_name == site_name] 
+
+max_gamma <- round(max(varios$gamma),3) + 0.001
+# Plot 4m plot
+vario_plot_5m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
+                        aes(x = dist, y = gamma, 
+                            group = veg,
+                            colour = veg)) +
+  geom_point(size = 2) + 
+  geom_line(data = filter(vario_fits, max_dist == "15m" & dist < 4), 
+            mapping = aes(x=dist, y = gamma, 
+                          group = veg, 
+                          colour = veg,
+                          alpha = 0.6),
+            size = 1.5,
+            inherit.aes = F) +
+  geom_vline(xintercept = range_mean, colour = "black", size = 1, alpha = 0.6) +
+  scale_colour_manual(values = c(her_col, kom_col)) +
+  scale_x_continuous(limits = c(0,4), 
+                     breaks = seq(0,4,1)) +
+  scale_y_continuous(limits = c(0,max_gamma), 
+                     breaks = seq(0.000, max_gamma,0.002)) +
+  ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
+  ylab("NDVI semivariance") +
+  xlab("Distance (m)") +
+  annotate("text", x = 4, y = her_sill, label = "Tussock Sedge Tundra", 
+           hjust = 1, colour = her_col, size = 6) +    
+  annotate("text", x = 4, y = kom_sill, label = "Dryas-Vetch Tundra", 
+           hjust = 1, colour = kom_col, size = 6) +
+  annotate("text", x = range_mean + 0.1, y = 0, label = paste0(round(range_mean, 2), " m"), 
+           hjust = 0, vjust = 0, colour = "black", size = 5) +
+  theme_cowplot(18) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0)) 
+save_plot(vario_plot_5m, 
+          filename = paste0(figure_out_path, 
+                            "/fig_3_variograms/",
+                            site_name, "_vario_4m.png"),
+          base_aspect_ratio = 1.6)
+# 45 m plot 
+vario_plot_45m <- ggplot(varios,
+                        aes(x = dist, y = gamma, 
+                            group = veg,
+                            colour = veg)) +
+  geom_point(size = 2) + 
+  geom_line(data = vario_fits, 
+            mapping = aes(x=dist, y = gamma, 
+                          group = veg, 
+                          colour = veg,
+                          alpha = 0.6),
+            size = 1.5,
+            inherit.aes = F) +
+  scale_colour_manual(values = c(her_col, kom_col)) +
+  scale_x_continuous(limits = c(0,45), 
+                     breaks = seq(0,45,5)) +
+  scale_y_continuous(limits = c(0,max_gamma), 
+                     breaks = seq(0.000, max_gamma,0.002)) +
+  ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
+  ylab("NDVI semivariance") +
+  xlab("Distance (m)") +
+  annotate("text", x = 45, y = her_sill, label = "Tussock Sedge Tundra", 
+           hjust = 1, colour = her_col, size = 6) +    
+  annotate("text", x = 45, y = kom_sill, label = "Dryas-Vetch Tundra", 
+           hjust = 1, colour = kom_col, size = 6) +
+  theme_cowplot(18) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0)) 
+save_plot(vario_plot_45m, 
+          filename = paste0(figure_out_path, 
+                            "/fig_3_variograms/",
+                            site_name, "_vario_45m.png"),
+          base_aspect_ratio = 1.6)
+
+
+# Peak season variograms for all sites figure_s1 two panels (a her and b kom)
+varios <- varios_all_df %>% 
+  filter(date == as.Date("2017-07-26") |
+           date == as.Date("2017-07-28")) %>%
+  mutate(veg = ordered(substr(site_veg, 5, 8), levels = c("HER", "KOM")))
+vario_fits <- varios_fits_all_df %>% 
+  filter(date == as.Date("2017-07-26") |
+           date == as.Date("2017-07-28")) %>%
+  mutate(veg = ordered(substr(site_veg, 5, 8), levels =c("HER", "KOM")))
+
+vario_plot_her <- ggplot(filter(varios, veg == "HER"),
+                         aes(x = dist, y = gamma, 
+                             group = site_date,
+                             colour = site_date)) +
+  geom_point(size = 2) + 
+  geom_line(data = filter(vario_fits, veg == "HER"), 
+            mapping = aes(x=dist, y = gamma, 
+                          group = site_date, 
+                          colour = site_date),
+            size = 1.5,
+            alpha = 0.6,
+            inherit.aes = F) +
+  scale_x_continuous(limits = c(0,45), 
+                     breaks = seq(0,45,5)) +
+  scale_y_continuous(limits = c(0,0.006), 
+                     breaks = seq(0.000, 0.006,0.002)) +
+  ylab("NDVI semivariance") +
+  xlab("Distance (m)") +
+  ggtitle("Peak-Season Variograms", subtitle ="Tussock Sedge Tundra") +
+  annotate("text", x = 45, y = 0.0018, label = "Site 1", 
+           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+  annotate("text", x = 45, y = 0.001, label = "Site 2", 
+           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+  annotate("text", x = 45, y = 0.0002, label = "Site 4", 
+           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+  theme_cowplot(18) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0)) 
+
+vario_plot_kom <- ggplot(filter(varios, veg == "KOM" & site_veg != "PS3_KOM"),
+                         aes(x = dist, y = gamma, 
+                             group = site_date,
+                             colour = site_date)) +
+  geom_point(size = 2) + 
+  geom_line(data = filter(vario_fits, veg == "KOM" & site_veg != "PS3_KOM"), 
+            mapping = aes(x=dist, y = gamma, 
+                          group = site_date, 
+                          colour = site_date),
+            size = 1.5,
+            alpha = 0.6,
+            inherit.aes = F) +
+  scale_x_continuous(limits = c(0,45), 
+                     breaks = seq(0,45,5)) +
+  scale_y_continuous(limits = c(0,0.006), 
+                     breaks = seq(0.000, 0.006,0.002)) +
+  ylab("NDVI semivariance") +
+  xlab("Distance (m)") +
+  ggtitle("Peak-Season Variograms", subtitle ="Dryas-Vetch Tundra") +
+  annotate("text", x = 45, y = 0.0018, label = "Site 1", 
+           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+  annotate("text", x = 45, y = 0.001, label = "Site 2", 
+           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+  annotate("text", x = 45, y = 0.0002, label = "Site 4", 
+           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+  theme_cowplot(18) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0)) 
+save_plot(paste0(figure_out_path, "fig_s1_variograms_all/fig_s1_peak_season_varios.png"),
+          plot_grid(vario_plot_her, vario_plot_kom, ncol = 2, labels = "auto"),
+          base_aspect_ratio = 2.6)
+
+
+
+
 plot_colours <- c("#1E914870","#1E9148AA", "#1E9148FF", "#1E5C9170", "#1E5C91AA", "#1E5C91FF")
 varios_all_plot <- ggplot(varios_all_df, aes(x = dist, y = gamma, group = flight_mdist , colour = flight_id)) +
   geom_point(size = 2) + 
@@ -420,7 +625,7 @@ varios_all_plot <- ggplot(varios_all_df, aes(x = dist, y = gamma, group = flight
             mapping = aes(x=dist, y = gamma, group = flight_mdist , colour = flight_id),
             size = 1.5,
             inherit.aes = F) +
-  scale_colour_manual(values = plot_colours) +
+  #scale_colour_manual(values = plot_colours) +
   scale_x_continuous(limits = c(0,45), breaks =  seq(0,45, 5)) +
   scale_y_continuous(limits = c(0,0.011), breaks = seq(0,0.011, 0.002)) +
   # annotate("text", x = 35,  y = 0.0095, label = paste0("Range: ",round(range,2), " m"), colour = "black", hjust = 0, size = 5) +
@@ -446,11 +651,16 @@ varios_all_plot <- ggplot(varios_all_df, aes(x = dist, y = gamma, group = flight
 
 varios_all_plot
 
-
+ggplot(varios_all_df, aes(x = dist, y = gamma, group = flight_mdist , colour = flight_id)) +
+  geom_point(size = 2) + 
+  geom_line(data = filter(varios_fits_all_df, max_dist == "15m"), 
+            mapping = aes(x=dist, y = gamma, group = flight_mdist , colour = flight_id),
+            size = 1.5,
+            inherit.aes = F) 
 # Close up 
 # Calculate range mean
 range_mean <- mean(unique(varios_fits_all_df$range))
-
+range_mean <- mean(unique(vario_fits_15m_df$range))
 varios_1m_plot <- ggplot(filter(varios_all_df, max_dist == "15m"), aes(x = dist, y = gamma, group = flight_mdist , colour = flight_id)) +
   geom_vline(xintercept = range_mean, colour = "black", size = 0.5, alpha = 0.6) +
   geom_point(size = 4) + 
