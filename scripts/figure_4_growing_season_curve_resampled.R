@@ -1,0 +1,590 @@
+# Change in variation of NDVI curves with aggregation
+# Jakob Assmann j.assmann@ed.ac.uk 8 October 2018
+
+### Preparations ----
+# Dependencies
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(raster)
+library(rasterVis)
+library(viridisLite)
+library(MCMCglmm)
+library(cowplot)
+library(gridExtra)
+
+# Set global parameters / load site boundaries and meta data
+figure_out_path <- "figures/fig_4_curve_fits/"
+log_path <- "log/"
+data_out_path <- "data/fig_4_curve_resampled/"
+site_boundaries <- read.csv("data/site_boundaries/ps_sent_site_bounds.csv")
+load("data/meta_data.Rda")
+
+# Function to create an extent object form the boundaries data.frame
+get_sent_extent <- function(site_veg_id, sent_boundaries) {
+  extent_object <- extent(
+    c(sent_boundaries[which(sent_boundaries$site_veg == site_veg_id),]$xmin,
+      sent_boundaries[which(sent_boundaries$site_veg == site_veg_id),]$xmax,
+      sent_boundaries[which(sent_boundaries$site_veg == site_veg_id),]$ymin,
+      sent_boundaries[which(sent_boundaries$site_veg == site_veg_id),]$ymax))
+  return(extent_object)
+}
+
+# Create extent objects
+PS1_HER_extent <- get_sent_extent("PS1_HER", site_boundaries)
+PS1_KOM_extent <- get_sent_extent("PS1_KOM", site_boundaries)
+PS2_HER_extent <- get_sent_extent("PS2_HER", site_boundaries)
+PS2_KOM_extent <- get_sent_extent("PS2_KOM", site_boundaries)
+PS3_HER_extent <- get_sent_extent("PS3_HER", site_boundaries)
+PS3_KOM_extent <- get_sent_extent("PS3_KOM", site_boundaries)
+PS4_HER_extent <- get_sent_extent("PS4_HER", site_boundaries)
+PS4_KOM_extent <- get_sent_extent("PS4_KOM", site_boundaries)
+
+# Set time-series combos of interest (in 2016 we can only use PS1 and PS2)
+
+ts_combos <- data.frame(
+  site_veg = c("PS1_HER",
+               "PS1_KOM",
+               "PS2_HER",
+               "PS2_KOM",
+               "PS3_HER",
+               "PS3_KOM",
+               "PS4_HER",
+               "PS4_KOM"),
+  year = format(as.Date(c("2017",
+                          "2017",
+                          "2017",
+                          "2017",
+                          "2017",
+                          "2017",
+                          "2017",
+                          "2017"),
+                        format = "%Y"), "%Y"),
+  stringsAsFactors = F)
+
+# Set aggregation levels for drone data
+agg_levels <- c(0.5, 1,5,10,20,30)
+# fill in ts_combos data frame!
+ts_combos <- data.frame(
+  ts_combos,
+  agg_levels = sort(rep(agg_levels, nrow(ts_combos))),
+  stringsAsFactors = F
+)
+
+### 1) Perform aggregation ----
+
+# Note:
+# as the drone rasters all have odd resultions that are just below or around
+# 0.05 m we have to resample rather than just aggregate
+# by default 'resample' first performs an aggregation if the scale factor is > 2
+# and then shifts the position of the cells accurately using the
+# 'bilinear' algorithm.
+# See https://github.com/cran/raster/blob/master/R/resample.R
+
+# define function to prepare aggregation templates
+create_agg_raster <- function(site_veg, agg_level){
+  # Build a raster
+  # Empty object
+  agg_raster <- raster()
+  # Set projection
+  projection(agg_raster) <- "+proj=utm +zone=7 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"
+  # Set extent
+  extent(agg_raster) <- get(paste0(site_veg, "_extent"))
+  # Set dimension
+  ncol(agg_raster) <- 100 / agg_level
+  nrow(agg_raster) <- 100 / agg_level
+  # return raster
+  return(agg_raster)
+}
+
+# Create aggregation templates for all site_veg and aggregation level combos
+list2env(mapply(function(x, y){create_agg_raster(x, y)},
+                setNames(ts_combos$site_veg, 
+                         make.names(paste0(ts_combos$site_veg, "_agg_raster_", paste0(ts_combos$agg_levels), "m"))),
+                ts_combos$agg_levels), 
+         envir = .GlobalEnv)
+
+# Define function to calculate NDVI
+NDVI <- function(red_band, nir_band) {(nir_band - red_band) / (nir_band + red_band) }
+
+# Define function to reasmple drone rasters and produce summary statistics
+resample_agg_rasters <- function(site_veg_es, year_es, agg_level) {
+  cat("starting: ", site_veg_es, "_", year_es, "_", agg_level, "m... ", sep = "")
+  # subset meta data
+  ts_objects <- meta_data %>% 
+    filter(site_veg == site_veg_es, 
+           format(date, "%Y") == year_es, 
+           band != "NDVI")
+  # Remove PS4 HER 2017-07-17 (outlier)
+  if  (site_veg_es == "PS4_HER" & year_es == format(as.Date("2017", "%Y"),"%Y")) {
+    ts_objects <- ts_objects %>% filter(date != as.Date("2017-07-17"))
+  }
+  # Load raster files
+  list2env(
+    lapply(
+      setNames(ts_objects$file_path, 
+               make.names(ts_objects$object_name)),
+      raster), 
+    envir = .GlobalEnv)
+  
+  # Crop rasters to site extent
+  list2env(
+    lapply(
+      setNames(ts_objects$object_name, 
+               make.names(paste0(ts_objects$object_name, "_cropped"))),
+      function(x) { 
+        crop(get(x), get(paste0(site_veg_es, "_extent")))
+      }), 
+    envir = .GlobalEnv)
+  ts_objects$object_cropped <- paste0(ts_objects$object_name, "_cropped")
+  
+  # Aggregate and re-sample rasters
+  agg_raster <- paste0(site_veg_es, "_agg_raster_", agg_level, "m")
+  list2env(
+    lapply(
+      setNames(ts_objects$object_cropped, 
+               make.names(paste0(ts_objects$object_name, "_resamp"))),
+      function(x) { resample(get(x), get(agg_raster))}), 
+    envir = .GlobalEnv)
+  ts_objects$object_resamp <- paste0(ts_objects$object_name, "_resamp")
+  
+  # Calculate NDVI
+  red_bands <- (ts_objects %>% filter(band == "RED"))$object_resamp
+  nir_bands <- (ts_objects %>% filter(band == "NIR"))$object_resamp
+  ndvi_rasters <- paste0(unique(ts_objects$flight_id), "_", agg_level, "m_ndvi")
+  list2env(
+    mapply(
+      function(x, y) { NDVI(get(x), get(y))}, 
+      setNames(red_bands, 
+               make.names(ndvi_rasters)),
+      nir_bands),
+    envir = .GlobalEnv)
+  
+  # Calculate summary statistics
+  ts_stats <- data.frame(
+    flight_id = ts_objects[ts_objects$band == "RED",]$flight_id,
+    date = ts_objects[ts_objects$band == "RED",]$date, 
+    site_veg = site_veg_es,
+    site_name = ts_objects[ts_objects$band == "RED",]$site_name,
+    veg_type = ts_objects[ts_objects$band == "RED",]$veg_type,
+    agg_level = agg_level,
+    ndvi_mean = sapply(mget(ndvi_rasters, 
+                            envir = .GlobalEnv), 
+                       function(x) { cellStats(x, "mean")}), 
+    ndvi_sd = sapply(mget(ndvi_rasters, 
+                          envir = .GlobalEnv), 
+                     function(x) { cellStats(x, "sd")}), 
+    ndvi_min = sapply(mget(ndvi_rasters, 
+                           envir = .GlobalEnv), 
+                      function(x) { cellStats(x, "min")}), 
+    ndvi_max = sapply(mget(ndvi_rasters, 
+                           envir = .GlobalEnv), 
+                      function(x) { cellStats(x, "max")})) 
+  ts_stats$ndvi_mean_plus_sd = ts_stats$ndvi_mean + ts_stats$ndvi_sd
+  ts_stats$ndvi_mean_minus_sd = ts_stats$ndvi_mean - ts_stats$ndvi_sd
+  
+  # Plot the data, as extent and resolution match we can stack this time
+  # and use the rasterVis violin plots:
+  ts_ndvi_stack <- stack(mget(ndvi_rasters, envir = .GlobalEnv))
+  names(ts_ndvi_stack) <- format(ts_stats$date, "%b_%d")
+  png(filename = paste0(data_out_path, 
+                        year_es, "/", site_veg_es, "_", 
+                        year_es, "_", agg_level, "m.png"),
+      height = 6, width = 9, unit = "in", res = 300)
+  print(bwplot(ts_ndvi_stack,
+               main = list(label = paste0(site_veg_es, " ", 
+                                          year_es, " aggregated to ", 
+                                          agg_level, " m"), cex = 2), 
+               scales = list(axis.x.text = list(rot = 0)),
+               ylab = list(label = "NDVI", cex = 1.5)))
+  dev.off()
+  
+  # Save stack for later use
+  writeRaster(ts_ndvi_stack, filename = paste0(
+    data_out_path, year_es, "/", 
+    site_veg_es, "_NDVI_stack_", agg_level, ".tif"),
+    overwrite=TRUE)
+  # clean up 
+  rm(list = c(ts_objects$object_name,
+              ts_objects$object_cropped,
+              ts_objects$object_resamp,
+              ndvi_rasters), envir = .GlobalEnv)
+  gc()
+  
+  # Status output
+  cat("Finished processing: ", 
+      site_veg_es, "_", year_es, "_", agg_level, "m.\n", sep = "")
+  return(ts_stats)
+}
+
+# Extract NDVI for all combos and create day difference column in dataframe
+stats_list <- mapply(resample_agg_rasters,
+                     ts_combos$site_veg, 
+                     ts_combos$year, 
+                     ts_combos$agg_levels, 
+                     SIMPLIFY = F)
+
+# collapse list into dataframe 
+stats_df <- bind_rows(stats_list)
+# tidy up
+rm(stats_list)
+
+# create year and doy collumns
+stats_df$doy <- as.integer(format(stats_df$date, "%j"))
+stats_df$year <- factor(format(stats_df$date, "%Y"))
+
+# Save stats data frame for later
+save(stats_df , file = paste0(data_out_path, "stats_df.Rda"))
+#load(paste0(data_out_path, "stats_df.Rda"))
+
+## 2) Fit phenology models ----
+# Define function to fit a simple binominal model
+phen_model <- function(site_veg, year, agg_level){
+  cat("starting: ", site_veg, "_", year, "_", agg_level, "m... ", sep = "")
+  # Collect Meta Data
+  doy <- stats_df[stats_df$site_veg == site_veg & 
+                    stats_df$year == year & 
+                    stats_df$agg_level == agg_level,]$doy
+  # load timeseries brick
+  phen_brick <- brick(paste0(data_out_path, year, "/" , site_veg, 
+                             "_NDVI_stack_", agg_level, ".tif"))
+  # assign doy as layer names
+  names(phen_brick) <- doy
+  # fir quadratic curve
+  fit_quadratic <- function(x) {
+    lm(x ~ poly(doy,2, raw = T))$coefficients
+  }
+  phen_curves <- calc(phen_brick, fun = fit_quadratic)
+  
+  # quality control with random subsample of 9 points 
+  cell_id <- sample(phen_brick@ncols * phen_brick@nrows, 9)
+  cell_values <- raster::extract(phen_brick, cell_id)
+  cell_values <- data.frame(t(cell_values))
+  colnames(cell_values) <- cell_id
+  cell_values$doy <- doy
+  cell_values <- gather(cell_values, "cell_id", "NDVI", -doy)
+  
+  # calculate model predictions:
+  model_coeffs <- data.frame(raster::extract(phen_curves, cell_id))
+  model_coeffs$cell_id <- as.character(cell_id)
+  model_coeffs  
+  preds_df <- data.frame(
+    doy = rep(seq(min(doy), max(doy)), length(cell_id)),
+    cell_id = sort(rep(as.character(cell_id), length(seq(min(doy), max(doy))))))
+  preds_df$pred <- mapply(function(x, cell_id){
+    y <- model_coeffs[model_coeffs$cell_id == cell_id, 1] + 
+      model_coeffs[model_coeffs$cell_id == cell_id, 2]*x +
+      model_coeffs[model_coeffs$cell_id == cell_id, 3]*x^2
+  }, preds_df$doy, preds_df$cell_id)
+  
+  # plot curves and values for quality control
+  curve_plot <- ggplot(
+    cell_values, 
+    aes(x = doy, y = NDVI, group = cell_id, colour = cell_id)) +
+    geom_point() +
+    geom_smooth(data = preds_df, 
+                mapping = aes(x= doy, y= pred, 
+                              group = cell_id))
+  save_plot(curve_plot, 
+            filename = paste0(data_out_path, "QC/curve_fits/",
+                              "/", site_veg, "_", agg_level, ".png"))
+  
+  # NB Notation from now on: a quadratic term, b linear term, c intercept.
+  # visualise and plot rasters
+  a_coef <- levelplot(phen_curves[[3]])
+  b_coef <- levelplot(phen_curves[[2]])
+  c_coef <- levelplot(phen_curves[[1]])
+  png(filename = paste0(data_out_path, "QC/curve_fits/", 
+                        "/", site_veg, "_", agg_level, "_a_coef.png"))
+  print(a_coef)
+  dev.off()
+  png(filename = paste0(data_out_path, "QC/curve_fits/",
+                        "/", site_veg, "_", agg_level, "_b_coef.png"))
+  print(b_coef)
+  dev.off()
+  png(filename = paste0(data_out_path, "QC/curve_fits/",
+                        "/", site_veg, "_", agg_level, "_c_coef.png"))
+  print(c_coef)
+  dev.off()
+  
+  # write raster
+  writeRaster(
+    phen_curves, 
+    filename =  paste0(data_out_path, 
+                       "/curve_fits/", year, "/", site_veg, "_", 
+                       agg_level, "m_coefs.tif"), 
+    overwrite = T)
+  
+  # create data_frame to return values
+  coefs_df <- data.frame(site_veg = site_veg,
+                         veg = substr(site_veg, 5, 7),
+                         year = year,
+                         agg_level = agg_level,
+                         cell_id = seq(1, phen_curves@ncols * phen_curves@nrows),
+                         a = getValues(phen_curves[[3]]),
+                         b = getValues(phen_curves[[2]]),
+                         c = getValues(phen_curves[[1]]))
+  
+  cat("Finished processing: ", site_veg, "_", year, "_", agg_level, "m.\n", sep = "")
+  
+  # return df
+  return(coefs_df)
+}
+
+# execute for all sites and agg_levels
+coefs_list <- mapply(
+  phen_model, 
+  ts_combos$site_veg, 
+  ts_combos$year, 
+  ts_combos$agg_levels, 
+  SIMPLIFY = F)
+# collapse list into dataframe 
+coefs_df <- bind_rows(coefs_list)
+# tidy up
+rm(coefs_list)
+save(coefs_df , file = paste0(data_out_path, "coefs_df.Rda"))
+
+# quick scatter plots to check out patterns in coefficients
+coefs_df$agg_level[coefs_df$agg_level == 30] <- 33.3
+coefs_df <- mutate(coefs_df, agg_level_pretty = paste0(agg_level, " m"))
+scatter_both <- ggplot(
+  coefs_df, aes(x = a, y = b)) + 
+  geom_point() + 
+  xlab("coef. 'a'") +
+  ylab("coef. 'b'") +
+  facet_wrap(vars(agg_level_pretty)) +
+  theme_cowplot(20) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0))
+
+save_plot(paste0(data_out_path, "QC/scatter_plots_agg_levels.png"), 
+          scatter_both, base_aspect_ratio = 1.6, base_height = 10)
+
+## 3) Plotting results -----
+# Set colours
+her_col <- "#1e9148FF"
+kom_col <- "#1e5c91FF"
+
+# Create plots showing the reduction in sd with increasing grain size
+coefs_df_sd_summary <- coefs_df %>%
+  group_by(site_veg, agg_level) %>% 
+  summarise(mean_a = mean(a),
+            mean_b = mean(b),
+            mean_c = mean(c),
+            sd_a = sd(a),
+            sd_b = sd(b),
+            sd_c = sd(c),
+            min_a = min(a),
+            min_b = min(b),
+            min_c = min(c),
+            max_a = max(a),
+            max_b = max(b),
+            max_c = max(c)) %>%
+  mutate(site_name = substring(site_veg,1,3),
+         veg = substring(site_veg,5,7),
+         sd_a_e5 = sd_a *10^5,
+         mean_a_e5 = mean_a *10^5,
+         agg_level_pretty =  paste0(agg_level, " m"))
+
+coes_df_sd_summary_mean <- coefs_df_sd_summary %>%
+  group_by(agg_level) %>%
+  summarise(mean_sd_a_e5 = mean(sd_a_e5))
+
+coefs_df_sd_summary$agg_level_pretty <- ordered(
+  coefs_df_sd_summary$agg_level_pretty, 
+  levels = c("0.5 m",
+             "1 m",
+             "5 m",
+             "10 m",
+             "20 m",
+             "33.3 m"))
+
+a_sd_plot <- ggplot(coefs_df_sd_summary,
+       aes(x = agg_level,
+           y = sd_a_e5,
+           colour = veg)) +
+  geom_smooth(data = coes_df_sd_summary_mean,
+              mapping = aes(x = agg_level, y = mean_sd_a_e5),
+              method = "lm",
+              formula = y ~ log(x),
+              inherit.aes = F,
+              colour = "darkgrey",
+              se = F,
+              size = 1.5,
+              alpha = 0.5) +
+  geom_point(size = 2.5) +
+  xlab("Aggregation level (m)") +
+  ylab(expression(Variation~ "in"~a~(sigma~x~10^{-5}))) +
+  scale_x_continuous(limits = c(0,35),
+                     breaks = c(1,5,10,20,33.3),
+                     minor_breaks = c(0.5)) +
+  scale_y_continuous(limits = c(0,6),
+                     breaks = seq(0,6,1)) +
+  scale_colour_manual(values = c(her_col,
+                                 kom_col)) + 
+  annotate("text", x = 33.3, y = 5.75,
+           label = "Tussock sedge tundra",
+           colour = her_col,
+           size = 6, hjust = 1) +
+  annotate("text", x = 33.3, y = 5.25,
+           label = "Dryas-vetch tundra",
+           colour = kom_col,
+           size = 6, hjust = 1) +
+  theme_cowplot(20) +
+  theme(legend.position = "none") 
+
+
+a_mean_plot <- ggplot(coefs_df_sd_summary,
+                    aes(x = agg_level,
+                        y = mean_a_e5,
+                        colour = veg)) +
+  geom_point(size = 2.5) +
+  xlab("Aggregation level (m)") +
+  ylab(expression(Mean~ "of"~a~(mu~x~10^{-5}))) +
+  scale_x_continuous(limits = c(0,35),
+                     breaks = c(1,5,10,20,33.3),
+                     minor_breaks = c(0.5)) +
+  scale_y_continuous(limits = c(-25,0),
+                     breaks = seq(-25,0,5)) +
+  scale_colour_manual(values = c(her_col,
+                                 kom_col)) + 
+  annotate("text", x = 33.3, y = 0,
+           label = "Tussock sedge tundra",
+           colour = her_col,
+           size = 6, hjust = 1) +
+  annotate("text", x = 33.3, y = -2,
+           label = "Dryas-vetch tundra",
+           colour = kom_col,
+           size = 6, hjust = 1) +
+  theme_cowplot(20) +
+  theme(legend.position = "none")
+
+# Prep a plot with a stylised parabola
+a <- -2
+b <- -1
+c <- 5000
+x <- 1:100
+y <- a*(x-50)^2 +b*(x-50) +c
+parabola <- data.frame(
+  x = x,
+  y = y)
+parabola <- filter(parabola, y > 250)
+
+parabola_plot <- ggplot(
+  parabola,
+  aes(x = x, y = y)) +
+  geom_line(size = 2) +
+  scale_x_continuous(limits = c(-20, 120), breaks = NULL) + #c(0,25,50,75,100)) +
+  scale_y_continuous(limits = c(-1000, 6500), breaks = NULL) + #c(0,1250,2500,3750,5000,6250)) +
+  xlab("Day of Year\n") +
+  ylab("\nNDVI") +
+  annotate("text", x = 50, y = 6000, 
+           label = expression(a~x^{2}~+~b~x~+~c),
+           size = 6,
+           hjust = 0) +
+  theme_cowplot(16)  +
+  theme(axis.text = element_text(colour = "white"))
+
+curve_fit_grid <- plot_grid(sd_plot, parabola_plot)
+
+save_plot(paste0(figure_out_path, "fig_4_panel_a.png"),
+          curve_fit_grid, 
+          base_aspect_ratio = 2.4)
+
+## Plot PS2 Komakuk coef a aggreation as an example
+site_name <- "PS2"
+veg_type <- "KOM"
+rasters_to_plot <- paste0(site_name, "_",
+                          veg_type, "_",
+                          agg_levels, "_coefs.tif")
+
+# Set scale breaks
+scale_min <- coefs_df_sd_summary %>% 
+  filter(site_veg == paste0(site_name, "_",
+                           veg_type)) %>%
+  pull(min_a) %>% 
+  min() %>%
+  round(4)
+scale_max <- coefs_df_sd_summary %>% 
+  filter(site_veg == paste0(site_name, "_",
+                            veg_type)) %>%
+  pull(max_a) %>% 
+  max() %>%
+  round(4)
+scale_min <- scale_min * 10^5
+scale_max <- scale_max * 10^5
+scale_breaks <- seq(scale_min, scale_max, by = (scale_max - scale_min)/100)
+
+# Set magma theme
+magma_no_borders <- rasterTheme(
+  region = magma(100, begin = 0, end = 1), # virdis scale with steps
+  axis.line = list(lwd = 2),
+  par.main.text = list(font = 1, cex = 2)) # normal face title
+
+# Plot function
+agg_levels_pretty <- c("0.5 m",
+                       "1 m",
+                       "5 m",
+                       "10 m",
+                       "20 m",
+                       "33.3 m")
+plot_list <- lapply(agg_levels, function(agg_level){
+  plot_drone_native <- levelplot(
+    (raster(paste0(data_out_path,
+                  "curve_fits/2017/",
+                  site_name, "_", veg_type, "_", agg_level, "m_coefs.tif"),
+           band = 3) * 10^5),
+    main = list(
+      label = paste0(agg_levels_pretty[agg_levels == agg_level]), 
+      cex = 2), 
+    margin = F, # no margins
+    maxpixels = 6e5,
+    # xlab = list(label = "Coef a", cex = 1.5),
+    colorkey = F, #list(draw = T, axis.line = list(lwd = 2), axis.text = list(cex = 1.5)), 
+    par.settings = magma_no_borders, 
+    scales = list(draw = F),
+    at = scale_breaks)
+})
+
+grid_matrix <- rbind(c( 1, 2, 3, 4, 5, 6))
+png(paste0(figure_out_path, "fig_4_panel_b.png"), 
+    width = 12,
+    height = 3, 
+    units = "in", 
+    res = 300)
+grid.arrange(grobs = plot_list,
+             ncol = 6, 
+             nrow = 1,
+             layout_matrix = grid_matrix)
+dev.off()
+
+# Scale bar plot
+plot_drone_native <- levelplot(
+  (raster(paste0(data_out_path,
+                 "curve_fits/2017/",
+                 site_name, "_", veg_type, "_", agg_levels[1], "m_coefs.tif"),
+          band = 3) * 10^5),
+  # main = list(
+  #  label = paste0(agg_levels_pretty[agg_levels == agg_level]), 
+  #  cex = 2), 
+  margin = F, # no margins
+  maxpixels = 6e5,
+  # xlab = list(label = "Coef a", cex = 1.5),
+  colorkey = list(draw = T, axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1),
+                  space='bottom'), 
+  par.settings = magma_no_borders, 
+  scales = list(draw = F),
+  at = scale_breaks)
+
+grid_matrix <- rbind(c( 1, 1, 1, 1, 1, 1))
+png(paste0(figure_out_path, "fig_4_scale_bar.png"), 
+    width = 12,
+    height = 3, 
+    units = "in", 
+    res = 300)
+grid.arrange(plot_drone_native,
+             ncol = 6, 
+             nrow = 1,
+             layout_matrix = grid_matrix)
+dev.off()
+ 

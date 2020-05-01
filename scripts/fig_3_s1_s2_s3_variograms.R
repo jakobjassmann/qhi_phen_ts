@@ -1,5 +1,5 @@
 # Varigrams for the TS in 2017
-# Jakob Assmann j.assmann@ed.ac.uk 8 October 2017
+# Jakob Assmann j.assmann@ed.ac.uk 8 October 2017 updated 20 April 2020
 
 ### Preparations ----
 # depenencies
