@@ -98,14 +98,19 @@ create_agg_raster <- function(site_veg, agg_level){
 }
 
 # Create aggregation templates for all site_veg and aggregation level combos
-list2env(mapply(function(x, y){create_agg_raster(x, y)},
-                setNames(ts_combos$site_veg, 
-                         make.names(paste0(ts_combos$site_veg, "_agg_raster_", paste0(ts_combos$agg_levels), "m"))),
-                ts_combos$agg_levels), 
-         envir = .GlobalEnv)
+list2env(
+  mapply(
+    function(x, y){create_agg_raster(x, y)},
+    setNames(ts_combos$site_veg, 
+             make.names(paste0(ts_combos$site_veg, 
+                               "_agg_raster_", 
+                               paste0(ts_combos$agg_levels), "m"))),
+    ts_combos$agg_levels), 
+  envir = .GlobalEnv)
 
 # Define function to calculate NDVI
-NDVI <- function(red_band, nir_band) {(nir_band - red_band) / (nir_band + red_band) }
+NDVI <- function(red_band, nir_band) {
+  (nir_band - red_band) / (nir_band + red_band) }
 
 # Define function to reasmple drone rasters and produce summary statistics
 resample_agg_rasters <- function(site_veg_es, year_es, agg_level) {
@@ -316,16 +321,18 @@ phen_model <- function(site_veg, year, agg_level){
     overwrite = T)
   
   # create data_frame to return values
-  coefs_df <- data.frame(site_veg = site_veg,
-                         veg = substr(site_veg, 5, 7),
-                         year = year,
-                         agg_level = agg_level,
-                         cell_id = seq(1, phen_curves@ncols * phen_curves@nrows),
-                         a = getValues(phen_curves[[3]]),
-                         b = getValues(phen_curves[[2]]),
-                         c = getValues(phen_curves[[1]]))
+  coefs_df <- data.frame(
+    site_veg = site_veg,
+    veg = substr(site_veg, 5, 7),
+    year = year,
+    agg_level = agg_level,
+    cell_id = seq(1, phen_curves@ncols * phen_curves@nrows),
+    a = getValues(phen_curves[[3]]),
+    b = getValues(phen_curves[[2]]),
+    c = getValues(phen_curves[[1]]))
   
-  cat("Finished processing: ", site_veg, "_", year, "_", agg_level, "m.\n", sep = "")
+  cat("Finished processing: ", 
+      site_veg, "_", year, "_", agg_level, "m.\n", sep = "")
   
   # return df
   return(coefs_df)
@@ -341,11 +348,12 @@ coefs_list <- mapply(
 # collapse list into dataframe 
 coefs_df <- bind_rows(coefs_list)
 # tidy up
+coefs_df$agg_level[coefs_df$agg_level == 30] <- 33.3
 rm(coefs_list)
 save(coefs_df , file = paste0(data_out_path, "coefs_df.Rda"))
-
+# load( paste0(data_out_path, "coefs_df.Rda"))
 # quick scatter plots to check out patterns in coefficients
-coefs_df$agg_level[coefs_df$agg_level == 30] <- 33.3
+
 coefs_df <- mutate(coefs_df, agg_level_pretty = paste0(agg_level, " m"))
 scatter_both <- ggplot(
   coefs_df, aes(x = a, y = b)) + 
@@ -354,12 +362,12 @@ scatter_both <- ggplot(
   ylab("coef. 'b'") +
   facet_wrap(vars(agg_level_pretty)) +
   theme_cowplot(20) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 0))
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-save_plot(paste0(data_out_path, "QC/scatter_plots_agg_levels.png"), 
+save_plot(paste0(figure_out_path, "../fig_s5_coefs_agg_level.png"), 
           scatter_both, base_aspect_ratio = 1.6, base_height = 10)
 
-## 3) Plotting results -----
+## 3) Plot results -----
 # Set colours
 her_col <- "#1e9148FF"
 kom_col <- "#1e5c91FF"
@@ -458,6 +466,9 @@ a_mean_plot <- ggplot(coefs_df_sd_summary,
   theme_cowplot(20) +
   theme(legend.position = "none")
 
+save_plot(paste0(figure_out_path, "../fig_s4_a_mean_agg.png"), a_mean_plot, 
+          base_aspect_ratio = 1.6)
+
 # Prep a plot with a stylised parabola
 a <- -2
 b <- -1
@@ -473,8 +484,8 @@ parabola_plot <- ggplot(
   parabola,
   aes(x = x, y = y)) +
   geom_line(size = 2) +
-  scale_x_continuous(limits = c(-20, 120), breaks = NULL) + #c(0,25,50,75,100)) +
-  scale_y_continuous(limits = c(-1000, 6500), breaks = NULL) + #c(0,1250,2500,3750,5000,6250)) +
+  scale_x_continuous(limits = c(-20, 120), breaks = NULL) + 
+  scale_y_continuous(limits = c(-1000, 6500), breaks = NULL) +
   xlab("Day of Year\n") +
   ylab("\nNDVI") +
   annotate("text", x = 50, y = 6000, 
@@ -536,10 +547,9 @@ plot_list <- lapply(agg_levels, function(agg_level){
     main = list(
       label = paste0(agg_levels_pretty[agg_levels == agg_level]), 
       cex = 2), 
-    margin = F, # no margins
+    margin = F, 
     maxpixels = 6e5,
-    # xlab = list(label = "Coef a", cex = 1.5),
-    colorkey = F, #list(draw = T, axis.line = list(lwd = 2), axis.text = list(cex = 1.5)), 
+    colorkey = F,
     par.settings = magma_no_borders, 
     scales = list(draw = F),
     at = scale_breaks)
@@ -563,12 +573,8 @@ plot_drone_native <- levelplot(
                  "curve_fits/2017/",
                  site_name, "_", veg_type, "_", agg_levels[1], "m_coefs.tif"),
           band = 3) * 10^5),
-  # main = list(
-  #  label = paste0(agg_levels_pretty[agg_levels == agg_level]), 
-  #  cex = 2), 
   margin = F, # no margins
   maxpixels = 6e5,
-  # xlab = list(label = "Coef a", cex = 1.5),
   colorkey = list(draw = T, axis.line = list(lwd = 2), 
                   axis.text = list(cex = 1),
                   space='bottom'), 

@@ -13,7 +13,7 @@ library(MCMCglmm)
 library(cowplot)
 
 # Set global parameters / load site boundaries and meta data
-figure_out_path <- "figures/"
+figure_out_path <- "figures/fig_4_curve_fits_aggregations/"
 log_path <- "log/"
 data_out_path <- "data/fig_4_curve_aggregations/"
 site_boundaries <- read.csv("data/site_boundaries/ps_sent_site_bounds.csv")
@@ -73,12 +73,10 @@ ts_combos <- data.frame(
 ### 1) Perform aggregation ----
 
 # Note:
-# as the drone rasters all have odd resultions that are just below or around
-# 0.05 m we have to resample rather than just aggregate
-# by default 'resample' first performs an aggregation if the scale factor is > 2
-# and then shifts the position of the cells accurately using the
-# 'bilinear' algorithm.
-# See https://github.com/cran/raster/blob/master/R/resample.R
+# In this script I first re-sample the rasters to a common resolution of 5 cm
+# and then aggregate cleanly using the mean. The approach taken in the figure
+# for the main manuscript takes the opposite approach: it aggregates first and
+# then re-samples.
 
 # define function to prepare aggregation templates
 create_agg_raster <- function(site_veg, agg_level){
@@ -99,29 +97,35 @@ create_agg_raster <- function(site_veg, agg_level){
 # Create aggregation templates for all site_veg combos for 0.05 m
 list2env(mapply(function(x, y){create_agg_raster(x, y)},
                 setNames(unique(ts_combos$site_veg), 
-                         make.names(paste0(unique(ts_combos$site_veg), "_agg_raster_","0.05m"))),
+                         make.names(paste0(unique(ts_combos$site_veg), 
+                                           "_agg_raster_","0.05m"))),
                 0.05), 
          envir = .GlobalEnv)
 # and 33.333... m
 list2env(mapply(function(x, y){create_agg_raster(x, y)},
                 setNames(unique(ts_combos$site_veg), 
-                         make.names(paste0(unique(ts_combos$site_veg), "_agg_raster_","33.3m"))),
+                         make.names(paste0(unique(ts_combos$site_veg), 
+                                           "_agg_raster_","33.3m"))),
                 30), 
          envir = .GlobalEnv)
 
 # Define function to calculate NDVI
-NDVI <- function(red_band, nir_band) {(nir_band - red_band) / (nir_band + red_band) }
+NDVI <- function(red_band, nir_band) {
+  (nir_band - red_band) / (nir_band + red_band) 
+  }
 
 # Define function to reasmple drone rasters and produce summary statistics
 resample_agg_rasters <- function(site_veg_es, year_es, agg_level) {
-  cat("starting: ", site_veg_es, "_", year_es, "_", agg_level, "m... ", sep = "")
+  cat("starting: ", site_veg_es, "_", year_es, "_", 
+      agg_level, "m... ", sep = "")
   # subset meta data
   ts_objects <- meta_data %>% 
     filter(site_veg == site_veg_es, 
            format(date, "%Y") == year_es, 
            band != "NDVI")
   # Remove PS4 HER 2017-07-17 (outlier)
-  if  (site_veg_es == "PS4_HER" & year_es == format(as.Date("2017", "%Y"),"%Y")) {
+  if  (site_veg_es == "PS4_HER" & 
+       year_es == format(as.Date("2017", "%Y"),"%Y")) {
     ts_objects <- ts_objects %>% filter(date != as.Date("2017-07-17"))
   }
   # Load raster files
@@ -353,16 +357,18 @@ phen_model <- function(site_veg, year, agg_level){
     overwrite = T)
   
   # create data_frame to return values
-  coefs_df <- data.frame(site_veg = site_veg,
-                         veg = substr(site_veg, 5, 7),
-                         year = year,
-                         agg_level = agg_level,
-                         cell_id = seq(1, phen_curves@ncols * phen_curves@nrows),
-                         a = getValues(phen_curves[[3]]),
-                         b = getValues(phen_curves[[2]]),
-                         c = getValues(phen_curves[[1]]))
+  coefs_df <- data.frame(
+    site_veg = site_veg,
+    veg = substr(site_veg, 5, 7),
+    year = year,
+    agg_level = agg_level,
+    cell_id = seq(1, phen_curves@ncols * phen_curves@nrows),
+    a = getValues(phen_curves[[3]]),
+    b = getValues(phen_curves[[2]]),
+    c = getValues(phen_curves[[1]]))
   
-  cat("Finished processing: ", site_veg, "_", year, "_", agg_level, "m.\n", sep = "")
+  cat("Finished processing: ", site_veg, "_", year, "_",
+      agg_level, "m.\n", sep = "")
   
   # return df
   return(coefs_df)
@@ -381,14 +387,232 @@ coefs_df <- bind_rows(coefs_list)
 rm(coefs_list)
 save(coefs_df , file = paste0(data_out_path, "coefs_df.Rda"))
 
-# quick scatter plots to check out patterns
-ordination_both <- ggplot(coefs_df, aes(x = a, y = b, group = veg, colour = veg)) + geom_point() + 
-  scale_colour_manual(values = c("#440154FF", "#21908CFF")) + facet_wrap(vars(agg_level))
-ordination_HER <- ggplot(coefs_df, aes(x = a, y = b, group = veg, colour = veg)) + geom_point() + 
-  scale_colour_manual(values = c("#44015400", "#21908CFF")) + facet_wrap(vars(agg_level))
-ordination_KOM <- ggplot(coefs_df, aes(x = a, y = b, group = veg, colour = veg)) + geom_point() + 
-  scale_colour_manual(values = c("#440154FF", "#21908C00")) + facet_wrap(vars(agg_level))
+#load(paste0(data_out_path, "coefs_df.Rda"))
 
-ordination_plots <- plot_grid(ordination_both, ordination_HER, ordination_KOM)
-save_plot(paste0(data_out_path, "ordination_plots_agg_levels.png"), ordination_plots, base_aspect_ratio = 1.5, base_height = 10)
+## 3) Plot results -----
+# Set colours
+her_col <- "#1e9148FF"
+kom_col <- "#1e5c91FF"
+
+# Create plots showing the reduction in sd with increasing grain size
+coefs_df_sd_summary <- coefs_df %>%
+  group_by(site_veg, agg_level) %>% 
+  summarise(mean_a = mean(a),
+            mean_b = mean(b),
+            mean_c = mean(c),
+            sd_a = sd(a),
+            sd_b = sd(b),
+            sd_c = sd(c),
+            min_a = min(a),
+            min_b = min(b),
+            min_c = min(c),
+            max_a = max(a),
+            max_b = max(b),
+            max_c = max(c)) %>%
+  mutate(site_name = substring(site_veg,1,3),
+         veg = substring(site_veg,5,7),
+         sd_a_e5 = sd_a *10^5,
+         mean_a_e5 = mean_a *10^5,
+         agg_level_pretty =  paste0(agg_level, " m"))
+
+coes_df_sd_summary_mean <- coefs_df_sd_summary %>%
+  group_by(agg_level) %>%
+  summarise(mean_sd_a_e5 = mean(sd_a_e5))
+
+coefs_df_sd_summary$agg_level_pretty <- ordered(
+  coefs_df_sd_summary$agg_level_pretty, 
+  levels = c("0.5 m",
+             "1 m",
+             "5 m",
+             "10 m",
+             "20 m",
+             "33.3 m"))
+
+a_sd_plot <- ggplot(coefs_df_sd_summary,
+                    aes(x = agg_level,
+                        y = sd_a_e5,
+                        colour = veg)) +
+  geom_smooth(data = coes_df_sd_summary_mean,
+              mapping = aes(x = agg_level, y = mean_sd_a_e5),
+              method = "lm",
+              formula = y ~ log(x),
+              inherit.aes = F,
+              colour = "darkgrey",
+              se = F,
+              size = 1.5,
+              alpha = 0.5) +
+  geom_point(size = 2.5) +
+  xlab("Aggregation level (m)") +
+  ylab(expression(Variation~ "in"~a~(sigma~x~10^{-5}))) +
+  scale_x_continuous(limits = c(0,35),
+                     breaks = c(1,5,10,20,33.3),
+                     minor_breaks = c(0.5)) +
+  scale_y_continuous(limits = c(0,6),
+                     breaks = seq(0,6,1)) +
+  scale_colour_manual(values = c(her_col,
+                                 kom_col)) + 
+  annotate("text", x = 33.3, y = 5.75,
+           label = "Tussock sedge tundra",
+           colour = her_col,
+           size = 6, hjust = 1) +
+  annotate("text", x = 33.3, y = 5.25,
+           label = "Dryas-vetch tundra",
+           colour = kom_col,
+           size = 6, hjust = 1) +
+  theme_cowplot(20) +
+  theme(legend.position = "none") 
+
+
+a_mean_plot <- ggplot(coefs_df_sd_summary,
+                      aes(x = agg_level,
+                          y = mean_a_e5,
+                          colour = veg)) +
+  geom_point(size = 2.5) +
+  xlab("Aggregation level (m)") +
+  ylab(expression(Mean~ "of"~a~(mu~x~10^{-5}))) +
+  scale_x_continuous(limits = c(0,35),
+                     breaks = c(1,5,10,20,33.3),
+                     minor_breaks = c(0.5)) +
+  scale_y_continuous(limits = c(-25,0),
+                     breaks = seq(-25,0,5)) +
+  scale_colour_manual(values = c(her_col,
+                                 kom_col)) + 
+  annotate("text", x = 33.3, y = 0,
+           label = "Tussock sedge tundra",
+           colour = her_col,
+           size = 6, hjust = 1) +
+  annotate("text", x = 33.3, y = -2,
+           label = "Dryas-vetch tundra",
+           colour = kom_col,
+           size = 6, hjust = 1) +
+  theme_cowplot(20) +
+  theme(legend.position = "none")
+
+save_plot(paste0(figure_out_path, "fig_s4_a_mean_resampled.png"), a_mean_plot, 
+          base_aspect_ratio = 1.6)
+
+# Prep a plot with a stylised parabola
+a <- -2
+b <- -1
+c <- 5000
+x <- 1:100
+y <- a*(x-50)^2 +b*(x-50) +c
+parabola <- data.frame(
+  x = x,
+  y = y)
+parabola <- filter(parabola, y > 250)
+
+parabola_plot <- ggplot(
+  parabola,
+  aes(x = x, y = y)) +
+  geom_line(size = 2) +
+  scale_x_continuous(limits = c(-20, 120), breaks = NULL) + 
+  scale_y_continuous(limits = c(-1000, 6500), breaks = NULL) +
+  xlab("Day of Year\n") +
+  ylab("\nNDVI") +
+  annotate("text", x = 50, y = 6000, 
+           label = expression(a~x^{2}~+~b~x~+~c),
+           size = 6,
+           hjust = 0) +
+  theme_cowplot(16)  +
+  theme(axis.text = element_text(colour = "white"))
+
+curve_fit_grid <- plot_grid(a_sd_plot, parabola_plot)
+
+save_plot(paste0(figure_out_path, "fig_4_panel_a.png"),
+          curve_fit_grid, 
+          base_aspect_ratio = 2.4)
+
+## Plot PS2 Komakuk coef a aggreation as an example
+site_name <- "PS2"
+veg_type <- "KOM"
+rasters_to_plot <- paste0(site_name, "_",
+                          veg_type, "_",
+                          agg_levels, "_coefs.tif")
+
+# Set scale breaks
+scale_min <- coefs_df_sd_summary %>% 
+  filter(site_veg == paste0(site_name, "_",
+                            veg_type)) %>%
+  pull(min_a) %>% 
+  min() %>%
+  round(4)
+scale_max <- coefs_df_sd_summary %>% 
+  filter(site_veg == paste0(site_name, "_",
+                            veg_type)) %>%
+  pull(max_a) %>% 
+  max() %>%
+  round(4)
+scale_min <- scale_min * 10^5
+scale_max <- scale_max * 10^5
+scale_breaks <- seq(scale_min, scale_max, by = (scale_max - scale_min)/100)
+
+# Set magma theme
+magma_no_borders <- rasterTheme(
+  region = magma(100, begin = 0, end = 1), # virdis scale with steps
+  axis.line = list(lwd = 2),
+  par.main.text = list(font = 1, cex = 2)) # normal face title
+
+# Plot function
+agg_levels_pretty <- c("0.5 m",
+                       "1 m",
+                       "5 m",
+                       "10 m",
+                       "20 m",
+                       "33.3 m")
+plot_list <- lapply(agg_levels, function(agg_level){
+  plot_drone_native <- levelplot(
+    (raster(paste0(data_out_path,
+                   "curve_fits/2017/",
+                   site_name, "_", veg_type, "_", agg_level, "m_coefs.tif"),
+            band = 3) * 10^5),
+    main = list(
+      label = paste0(agg_levels_pretty[agg_levels == agg_level]), 
+      cex = 2), 
+    margin = F, 
+    maxpixels = 6e5,
+    colorkey = F,
+    par.settings = magma_no_borders, 
+    scales = list(draw = F),
+    at = scale_breaks)
+})
+
+grid_matrix <- rbind(c( 1, 2, 3, 4, 5, 6))
+png(paste0(figure_out_path, "fig_4_panel_b.png"), 
+    width = 12,
+    height = 3, 
+    units = "in", 
+    res = 300)
+grid.arrange(grobs = plot_list,
+             ncol = 6, 
+             nrow = 1,
+             layout_matrix = grid_matrix)
+dev.off()
+
+# Scale bar plot
+plot_drone_native <- levelplot(
+  (raster(paste0(data_out_path,
+                 "curve_fits/2017/",
+                 site_name, "_", veg_type, "_", agg_levels[1], "m_coefs.tif"),
+          band = 3) * 10^5),
+  margin = F, # no margins
+  maxpixels = 6e5,
+  colorkey = list(draw = T, axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1),
+                  space='bottom'), 
+  par.settings = magma_no_borders, 
+  scales = list(draw = F),
+  at = scale_breaks)
+
+grid_matrix <- rbind(c( 1, 1, 1, 1, 1, 1))
+png(paste0(figure_out_path, "fig_4_scale_bar.png"), 
+    width = 12,
+    height = 3, 
+    units = "in", 
+    res = 300)
+grid.arrange(plot_drone_native,
+             ncol = 6, 
+             nrow = 1,
+             layout_matrix = grid_matrix)
+dev.off()
 
