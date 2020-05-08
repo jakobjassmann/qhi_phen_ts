@@ -14,7 +14,7 @@ library(ggplot2)
 library(viridis)
 
 ## Prepare global variables 
-data_path <- "data/ground_based_phenology/"
+data_path <- "data/fig_5_ground_based_phenology/"
 
 ## Load required datasets
 # Ground based phenology plot coordinates
@@ -251,4 +251,37 @@ gbstats_df <- gbstats_df[c(-which(gbstats_df$site_veg == "PS4_KOM" &
 # Save stats df to file
 save(gbstats_df, file = paste0(data_path, "gbstats_drone.Rda"))
 
+### 2) Prepare ground-based phenology validation data ----
+
+# Load File
+phenology <- read.csv(file = paste0(data_out_path,
+                                    "ps_gb_phenology_2017_clean.csv"), 
+                      stringsAsFactors = F)
+# Fromat date colfumns
+dates_2017 <- as.Date(phenology$date[1:1900], format = "%d/%m/%Y")
+dates_2016 <- as.Date(phenology$date[1901:3428], format = "%d-%b-%y")
+phenology$date <- c(dates_2017, dates_2016)
+# Create year and doy columns
+phenology$year <- format(phenology$date, "%Y")
+phenology$doy <- format(phenology$date, "%j")
+# Create site_veg identifier
+phenology$site_veg <- paste0(phenology$plot, "_", phenology$veg_type)
+# Convert flower_stalk into integer
+phenology$flower_stalk <- as.integer(phenology$flower_stalk)
+save(phenology, file = paste0(data_out_path,
+                              "gb_phenology.Rda"))
+
+# Create plot means per date and reformat columns (which will be lost)
+phen_means <- phenology %>% group_by(site_veg, date, species) %>% filter(!is.na(species)) %>%
+  summarise(mean_flower_stalk = mean(flower_stalk, na.rm = T),
+            mean_leaf = mean(longest_leaf, na.rm = T),
+            mean_growth = mean(new_growth, na.rm = T),
+            sd_leaf = sd(longest_leaf, na.rm = T))
+phen_means$doy <- format(phen_means$date, "%j")
+phen_means$year <- format(phen_means$date, "%Y")
+save(phen_means, file = paste0(data_out_path, "gb_phenmeans_abs.Rda"))
+
+# ggplot(phen_means, aes(x = doy, y = mean_leaf, group = site_veg,
+#                        colour = site_veg)) + geom_point() +
+#   facet_wrap(~species)
      
