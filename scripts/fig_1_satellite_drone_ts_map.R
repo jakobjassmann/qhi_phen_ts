@@ -4,6 +4,7 @@
 
 # Dependencies
 library(dplyr)
+library(tidyverse)
 library(raster)
 library(rgdal)
 library(rasterVis)
@@ -31,6 +32,7 @@ ts_out_path <- "figures/fig_1_ts_plots/"
 sentinel_path <- 
   "/Volumes/BowheadRdge/phen_time_series/sentinel_data/qhi_cld_free/"
 drone_path <- "/Volumes/BowheadRdge/phen_time_series/final_outputs"
+data_out_path <- "data/fig_1_satellite_drone_ts_map/"
 
 # Prepare meta data
 meta_data_global <- data.frame(flight_id = NA,
@@ -798,3 +800,57 @@ st_write(sites_coords_sf, "data/site_boundaries/ps_site_bounds.shp",
 ### See QGIS project file and layout in:
 ### figures/fig_1_ts_plots/fig_1_drone_satellite_ts_map.qgz
 
+### 6) Calculate peak-growing season offset between sensors: ----
+sensor_peak_season_mean <- meta_data_global %>% 
+  filter(as.numeric(format.Date(date, "%j")) >= 201 & 
+           as.numeric(format.Date(date, "%j")) <= 221 &
+           as.numeric(format.Date(date, "%Y")) == 2017) %>%
+  group_by(site_name, veg_type, sensor) %>%
+  summarise(mean_NDVI = mean(mean_NDVI, na.rm = T)) %>%
+  filter(sensor != "drone_nocalib")
+
+combine_sentinel <- function(x) {
+  if(x == "sentinel") return("sentinel")
+  else if(x == "Sentinel 2A") return("sentinel")
+  else if(x == "Sentinel 2B") return("sentinel")
+  else return(x)
+}
+sensor_peak_season_mean$sensor <- 
+  modify(sensor_peak_season_mean$sensor, combine_sentinel) 
+sensor_peak_season_mean <- sensor_peak_season_mean %>%
+  group_by(site_name, veg_type, sensor) %>%
+  summarise(mean_NDVI = mean(mean_NDVI))
+sensor_peak_season_mean_wide <- pivot_wider(sensor_peak_season_mean,
+            names_from = "sensor",
+            values_from = "mean_NDVI") %>% na.omit()
+peak_season_cor <- sensor_peak_season_mean_wide %>%
+  ungroup() %>%
+  dplyr::select(drone, sentinel, MODIS) %>% as.data.frame() %>%
+  cor() %>% round(2)
+
+sensor_peak_season_diff <- sensor_peak_season_mean %>%
+  group_by(site_name, veg_type) %>%
+  group_map(function(subset, groupings){
+    return(data.frame(
+      site_name = groupings[1],
+      veg_type = groupings[2],
+      modis_drone = abs(subset[subset$sensor == "MODIS",]$mean_NDVI) -
+        abs(subset[subset$sensor == "drone",]$mean_NDVI),
+      modis_sentinel = abs(subset[subset$sensor == "MODIS",]$mean_NDVI -
+        subset[subset$sensor == "sentinel",]$mean_NDVI),
+      sentinel_drone = abs(subset[subset$sensor == "sentinel",]$mean_NDVI -
+        subset[subset$sensor == "drone",]$mean_NDVI)
+    ))
+  }) %>% bind_rows()
+sensor_peak_season_diff_mean <- sensor_peak_season_diff %>% 
+  summarise('difference MODIS:drone' = round(mean(modis_drone),3),
+            'difference MODIS:sentinel' = round(mean(modis_sentinel),3),
+            'difference Sentinel:drone' = round(mean(sentinel_drone),3))
+# Save / export data
+write.csv(peak_season_cor,
+          file = paste0(data_out_path, "sensor_peak_season_cor.csv"))
+write.csv(sensor_peak_season_diff_mean,
+          file = paste0(data_out_path, "sensor_peak_season_mean_diff.csv"))
+
+save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
+     meta_data_global)
