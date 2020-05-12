@@ -854,3 +854,104 @@ write.csv(sensor_peak_season_diff_mean,
 
 save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
      meta_data_global)
+
+### 7) Data overview tables ----
+
+## Drone flights
+drone_flights <- meta_data_global %>% 
+  filter(sensor == "drone" | sensor == "drone_nocalib") %>%
+  group_by(site_name, veg_type) %>%
+  distinct(date) %>%
+  ungroup() %>%
+  select(site_name, veg_type, date) %>%
+  arrange(site_name, veg_type, date)
+
+# Helper function to produce pretty names
+pretty_name <- function(value){
+  site_names_pretty <- data.frame(
+    site_name = as.character(unique(drone_flights$site_name)),
+    site_pretty = c(
+      "Site 1 - Collinson Head",
+      "Site 2 - Bowehead Ridge",
+      "Site 3 - Hawk Valley",
+      "Site 4 - Hawk Ridge"
+    ), stringsAsFactors = F)
+  if(value == site_names_pretty[1,1]) return_value <- site_names_pretty[1,2]
+  if(value == site_names_pretty[2,1]) return_value <- site_names_pretty[2,2]
+  if(value == site_names_pretty[3,1]) return_value <- site_names_pretty[3,2]
+  if(value == site_names_pretty[4,1]) return_value <- site_names_pretty[4,2]
+  if(value == "HER") return_value <- "Tussock Sedge Tundra"
+  if(value == "KOM") return_value <- "Dryas-Vetch Tundra"
+  return(return_value)
+}
+drone_flights$site_name <- as.character(drone_flights$site_name)
+drone_flights$veg_type <- as.character(drone_flights$veg_type)
+drone_flights$site_name <- modify(drone_flights$site_name, pretty_name)
+drone_flights$veg_type <- modify(drone_flights$veg_type, pretty_name)
+
+names(drone_flights) <- c("Site Name", "Vegetation Type", "Date")
+
+write.csv(file = paste0(data_out_path, "drone_flights.csv"), 
+          drone_flights, 
+          row.names = F)
+
+
+# Satellite Data Sensing dates
+# These are the same for all site veg combinations
+meta_data_global$sensor[meta_data_global$sensor == "sentinel"] <- "Sentinel 2A"
+sentinel_scenes <- meta_data_global %>% 
+  filter(sensor == "Sentinel 2A" | sensor ==  "Sentinel 2B" |
+           sensor == "Sentinel") %>%
+  group_by(sensor) %>% 
+  distinct(date) %>% 
+  select(sensor, date) %>%
+  arrange(sensor, date)  
+write.csv(file = paste0(data_out_path, "sentinel_scenes.csv"), 
+          sentinel_scenes, 
+          row.names = F)
+
+
+# Modis Pixels
+# Due to quality control the dates are not the same for all sites
+meta_data_global %>%
+  filter(sensor == "MODIS") %>%
+  group_by(site_veg) %>% 
+  distinct(date) %>% summarise(n = n())
+
+modis_pixels <- meta_data_global %>% 
+  filter(sensor == "MODIS") %>%
+  group_by(site_name, veg_type) %>%
+  distinct(date) %>%
+  ungroup() %>%
+  select(site_name, veg_type, date) %>%
+  arrange(site_name, veg_type, date)
+
+# Helper function to produce pretty names
+pretty_name <- function(value){
+  site_names_pretty <- data.frame(
+    site_name = as.character(unique(modis_pixels$site_name)),
+    site_pretty = c(
+      "Site 1 - Collinson Head",
+      "Site 2 - Bowehead Ridge",
+      "Site 3 - Hawk Valley",
+      "Site 4 - Hawk Ridge"
+    ), stringsAsFactors = F)
+  if(value == site_names_pretty[1,1]) return_value <- site_names_pretty[1,2]
+  if(value == site_names_pretty[2,1]) return_value <- site_names_pretty[2,2]
+  if(value == site_names_pretty[3,1]) return_value <- site_names_pretty[3,2]
+  if(value == site_names_pretty[4,1]) return_value <- site_names_pretty[4,2]
+  if(value == "HER") return_value <- "Tussock Sedge Tundra"
+  if(value == "KOM") return_value <- "Dryas-Vetch Tundra"
+  return(return_value)
+}
+
+modis_pixels$site_name <- as.character(modis_pixels$site_name)
+modis_pixels$veg_type <- as.character(modis_pixels$veg_type)
+modis_pixels$site_name <- modify(modis_pixels$site_name, pretty_name)
+modis_pixels$veg_type <- modify(modis_pixels$veg_type, pretty_name)
+
+names(modis_pixels) <- c("Site Name", "Vegetation Type", "Date")
+
+write.csv(file = paste0(data_out_path, "modis_pixels.csv"), 
+          modis_pixels,
+          row.names = F)
