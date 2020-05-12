@@ -288,6 +288,40 @@ ggplot(pixel_combos,
 
 ##### 3) Linear Models ----
 
+# Define helper function to process model outputs
+mcmc_output_to_table <- function(mcmc_model, file_name, digits = 4){
+  solutions <- data.frame(
+    effect = row.names(as.data.frame(summary(mcmc_model)$solutions)),
+    as.data.frame(round(summary(mcmc_model)$solutions, digits)))
+  row.names(solutions) <- NULL
+  solutions$eff.samp <- round(solutions$eff.samp)
+  colnames(solutions) <- c("Effect Name", "Effect Size", "Lower 95% CI", "Upper 95% CI",
+                           "Effective Sample Size", "pMCMC")
+  random <- data.frame(summary(mcmc_model)$Rcovariances)
+  random <- round(random, digits+1)
+  random$name <- rownames(random)
+  random$pMCMC <- " "
+  random <- random[, c("name", "post.mean", "l.95..CI", "u.95..CI", "eff.samp", "pMCMC")]  
+  random$eff.samp <- round(random$eff.samp)
+  colnames(random) <- names(solutions)
+  rownames(random) <- NULL
+  
+  model_formula <- paste(as.character(summary(mcmc_model)$fixed.formula)[2], 
+                         summary(mcmc_model)$fixed.formula[1], 
+                         summary(mcmc_model)$fixed.formula[3])
+  final_table <- rbind(
+    setNames(rep(" ", length(names(solutions))), names(solutions)),
+    setNames(c(model_formula, rep(" ", length(names(solutions))-1)), names(solutions)),
+    setNames(rep(" ", length(names(solutions))), names(solutions)),
+    setNames(as.character(names(solutions)), as.character(names(solutions))),
+    data.frame(apply(solutions, 2, as.character), stringsAsFactors = F),
+    setNames(rep(" ", length(names(solutions))), names(solutions)))
+  colnames(final_table) <- colnames(solutions)
+  final_table = rbind(final_table, random)
+  write.csv(file = file_name, final_table, row.names = F, col.names = F)
+}
+
+
 # Take random subsample of 10% for each sentinel / drone data combo
 set.seed(5)
 pixel_combos_sample <- pixel_combos %>% group_by(combo_id) %>% sample_frac(0.1)
@@ -300,6 +334,9 @@ sentinel_drone_model_simple <- MCMCglmm(sentinel_ndvi ~ drone_ndvi,
 summary(sentinel_drone_model_simple)
 save(sentinel_drone_model_simple, file = paste0(data_out_path, "model_simple.rda"))
 
+mcmc_output_to_table(sentinel_drone_model_simple, 
+                     paste0(data_out_path, "model_simple_table.csv"))
+
 # Let's test whether there is an effect of doy, sentinel, 
 # veg_type + interaction and on the relationship
 sentinel_drone_model_full <- MCMCglmm(
@@ -311,6 +348,10 @@ sentinel_drone_model_full <- MCMCglmm(
   pr = T) 
 summary(sentinel_drone_model_full)
 save(sentinel_drone_model_full, file = paste0(data_out_path, "model_full.rda"))
+
+mcmc_output_to_table(sentinel_drone_model_full, 
+                     paste0(data_out_path, "model_full_table.csv"))
+
 # The date difference intercept is the only tested variable that does not have
 # a significant effect on the relationship, however it affects the slope 
 # significantly
