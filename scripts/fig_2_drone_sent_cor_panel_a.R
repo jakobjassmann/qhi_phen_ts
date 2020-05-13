@@ -333,9 +333,16 @@ sentinel_drone_model_simple <- MCMCglmm(sentinel_ndvi ~ drone_ndvi,
                                  pr = T) 
 summary(sentinel_drone_model_simple)
 save(sentinel_drone_model_simple, file = paste0(data_out_path, "model_simple.rda"))
-
+#load(paste0(data_out_path, "model_simple.rda"))
 mcmc_output_to_table(sentinel_drone_model_simple, 
                      paste0(data_out_path, "model_simple_table.csv"))
+
+# Claculate R2 - based on https://www.researchgate.net/post/How_can_I_calculate_R2_for_an_Bayesian_MCMC_multilevel_model
+# Variance in fitted values
+var_fitted <- var(as.vector(apply(sentinel_drone_model_simple$Sol,2,mean) %*% 
+                              t(sentinel_drone_model_simple$X)))
+# Caluclate marginal r2 
+r2 <- var_fitted/(var_fitted+sum(apply(sentinel_drone_model_simple$VCV,2,mean)))
 
 # Let's test whether there is an effect of doy, sentinel, 
 # veg_type + interaction and on the relationship
@@ -348,9 +355,17 @@ sentinel_drone_model_full <- MCMCglmm(
   pr = T) 
 summary(sentinel_drone_model_full)
 save(sentinel_drone_model_full, file = paste0(data_out_path, "model_full.rda"))
-
+#load(paste0(data_out_path, "model_full.rda"))
 mcmc_output_to_table(sentinel_drone_model_full, 
                      paste0(data_out_path, "model_full_table.csv"))
+
+# Claculate R2 - based on https://www.researchgate.net/post/How_can_I_calculate_R2_for_an_Bayesian_MCMC_multilevel_model
+# Variance in fitted values
+var_fitted <- var(as.vector(apply(sentinel_drone_model_full$Sol,2,mean) %*% 
+                              t(sentinel_drone_model_full$X)))
+# Caluclate marginal r2 
+r2 <- var_fitted/(var_fitted+sum(apply(sentinel_drone_model_full$VCV,2,mean)))
+
 
 # The date difference intercept is the only tested variable that does not have
 # a significant effect on the relationship, however it affects the slope 
