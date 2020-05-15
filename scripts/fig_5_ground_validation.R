@@ -10,8 +10,6 @@ library(rasterVis)
 library(gridExtra)
 library(grid)
 library(viridis)
-library(Rfit)
-library(rlme)
 
 #### 1) Preparations ----
 data_out_path <- "data/fig_5_ground_based_phenology/"
@@ -23,9 +21,9 @@ load(paste0(data_out_path, "gbstats_drone.Rda"))
 load("data/meta_data.Rda")
 #### Merge two data frames
 # Determine distinct doys each data frame and export for manual matching
-doy_distinct_drone <- gbstats_df %>% select(site_veg, year, doy) %>% distinct()
-doy_distinct_phen <- phen_means_rel %>% ungroup() %>% 
-  select(site_veg, year, doy) %>% distinct()
+doy_distinct_drone <- gbstats_df %>% dplyr::select(site_veg, year, doy) %>% distinct()
+doy_distinct_phen <- phen_means %>% ungroup() %>% 
+  dplyr::select(site_veg, year, doy) %>% distinct()
 #write.csv(doy_distinct_drone, 
 #          file = paste0(script_path, "doy_distinct_drone.csv"))
 #write.csv(doy_distinct_phen, 
@@ -36,8 +34,20 @@ doy_distinct_phen <- phen_means_rel %>% ungroup() %>%
 doy_drone_phen_key <- read.csv(file = paste0(data_out_path,
                                              "doy_drone_phen_key.csv"), 
                                stringsAsFactors = F)
-# Calculate max time difference between drone and phen obs
+# Make clean version of key for output as table
+drone_phen_key_pretty <- doy_drone_phen_key %>% 
+  mutate(site = substr(site_veg,1,3),
+         veg = substr(site_veg,5,7)) %>%
+  group_by(site, veg) %>% 
+  na.omit() %>% 
+  dplyr::select(site,veg, year, drone_doy, phen_doy)
+write.csv(drone_phen_key_pretty, 
+          paste0(data_out_path, "doy_drone_phen_key_pretty.csv"),
+          row.names = F)
+
+# Calculate max and mean time difference between drone and phen obs
 max(abs(doy_drone_phen_key$drone_doy - doy_drone_phen_key$key_phen), na.rm =T)
+mean(abs(doy_drone_phen_key$drone_doy - doy_drone_phen_key$key_phen), na.rm =T)
 # Three days, manual matching worked well!
 
 # Retain only values that are not na in the key

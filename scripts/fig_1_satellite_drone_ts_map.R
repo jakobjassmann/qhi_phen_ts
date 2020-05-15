@@ -854,6 +854,7 @@ write.csv(sensor_peak_season_diff_mean,
 
 save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
      meta_data_global)
+# load(paste0(data_out_path, "meta_data_with_means.Rda")
 
 ### 7) Data overview tables ----
 
