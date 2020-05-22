@@ -218,7 +218,7 @@ rm(pixel_combos_list)
 # Save to Rda file
 save(pixel_combos, file = paste0(data_out_path, "pixel_combos.Rda"))
 
-load(paste0(data_out_path, "pixel_combos.Rda"))
+#load(paste0(data_out_path, "pixel_combos.Rda"))
 
 #### 2) Garphical exploration of relationship -----
 
@@ -375,6 +375,10 @@ r2 <- var_fitted/(var_fitted+sum(apply(sentinel_drone_model_full$VCV,2,mean)))
 
 ## Pretty plot for publication
 
+# Set colours
+her_col <- "#1e9148FF"
+kom_col <- "#1e5c91FF"
+
 # Extract model predictions and confidence intervals for simple model
 #load(paste0(data_out_path, "model_simple.rda"))
 
@@ -386,37 +390,97 @@ preds <- cbind(preds,
                  drone_ndvi = sentinel_drone_model_simple$X[,2],
                  stringsAsFactors = F))
 
+# Specify difference in days for plotting (little = big, a lot = small)
+pixel_combos_sample$diff_plot <- abs(pixel_combos_sample$diff)
+max(pixel_combos_sample$diff_plot)
+# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 0] <-
+#   3
+# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 2] <-
+#   -5
+# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 1] <-
+#   2
+# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == -5] <-
+#   1
+
 sentinel_drone_plot <- ggplot(data = pixel_combos_sample, 
                               mapping = aes(x = drone_ndvi, 
-                                            y = sentinel_ndvi)) +
+                                            y = sentinel_ndvi,
+                                            colour = veg_type,
+                                            shape = sentinel_id,
+                                            size = diff_plot)) +
   geom_abline(intercept = 0, slope = 1, 
               color="black", linetype="dashed", 
               size= 1, alpha = 1 ) +
-  geom_point(size = 2, color = "black") +
-  geom_line(data = preds,
-            mapping = aes(x = drone_ndvi,
-                          y = fit
-            ),
-            colour = "blue",
-            inherit.aes = FALSE,
-            size = 1) +
+  geom_point() +
+  scale_shape_manual(values = c(21,22)) +
   geom_ribbon(data = preds,
               mapping = aes(x = drone_ndvi,
                             ymin = lwr,
                             ymax = upr
               ),
-              fill = "blue",
-              alpha = 0.5,
+              fill = "black",
+              alpha = 0.4,
               inherit.aes = FALSE) + 
+  geom_line(data = preds,
+            mapping = aes(x = drone_ndvi,
+                          y = fit
+            ),
+            colour = "black",
+            inherit.aes = FALSE,
+            size = 1) +
+  scale_size(range = c(2, 4)) +
   scale_x_continuous(limits = c(0.28,0.9), breaks = seq(0.3,0.9,0.1)) +
   scale_y_continuous(limits = c(0.28,0.9), breaks = seq(0.3,0.9,0.1)) +
   scale_colour_manual(values = c("#1E9148FF", "#1E5C91FF")) +
   scale_fill_manual(values = c("#1E9148FF", "#1E5C91FF")) +
   scale_linetype_manual(values = c("solid", "twodash")) +
+  annotate("text", x = 0.65, y = 0.3, 
+           label = "  Dryas-vetch Tundra", hjust = 0,
+           colour = kom_col, size = 4) +
+  annotate("text", x = 0.65, y = 0.34, 
+           label = "  Tussock Sedge Tundra", hjust = 0,
+           colour = her_col, size = 4) +
+  annotate("point", x = 0.65, y = 0.3, 
+           size = 3, shape = 21,
+           colour = kom_col) +
+  annotate("point", x = 0.65, y = 0.34, 
+           size = 3, shape = 21,
+           colour = her_col) +
+  annotate("text", x = 0.65, y = 0.40, 
+           label = "  Sentinel-2 B", hjust = 0,
+           colour = "black", size = 4) +
+  annotate("text", x = 0.65, y = 0.44, 
+           label = "  Sentinel-2 A", hjust = 0,
+           colour = "black", size = 4) +
+  annotate("point", x = 0.65, y = 0.40, 
+           size = 3, shape = 22,
+           colour = "black") +
+  annotate("point", x = 0.65, y = 0.44, 
+           size = 3, shape = 21,
+           colour = "black") +
+  annotate("text", x = 0.3, y = 0.9, 
+           label = "   0 days difference", hjust = 0,
+           colour = "black", size = 4) +
+  annotate("text", x = 0.3, y = 0.86, 
+           label = "   1 day difference", hjust = 0,
+           colour = "black", size = 4) +
+  annotate("text", x = 0.3, y = 0.82, 
+           label = "   2 days difference", hjust = 0,
+           colour = "black", size = 4) +
+  annotate("point", x = 0.3, y = 0.9, 
+           size = 2, shape = 21,
+           colour = "black") +
+  annotate("point", x = 0.3, y = 0.86, 
+           size = 3, shape = 21,
+           colour = "black") +
+  annotate("point", x = 0.3, y = 0.82, 
+           size = 4, shape = 21,
+           colour = "black") +
   xlab('Drone NDVI')+
   ylab("Sentinel NDVI") +
-  theme_cowplot(18)
-
+  theme_cowplot(15) +
+  theme(legend.position = "none")
+sentinel_drone_plot
 save_plot(paste0(figure_out_path, "fig_2_panel_a/drone_sent_cor.png"), 
        plot = sentinel_drone_plot, base_aspect_ratio =  1.3)
        
