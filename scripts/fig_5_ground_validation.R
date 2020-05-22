@@ -203,16 +203,18 @@ pretty_leaf_vs_ndvi_plot <- function(species_to_plot) {
   mean_cor_coef <- cor_spear_sum[cor_spear_sum$Species == species_name,2]
   leaf_vs_ndvi_by_spp <- 
     ggplot(gb_phen_ndvi_sub, aes(x = mean_leaf, y = mean_ndvi, 
-                                 group = site_veg_year)) +
+                                 group = site_veg_year,
+                                 linetype = year)) +
     geom_point(colour = species_colour) +
-    geom_smooth(method = 'lm', colour = species_colour, se = F) +
+    geom_smooth(method = 'lm', colour = species_colour, se = F,) +
     ylab("Mean NDVI") +
-    xlab("Mean Leaf-Length") +
+    xlab("Mean length of longest leaf (cm)") +
     scale_x_continuous(limits = c(min_x, max_x),
                        breaks = seq(min_x, max_x, x_axis_fac)) +
     
     scale_y_continuous(limits = c(min_y, max_y), 
                        breaks = seq(min_y, max_y, 0.1)) +
+    scale_linetype_manual(values = c(2,1)) +
     annotate("text", x = ((max_x - min_x) / 2 + min_x), y = max_y, 
              label = species_name, 
              size = 6, 
@@ -224,7 +226,8 @@ pretty_leaf_vs_ndvi_plot <- function(species_to_plot) {
              size = 5.5, 
              colour = "black",
              hjust = 1,
-             vjust = 0) 
+             vjust = 0) +
+    theme(legend.position = "none")
   return(leaf_vs_ndvi_by_spp)
 }
 pretty_leaf_vs_ndvi_plots <- lapply(sort(unique(gb_phen_ndvi$species)), 
