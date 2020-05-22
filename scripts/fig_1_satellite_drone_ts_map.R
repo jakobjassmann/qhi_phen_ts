@@ -12,6 +12,7 @@ library(viridisLite)
 
 library(maps)
 library(mapdata)
+library(sf)
 
 library(cowplot)
 library(ggmap)
@@ -726,7 +727,7 @@ qhi_location <- data.frame(y = c(69.58), x = c(-139.05), label = "Qikiatruk") %>
 canada_map <- ggplot() + geom_sf(data = world, fill = "#ffffffFF", size = 0.5) + 
   geom_sf(data = qhi_location, colour = "white",
              fill = "#1e5c91FF", shape = 21, size = 8) +  
-  coord_sf(xlim = c(-180, -100), ylim = c(50, 82.3), expand = F) +
+  coord_sf(xlim = c(-170, -100), ylim = c(55.7, 81.3), expand = F) +
   theme(legend.title = element_blank(),
         axis.text = element_blank(),
         axis.line = element_blank(),
