@@ -208,7 +208,7 @@ pretty_leaf_vs_ndvi_plot <- function(species_to_plot) {
     geom_point(colour = species_colour) +
     geom_smooth(method = 'lm', colour = species_colour, se = F,) +
     ylab("Mean NDVI") +
-    xlab("Mean length of longest leaf (cm)") +
+    xlab("Mean length of longest leaf (mm)") +
     scale_x_continuous(limits = c(min_x, max_x),
                        breaks = seq(min_x, max_x, x_axis_fac)) +
     
@@ -284,7 +284,7 @@ PS2_HER_plot <- function(species_to_plot){
     scale_y_continuous(limits = c(y_min, y_max), 
                        breaks = seq(y_min,y_max, y_step)) +
     geom_smooth(method ="lm", se = F, colour = species_colour) +
-    ylab("Mean Leaf-Length (mm)") +
+    ylab("Mean length of longest leaf (mm)") +
     xlab("Day of Year") +
     annotate("text", x = 200, y = y_max, 
              label = species_name, 
@@ -292,7 +292,8 @@ PS2_HER_plot <- function(species_to_plot){
              colour = species_colour,
              fontface = "italic") +
     theme(axis.title.x = element_text(colour = x_axis_label),
-          axis.title.y = element_text(colour = y_axis_label))
+          axis.title.y = element_text(colour = y_axis_label),
+          legend.position = "none")
 }
 PS2_HER_plot_list <- lapply(c("ARCLAT", "DRYINT", "ERIVAG", "SALPUL"),
                             PS2_HER_plot)
@@ -362,7 +363,7 @@ PS2_KOM_plot <- function(species_to_plot){
     scale_y_continuous(limits = c(y_min, y_max), 
                        breaks = seq(y_min,y_max, y_step)) +
     geom_smooth(method ="lm", se = F, colour = species_colour) +
-    ylab("Mean Leaf-Length (mm)") +
+    ylab("Mean length of longest leaf (mm)") +
     xlab("Day of Year") +
     annotate("text", x = 200, y = y_max, 
              label = species_name, 
@@ -370,7 +371,8 @@ PS2_KOM_plot <- function(species_to_plot){
              colour = species_colour,
              fontface = "italic") +
     theme(axis.title.x = element_text(colour = x_axis_label),
-          axis.title.y = element_text(colour = y_axis_label))
+          axis.title.y = element_text(colour = y_axis_label),
+          legend.position = "none")
 }
 PS2_KOM_plot_list <- lapply(c("ARCLAT", "DRYINT", "SALARC"), PS2_KOM_plot)
 PS2_gb_phen_ndvi_sub <- PS2_gb_phen_ndvi %>% 
@@ -394,6 +396,88 @@ save_plot(PS2_KOM_plot_list_grid,
           filename = paste0(figure_out_path, "PS2_KOM_2017_plot_list_grid.png"),
           base_aspect_ratio = 4,
           base_height = 4)
+
+## For all sites comprehensively all in one common panel
+
+plot_species <- function(species_to_plot){
+  gb_phen_sub <- gb_phen_ndvi %>% filter(species == species_to_plot)
+  colourkey <- data.frame(species = c("ARCLAT",
+                                      "DRYINT",
+                                      "ERIVAG",
+                                      "SALARC",
+                                      "SALPUL"),
+                          name_pretty = c("Arctagrostis latifolia",
+                                          "Dryas integrifolia",
+                                          "Eriophorum vaginatum",
+                                          "Salix arctica",
+                                          "Salix pulchra"),
+                          colour = c("#112F41FF",
+                                     "#0894A1FF",
+                                     "#47AB6CFF",
+                                     "#F2B134FF",
+                                     "#ED553BFF"),
+                          y_axis_fac = c(50,
+                                         5,
+                                         20,
+                                         5,
+                                         5),
+                          stringsAsFactors = F)
+  species_name <- colourkey[colourkey$species == species_to_plot,]$name
+  species_colour <- colourkey[colourkey$species == species_to_plot,]$colour
+  x_axis_label <- 
+    colourkey[colourkey$species == species_to_plot,]$x_axis_labels
+  y_axis_label <- 
+    colourkey[colourkey$species == species_to_plot,]$y_axis_labels
+  y_step <- colourkey[colourkey$species == species_to_plot,]$y_axis_fac
+  y_min <- floor(min(gb_phen_sub$mean_leaf) / y_step) * y_step
+  y_max <- ceiling( max(gb_phen_sub$mean_leaf) / y_step) * y_step
+  print(paste0(y_min, " ", y_max, " ", y_step))
+  ggplot(gb_phen_sub, aes(x = doy, y = mean_leaf, group = site_veg_year,
+                      linetype = year)) +
+    geom_point(colour = species_colour) +
+    scale_x_continuous(limits = c(170, 230), 
+                       breaks = seq(170,230, 10)) +
+    scale_y_continuous(limits = c(y_min, y_max), 
+                       breaks = seq(y_min,y_max, y_step)) +
+    scale_linetype_manual(values = c(2,1)) +
+    geom_smooth(method ="lm", se = F, colour = species_colour) +
+    ylab("Mean length of longest leaf (mm)") +
+    xlab("Day of Year") +
+    annotate("text", x = 200, y = y_max, 
+             label = species_name, 
+             size = 6, 
+             colour = species_colour,
+             fontface = "italic") +
+    theme(axis.title.x = element_text(colour = x_axis_label),
+          axis.title.y = element_text(colour = y_axis_label),
+          legend.position = "none")
+}
+
+gb_phen_ts_all_list <- lapply(unique(gb_phen_ndvi$species), plot_species)
+gb_phen_ndvi_sub <- gb_phen_ndvi %>% 
+  group_by(site_veg_year, year) %>% 
+  distinct(doy, mean_ndvi)
+NDVI_ts_all <- ggplot(gb_phen_ndvi, 
+                            aes(x = doy, y = mean_ndvi, group = site_veg_year,
+                                linetype = year)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = F, colour = "black") +
+  scale_x_continuous(limits = c(170, 230), 
+                     breaks = seq(170,230, 10)) +
+  scale_y_continuous(limits = c(0.4, 0.8), 
+                     breaks = seq(0.4, 0.8, 0.1)) +
+  ylab("Mean NDVI") +
+  xlab("Day of Year") +
+  annotate("text", x = 200, y = 0.8, 
+           label = "NDVI", 
+           size = 6) +
+  theme(legend.position = "none")
+gb_phen_ts_all_list$ndvi <- NDVI_ts_all
+ts_all_plot_list_grid <- plot_grid(plotlist = gb_phen_ts_all_list, nrow = 1)
+save_plot(ts_all_plot_list_grid, 
+          filename = paste0(figure_out_path, "ts_gb_phen_all.png"),
+          base_aspect_ratio = 5,
+          base_height = 5)
 
 ### 4) Drone-Based Time-Series for PS2 ----
 
