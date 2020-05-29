@@ -493,7 +493,7 @@ site_name_full <- site_names$site_name_full[site_names$site_name == site_name]
 
 max_gamma <- round(max(varios$gamma),3) + 0.001
 # Plot 4m plot
-vario_plot_5m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
+vario_plot_4m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
                         aes(x = dist, y = gamma, 
                             group = veg,
                             colour = veg)) +
@@ -511,7 +511,7 @@ vario_plot_5m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
                      breaks = seq(0,4,1)) +
   scale_y_continuous(limits = c(0,max_gamma), 
                      breaks = seq(0.000, max_gamma,0.002)) +
-  ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
+  #ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   annotate("text", x = 4, y = her_sill, label = "Tussock Sedge Tundra", 
@@ -523,7 +523,7 @@ vario_plot_5m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
-save_plot(vario_plot_5m, 
+save_plot(vario_plot_4m, 
           filename = paste0(figure_out_path, 
                             "/fig_3_variograms/",
                             site_name, "_vario_4m.png"),
@@ -546,7 +546,7 @@ vario_plot_45m <- ggplot(varios,
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,max_gamma), 
                      breaks = seq(0.000, max_gamma,0.002)) +
-  ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
+  #ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   annotate("text", x = 45, y = her_sill, label = "Tussock Sedge Tundra", 
@@ -573,6 +573,8 @@ vario_fits <- varios_fits_all_df %>%
            date == as.Date("2017-07-28")) %>%
   mutate(veg = ordered(substr(site_veg, 5, 8), levels =c("HER", "KOM")))
 
+palette <- sequential_hcl(5, palette = "Greens 3")[c(-4,-5)]
+
 vario_plot_her <- ggplot(filter(varios, veg == "HER"),
                          aes(x = dist, y = gamma, 
                              group = site_date,
@@ -589,18 +591,21 @@ vario_plot_her <- ggplot(filter(varios, veg == "HER"),
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.006), 
                      breaks = seq(0.000, 0.006,0.002)) +
+  scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Peak-Season Variograms", subtitle ="Tussock Sedge Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "Site 1", 
-           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "Site 2", 
-           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[2]	, size = 6) +    
   annotate("text", x = 45, y = 0.0002, label = "Site 4", 
-           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
+
+palette <- sequential_hcl(5, palette = "Blues 3")[c(-4,-5)]
 
 vario_plot_kom <- ggplot(filter(varios, veg == "KOM" & site_veg != "PS3_KOM"),
                          aes(x = dist, y = gamma, 
@@ -618,20 +623,22 @@ vario_plot_kom <- ggplot(filter(varios, veg == "KOM" & site_veg != "PS3_KOM"),
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.006), 
                      breaks = seq(0.000, 0.006,0.002)) +
+  scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Peak-Season Variograms", subtitle ="Dryas-Vetch Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "Site 1", 
-           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[1], size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "Site 2", 
-           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[2]	, size = 6) +    
   annotate("text", x = 45, y = 0.0002, label = "Site 4", 
-           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
-save_plot(paste0(figure_out_path, "fig_s1_variograms_all/fig_s1_peak_season_varios.png"),
-          plot_grid(vario_plot_her, vario_plot_kom, ncol = 2, labels = "auto"),
+save_plot(paste0(figure_out_path, "fig_s1_peak_season_varios.png"),
+          plot_grid(vario_plot_her, vario_plot_kom, ncol = 2, labels = "auto",
+                    label_size = 26),
           base_aspect_ratio = 2.6)
 
 ## _5c) Figure S2 ----
@@ -644,6 +651,8 @@ vario_fits <- varios_fits_all_df %>%
   mutate(site_name = substr(site_veg, 1,3)) %>%
   filter(site_name == "PS1" | site_name == "PS2") %>%
   mutate(veg = ordered(substr(site_veg, 5, 8), levels =c("HER", "KOM")))
+
+palette <- sequential_hcl(4, palette = "Plasma")[-4]
 
 vario_plot_ps1_her <- ggplot(filter(varios, veg == "HER" & site_name == "PS1"),
                          aes(x = dist, y = gamma, 
@@ -661,15 +670,16 @@ vario_plot_ps1_her <- ggplot(filter(varios, veg == "HER" & site_name == "PS1"),
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.008), 
                      breaks = seq(0.000, 0.008,0.002)) +
+  scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Site 1 - Collinson Head", subtitle ="Tussock Sedge Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
-           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
-           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[2], size = 6) +    
   annotate("text", x = 45, y = 0.0002, label = "2017-08-09", 
-           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
@@ -690,15 +700,16 @@ vario_plot_ps1_kom <- ggplot(filter(varios, veg == "KOM" & site_name == "PS1"),
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.008), 
                      breaks = seq(0.000, 0.008,0.002)) +
+  scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Site 1 - Collinson Head", subtitle ="Dryas-Vetch Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
-           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
-           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[2]	, size = 6) +    
   annotate("text", x = 45, y = 0.0002, label = "2017-08-09", 
-           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
@@ -719,15 +730,16 @@ vario_plot_ps2_her <- ggplot(filter(varios, veg == "HER" & site_name == "PS1"),
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.008), 
                      breaks = seq(0.000, 0.008,0.002)) +
+  scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Site 2 - Bowhead Ridge", subtitle ="Tussock Sedge Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
-           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[1], size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
-           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[2], size = 6) +    
   annotate("text", x = 45, y = 0.0002, label = "2017-08-09", 
-           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
@@ -748,15 +760,16 @@ vario_plot_ps2_kom <- ggplot(filter(varios, veg == "KOM" & site_name == "PS1"),
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.008), 
                      breaks = seq(0.000, 0.008,0.002)) +
+  scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Site 2 - Bowhead Ridge", subtitle ="Dryas-Vetch Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
-           hjust = 1, colour = rgb(255,102,97, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
-           hjust = 1, colour = rgb(0, 197, 61, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[2]	, size = 6) +    
   annotate("text", x = 45, y = 0.0002, label = "2017-08-09", 
-           hjust = 1, colour = rgb(94, 147, 255, maxColorValue = 255)	, size = 6) +    
+           hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
@@ -766,7 +779,8 @@ cross_season_plots <- plot_grid(vario_plot_ps1_her,
                                 vario_plot_ps2_her,
                                 vario_plot_ps2_kom,
                                 nrow = 2, ncol = 2,
-                                labels = "auto")
+                                labels = "auto",
+                                label_size = 26)
 save_plot(paste0(figure_out_path, "fig_s2_cross_season_varios.png"),
           cross_season_plots,
           base_height = 8,
