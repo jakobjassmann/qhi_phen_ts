@@ -187,10 +187,12 @@ pretty_leaf_vs_ndvi_plot <- function(species_to_plot) {
                                      "#ED553BFF"),
                           x_axis_fac = c(50,
                                          5,
-                                         20,
+                                         40,
                                          10,
                                          5),
                           stringsAsFactors = F)
+  y_label <- ""
+  if(species_to_plot == "ARCLAT") y_label <- "Mean NDVI" 
   species_name <- colourkey[colourkey$species == species_to_plot,]$name_pretty
   species_colour <- colourkey[colourkey$species == species_to_plot,]$colour
   x_axis_fac <- colourkey[colourkey$species == species_to_plot,]$x_axis_fac
@@ -207,7 +209,7 @@ pretty_leaf_vs_ndvi_plot <- function(species_to_plot) {
                                  linetype = year)) +
     geom_point(colour = species_colour) +
     geom_smooth(method = 'lm', colour = species_colour, se = F,) +
-    ylab("Mean NDVI") +
+    ylab(y_label) +
     xlab("Mean length of longest leaf (mm)") +
     scale_x_continuous(limits = c(min_x, max_x),
                        breaks = seq(min_x, max_x, x_axis_fac)) +
@@ -227,7 +229,9 @@ pretty_leaf_vs_ndvi_plot <- function(species_to_plot) {
              colour = "black",
              hjust = 1,
              vjust = 0) +
-    theme(legend.position = "none")
+    theme_cowplot(20) +
+    theme(legend.position = "none",
+          axis.title.x = element_text(size = 15))
   return(leaf_vs_ndvi_by_spp)
 }
 pretty_leaf_vs_ndvi_plots <- lapply(sort(unique(gb_phen_ndvi$species)), 
@@ -406,11 +410,11 @@ plot_species <- function(species_to_plot){
                                       "ERIVAG",
                                       "SALARC",
                                       "SALPUL"),
-                          name_pretty = c("Arctagrostis latifolia",
-                                          "Dryas integrifolia",
-                                          "Eriophorum vaginatum",
-                                          "Salix arctica",
-                                          "Salix pulchra"),
+                          name_pretty = c("A. latifolia",
+                                          "D. integrifolia",
+                                          "E. vaginatum",
+                                          "S. arctica",
+                                          "S. pulchra"),
                           colour = c("#112F41FF",
                                      "#0894A1FF",
                                      "#47AB6CFF",
@@ -422,6 +426,8 @@ plot_species <- function(species_to_plot){
                                          5,
                                          5),
                           stringsAsFactors = F)
+  y_label <- ""
+  if(species_to_plot == "ARCLAT") y_label <- "Mean length of longest leaf (mm)"
   species_name <- colourkey[colourkey$species == species_to_plot,]$name
   species_colour <- colourkey[colourkey$species == species_to_plot,]$colour
   x_axis_label <- 
@@ -436,20 +442,21 @@ plot_species <- function(species_to_plot){
                       linetype = year)) +
     geom_point(colour = species_colour) +
     scale_x_continuous(limits = c(170, 230), 
-                       breaks = seq(170,230, 10)) +
+                       breaks = seq(170,230, 20)) +
     scale_y_continuous(limits = c(y_min, y_max), 
                        breaks = seq(y_min,y_max, y_step)) +
     scale_linetype_manual(values = c(2,1)) +
     geom_smooth(method ="lm", se = F, colour = species_colour) +
-    ylab("Mean length of longest leaf (mm)") +
+    ylab(y_label) +
     xlab("Day of Year") +
     annotate("text", x = 200, y = y_max, 
              label = species_name, 
-             size = 6, 
+             size = 7, 
              colour = species_colour,
              fontface = "italic") +
+    theme_cowplot(24) + 
     theme(axis.title.x = element_text(colour = x_axis_label),
-          axis.title.y = element_text(colour = y_axis_label),
+          axis.title.y = element_text(colour = y_axis_label, size = 18),
           legend.position = "none")
 }
 
@@ -463,14 +470,15 @@ NDVI_ts_all <- ggplot(gb_phen_ndvi,
   geom_point() +
   geom_smooth(method = 'lm', se = F, colour = "black") +
   scale_x_continuous(limits = c(170, 230), 
-                     breaks = seq(170,230, 10)) +
+                     breaks = seq(170,230, 20)) +
   scale_y_continuous(limits = c(0.4, 0.8), 
                      breaks = seq(0.4, 0.8, 0.1)) +
   ylab("Mean NDVI") +
   xlab("Day of Year") +
   annotate("text", x = 200, y = 0.8, 
            label = "NDVI", 
-           size = 6) +
+           size = 7) +
+  theme_cowplot(24) +
   theme(legend.position = "none")
 gb_phen_ts_all_list$ndvi <- NDVI_ts_all
 ts_all_plot_list_grid <- plot_grid(plotlist = gb_phen_ts_all_list, nrow = 1)
