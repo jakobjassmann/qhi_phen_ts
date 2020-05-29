@@ -367,6 +367,9 @@ scatter_both <- ggplot(
 save_plot(paste0(figure_out_path, "../fig_s5_coefs_agg_level.png"), 
           scatter_both, base_aspect_ratio = 1.6, base_height = 10)
 
+cor(coefs_df$a, coefs_df$b, method = "spearman")
+cor.test(coefs_df$a, coefs_df$b, method = "spearman")
+
 ## 3) Plot results -----
 # Set colours
 her_col <- "#1e9148FF"
