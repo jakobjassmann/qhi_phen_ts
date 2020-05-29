@@ -1,0 +1,1 @@
+Solar noon tables were calculated with https://www.esrl.noaa.gov/gmd/grad/solcalc/ for QHI 69.57 N -138.91 W

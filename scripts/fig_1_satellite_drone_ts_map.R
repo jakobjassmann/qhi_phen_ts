@@ -23,6 +23,7 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(rnaturalearthhires)
 
+library(oce)
 
 ### Global prepartions ----
 
@@ -855,19 +856,81 @@ write.csv(sensor_peak_season_diff_mean,
 
 save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
      meta_data_global)
-# load(paste0(data_out_path, "meta_data_with_means.Rda")
+# load(paste0(data_out_path, "meta_data_with_means.Rda"))
 
 ### 7) Data overview tables ----
 
 ## Drone flights
 drone_flights <- meta_data_global %>% 
   filter(sensor == "drone" | sensor == "drone_nocalib") %>%
-  group_by(site_name, veg_type) %>%
+  group_by(site_name, veg_type, flight_id) %>%
   distinct(date) %>%
   ungroup() %>%
-  select(site_name, veg_type, date) %>%
-  arrange(site_name, veg_type, date)
+  select(site_name, veg_type, date, flight_id) %>%
+  arrange(site_name, veg_type, date, flight_id)
 
+# Add meta-data from flight logs
+flight_log_meta <- read.csv("data/auxillary/flight_log_meta_data.csv", 
+                            stringsAsFactors = F)
+drone_flights <- merge(drone_flights, flight_log_meta,
+                       by.x = "flight_id",
+                       by.y = "flight_id") 
+drone_flights$date.x == drone_fligths$date.y
+drone_flights$date <- drone_flights$date.x
+drone_flights <- select(drone_flights, -date.x, -date.y)
+# Calculate solar elevation
+drone_flights$posix <- as.POSIXct(paste(drone_flights$date, drone_flights$time),
+                                  format = "%Y-%m-%d %H:%M:%OS",
+                                  tz = "MST7MDT")
+drone_flights$posix_utc <- as.POSIXct(format(drone_flights$posix, tz = "UTC"),
+                                      tz = "UTC")
+
+# Calculate solar elevation at sea-level
+drone_flights$solar_elevation <- sunAngle(drone_flights$posix_utc,
+                                          lat = 69.57, lon = -138.91)$altitude
+drone_flights$solar_azimuth <- sunAngle(drone_flights$posix_utc,
+                                  lat = 69.57, lon = -138.91)$azimuth
+
+# Load time of solar noon and calculate difference in time to solar noon
+solar_noon <- read.csv("data/auxillary/solar_noon.csv")
+solar_noon$solar_noon_posix <- as.POSIXct(
+  paste(solar_noon$date, solar_noon$solar_noon.UTC.7.),
+  format = "%Y-%m-%d %H:%M:%OS",
+  tz ="America/Vancouver")
+solar_noon$solar_noon_posix_utc <- as.POSIXct(
+  format(solar_noon$solar_noon_posix, tz = "UTC"),
+  tz = "UTC")
+solar_noon$date <- as.Date(solar_noon$date)
+
+drone_flights <- merge(drone_flights, solar_noon, by.x = "date", by.y = "date")
+drone_flights$solar_noon_diff <- difftime(drone_flights$posix_utc,
+                                          drone_flights$solar_noon_posix_utc,
+                                          units = "hours")
+
+# Tidy up
+drone_flights <- select(drone_flights,
+                        site_name,
+                        veg_type,
+                        date,
+                        time,
+                        solar_noon_diff,
+                        solar_elevation,
+                        solar_azimuth,
+                        Aircraft_ID,
+                        Sensor_ID,
+                        Skye_Code) 
+
+drone_flights <- arrange(drone_flights,
+                         site_name, veg_type, date)
+
+drone_flights$solar_noon_diff <- round(drone_flights$solar_noon_diff, 2)
+drone_flights$solar_elevation <- round(drone_flights$solar_elevation)
+drone_flights$solar_azimuth <- round(drone_flights$solar_azimuth)
+
+# Calculate mean difference to solar noon
+mean(drone_flights$solar_noon_diff, na.rm = T)
+
+# Filter time 
 # Helper function to produce pretty names
 pretty_name <- function(value){
   site_names_pretty <- data.frame(
@@ -891,7 +954,16 @@ drone_flights$veg_type <- as.character(drone_flights$veg_type)
 drone_flights$site_name <- modify(drone_flights$site_name, pretty_name)
 drone_flights$veg_type <- modify(drone_flights$veg_type, pretty_name)
 
-names(drone_flights) <- c("Site Name", "Vegetation Type", "Date")
+names(drone_flights) <- c("Site Name", 
+                          "Vegetation Type", 
+                          "Date",
+                          "Time (UTC-6)",
+                          "Diff. to Solar Noon (h)",
+                          "Solar Elevation",
+                          "Solar Azimuth",
+                          "Drone Platform",
+                          "Sensor",
+                          "Sky Code")
 
 write.csv(file = paste0(data_out_path, "drone_flights.csv"), 
           drone_flights, 
