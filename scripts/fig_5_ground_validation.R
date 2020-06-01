@@ -19,6 +19,7 @@ load(paste0(data_out_path, "gb_phenmeans_abs.Rda"))
 load(paste0(data_out_path, "gbstats_drone.Rda"))
 # Load Meta-Data
 load("data/meta_data.Rda")
+
 #### Merge two data frames
 # Determine distinct doys each data frame and export for manual matching
 doy_distinct_drone <- gbstats_df %>% dplyr::select(site_veg, year, doy) %>% distinct()
@@ -528,6 +529,15 @@ ts_combos <- data.frame(
                         format = "%Y"), "%Y"),
   stringsAsFactors = F)
 
+# Create meta_data rgb rasters
+rgb_meta <- data.frame(
+  site_veg = c("PS2_HER",
+               "PS2_KOM"),
+  file_path = c("/Volumes/BowheadRdge/phen_time_series/final_outputs/2017/PS2_HER/output/rgb/PS2_HER_2017-07-17_RGB.tif",
+                "/Volumes/BowheadRdge/phen_time_series/final_outputs/2017/PS2_KOM/output/rgb/PS2_KOM_2017-07-17_RGB.tif"),
+  date = as.Date(c("2017-07-17", "2017-07-17")),
+  stringsAsFactors = F
+)
 # Define function for creating plot time-series
 pretty_plots <- function(site_veg_es, year_es, agg_level) {  
   cat("starting: ", site_veg_es, "_", year_es, sep = "")
@@ -583,13 +593,13 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
     colorkey= list(
       space='bottom',
       labels=list(at=seq(ndvi_min, ndvi_max, 0.1),
-                  font=2, cex = 1.3)
+                  font=2, cex = 1.5)
     ),
     par.settings = list(
       axis.line=list(col='transparent'),
       par.main.text = list(font = 2, # make it bold
                            just = "left",
-                           cex = 1.3,
+                           cex = 1.5,
                            x = grid::unit(15, "mm"))
     ),
     main = paste0("DOY: ", ts_objects$doy[1]),
@@ -597,7 +607,7 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
     col.regions=viridis(100),                  
     at=seq(ndvi_min, ndvi_max, (ndvi_max - ndvi_min) / 100),
     legend=list(left=list(fun=grid::textGrob("NDVI", y=0.05, x = 1.4, 
-                                             gp=gpar(cex=1.3, 
+                                             gp=gpar(cex=1.5, 
                                                      fontface = "bold"))))
   )
   
@@ -620,15 +630,15 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
       margin = FALSE,  
       colorkey= list(
         space='bottom',
-        labels=list(at=seq(min_diff, max_diff, 0.1),
-                    font=2, cex = 1.3)
+        labels=list(at=seq(min_diff, max_diff,0.2),
+                    font=2, cex = 1.5)
       ),
       par.settings = list(
         axis.line=list(col='transparent'),
         par.main.text = list(font = 2, # make it bold
                              just = "left",
                              x = grid::unit(26, "mm"),
-                             cex = 1.3
+                             cex = 1.5
         )
       ),
       main = paste0("DOY: ", doy),
@@ -636,12 +646,54 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
       col.regions=magma(100),                  
       
       at=seq(min_diff, max_diff, (max_diff - min_diff) / 100),
-      legend=list(left=list(fun=grid::textGrob("Diff. NDVI", y=0.05, x = 1.425, 
-                                               gp=gpar(cex=1.3, 
+      legend=list(left=list(fun=grid::textGrob("Δ NDVI", y=0.05, x = 1.425, 
+                                               gp=gpar(cex=1.5, 
                                                        fontface = "bold")))))
   }, diff_rasters, ts_objects$doy[2:length(ts_objects$doy)], SIMPLIFY = F)
   gbplots <- list(first_doy_plot)
   for(i in 1:length(diff_plots)){gbplots[[1+i]] <- diff_plots[[i]]}
+  
+  ## Add RGB plot
+  # Load brick
+  if(site_veg_es == "PS2_HER" ) rgb_brick <- brick(rgb_meta$file_path[rgb_meta$site_veg == site_veg_es])  # throw out alpha band
+  if(site_veg_es == "PS2_KOM" ) rgb_brick <- brick(rgb_meta$file_path[rgb_meta$site_veg == site_veg_es])  # throw out alpha band
+  # crop brick
+  rgb_brick <- crop(rgb_brick, get(paste0(site_veg_es, "_gbplot_poly")))
+  rgb_brick <- mask(rgb_brick, get(paste0(site_veg_es, "_gbplot_poly")))
+  # discard alpha band
+  rgb_brick <- rgb_brick[[1:3]]
+  rgb_values <- getValues(rgb_brick)
+  # Prep colour layer values with NAs 
+  cols <- rgb_values[,1]
+  # Create HEX GB color for cell values and update colour layer values
+  cols[!is.na(cols)] <- rgb(rgb_values[!is.na(cols),], maxColorValue=255)
+  cols <- factor(cols)
+  # Creat single band temp raster
+  rgb_raster <- raster(rgb_brick)
+  # re-assign cell values
+  rgb_raster[] <- cols
+  
+  # Plot
+  rgb_plot <- levelplot(
+    rgb_raster, 
+    margin=FALSE,  # don't plot margins
+    scales=list(draw=FALSE), # suppress axis labels
+    col.regions=as.character(levels(cols)),
+    colorkey=FALSE,
+    par.settings = list(
+      axis.line=list(col='transparent'),
+      par.main.text = list(font = 2, # make it bold
+                           just = "left",
+                           x = grid::unit(26, "mm"),
+                           cex = 1.5
+      )
+    ),
+    main = paste0("RGB"),
+    #xlab.top = list("ffadsf", col = "white", cex = 0.8), # Quick work around to make sure spacing is the same
+    xlab = list("df", col = "white", cex = 4.6), # Quick work around to make sure spacing is the same
+    ylab = list("sd", col = "white", cex = 8) # This is a quick work around to replace the color key bar...
+  ) 
+  gbplots[[length(gbplots) + 1]] <- rgb_plot
   png(paste0(figure_out_path, 
              site_veg_es, "_", year_es, 
              "_gb_drone_ts_diff_", agg_level * 5, "cm.png"), 
