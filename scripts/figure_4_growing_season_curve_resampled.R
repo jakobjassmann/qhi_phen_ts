@@ -12,9 +12,11 @@ library(viridisLite)
 library(MCMCglmm)
 library(cowplot)
 library(gridExtra)
+library(tidyverse)
+library(colorspace)
 
 # Set global parameters / load site boundaries and meta data
-figure_out_path <- "figures/fig_4_curve_fits/"
+figure_out_path <- "figures/fig_4_curve_fits_resampled/"
 log_path <- "log/"
 data_out_path <- "data/fig_4_curve_resampled/"
 site_boundaries <- read.csv("data/site_boundaries/ps_sent_site_bounds.csv")
@@ -443,6 +445,9 @@ a_sd_plot <- ggplot(coefs_df_sd_summary,
   theme_cowplot(20) +
   theme(legend.position = "none") 
 
+save_plot(paste0(figure_out_path, "fig_4_panel_a.png"),
+          a_sd_plot, 
+          base_aspect_ratio = 1.3)
 
 a_mean_plot <- ggplot(coefs_df_sd_summary,
                     aes(x = agg_level,
@@ -472,37 +477,7 @@ a_mean_plot <- ggplot(coefs_df_sd_summary,
 save_plot(paste0(figure_out_path, "../fig_s4_a_mean_agg.png"), a_mean_plot, 
           base_aspect_ratio = 1.6)
 
-# Prep a plot with a stylised parabola
-a <- -2
-b <- -1
-c <- 5000
-x <- 1:100
-y <- a*(x-50)^2 +b*(x-50) +c
-parabola <- data.frame(
-  x = x,
-  y = y)
-parabola <- filter(parabola, y > 250)
 
-parabola_plot <- ggplot(
-  parabola,
-  aes(x = x, y = y)) +
-  geom_line(size = 2) +
-  scale_x_continuous(limits = c(-20, 120), breaks = NULL) + 
-  scale_y_continuous(limits = c(-1000, 6500), breaks = NULL) +
-  xlab("Day of Year\n") +
-  ylab("\nNDVI") +
-  annotate("text", x = 50, y = 6000, 
-           label = expression(a~x^{2}~+~b~x~+~c),
-           size = 6,
-           hjust = 0) +
-  theme_cowplot(16)  +
-  theme(axis.text = element_text(colour = "white"))
-
-curve_fit_grid <- plot_grid(sd_plot, parabola_plot)
-
-save_plot(paste0(figure_out_path, "fig_4_panel_a.png"),
-          curve_fit_grid, 
-          base_aspect_ratio = 2.4)
 
 ## Plot PS2 Komakuk coef a aggreation as an example
 site_name <- "PS2"
@@ -596,4 +571,188 @@ grid.arrange(plot_drone_native,
              nrow = 1,
              layout_matrix = grid_matrix)
 dev.off()
- 
+
+
+## Panel b) curve samples 
+# Example PS2 KOM
+
+ndvi_stack_0.5m <- brick(paste0("data/fig_4_curve_resampled/2017/PS2_KOM_NDVI_stack_0.5.tif"))
+ndvi_stack_10m <- brick(paste0("data/fig_4_curve_resampled/2017/PS2_KOM_NDVI_stack_10.tif"))
+ndvi_stack_30m <- brick(paste0("data/fig_4_curve_resampled/2017/PS2_KOM_NDVI_stack_30.tif"))
+doys <- meta_data %>%
+  filter(site_veg == "PS2_KOM" & format(date, "%Y") == 2017 & band == "NDVI") %>%
+  mutate(doy = format(date, "%j")) %>% 
+  pull(doy)
+names(ndvi_stack_0.5m) <- paste0("d", doys)
+names(ndvi_stack_10m) <- paste0("d", doys)
+names(ndvi_stack_30m) <- paste0("d", doys)
+ndvi_values <- bind_rows(
+  data.frame(getValues(ndvi_stack_0.5m), 
+             agg_level = 0.5, 
+             cell_id = 1:nrow(getValues(ndvi_stack_0.5m))),
+  data.frame(getValues(ndvi_stack_10m), 
+             agg_level = 10,
+             cell_id = 1:nrow(getValues(ndvi_stack_10m))),
+  data.frame(getValues(ndvi_stack_30m), 
+             agg_level = 33.3,
+             cell_id = 1:nrow(getValues(ndvi_stack_30m)))) 
+ndvi_values <- ndvi_values %>%
+  pivot_longer(cols = 1:5, 
+               names_to = "d_doy",
+               values_to = "NDVI") %>%
+  mutate(doy = as.numeric(substr(d_doy,2,4))) %>% 
+  dplyr::select(cell_id, agg_level, doy, NDVI)
+
+# Calculate predictions:
+coefs_df_sub <- coefs_df %>%
+  filter(site_veg == "PS2_KOM", agg_level %in% c(0.5,10,33.3)) %>% 
+  arrange(agg_level, cell_id)
+# Create data frame for predictions
+preds_df <- data.frame(
+    doy = c(rep(seq(min(ndvi_values$doy), 
+                  max(ndvi_values$doy)), 
+              length(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 0.5])),
+            rep(seq(min(ndvi_values$doy), 
+                    max(ndvi_values$doy)), 
+                length(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 10])),
+            rep(seq(min(ndvi_values$doy), 
+                    max(ndvi_values$doy)), 
+                length(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 33.3]))),
+    cell_id = c(sort(rep(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 0.5], 
+                       length(
+                         seq(min(ndvi_values$doy),
+                             max(ndvi_values$doy))))),
+                sort(rep(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 10], 
+                         length(
+                           seq(min(ndvi_values$doy),
+                               max(ndvi_values$doy))))),
+                sort(rep(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 33.3], 
+                         length(
+                           seq(min(ndvi_values$doy),
+                               max(ndvi_values$doy)))))),
+    agg_level = c(rep(rep(0.5, 
+                        length(
+                          seq(min(ndvi_values$doy),
+                              max(ndvi_values$doy)))), 
+                        length(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 0.5])),
+                  rep(rep(10, 
+                          length(
+                            seq(min(ndvi_values$doy),
+                                max(ndvi_values$doy)))), 
+                          length(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 10])),
+                  rep(rep(33.3, 
+                          length(
+                            seq(min(ndvi_values$doy),
+                                max(ndvi_values$doy)))), 
+                          length(coefs_df_sub$cell_id[coefs_df_sub$agg_level == 33.3]))),
+    cell_id_coefs_df = NA,
+    a = NA,
+    b = NA,
+    c = NA,
+    stringsAsFactors = F)
+preds_df <- preds_df %>% arrange(agg_level, doy, cell_id)
+preds_df[preds_df$agg_level == 0.5, 4:7] <-
+  coefs_df_sub[coefs_df_sub$agg_level == 0.5, 5:8]
+preds_df[preds_df$agg_level == 10, 4:7] <-
+  coefs_df_sub[coefs_df_sub$agg_level == 10, 5:8]
+preds_df[preds_df$agg_level == 33.3, 4:7] <-
+  coefs_df_sub[coefs_df_sub$agg_level == 33.3, 5:8]
+# Verify that matching worked
+sum(preds_df$cell_id != preds_df$cell_id_coefs_df)
+
+
+# # Optional subsample for quick plotting to adjust plot layout
+# set.seed(5)
+# sample_0.5m <- sample(unique(preds_df$cell_id[preds_df$agg_level == 0.5]),
+#                       100)
+# preds_df <- bind_rows(
+#   preds_df %>% filter(agg_level == 0.5 & cell_id %in% sample_0.5m),
+#   preds_df %>% filter(agg_level %in% c(10,33.3))
+# )
+# 
+# # Reduce size of NDVI values df
+# ndvi_values <- bind_rows(
+#   ndvi_values %>% filter(agg_level == 0.5 & cell_id %in% sample_0.5m),
+#   ndvi_values %>% filter(agg_level %in% c(10,33.3))
+# )
+
+# Calculate predictions
+preds_df$preds <- preds_df$a*((preds_df$doy)^2) + 
+    preds_df$b*(preds_df$doy) +
+    preds_df$c
+
+# Set grouping factors
+ndvi_values$agg_level <- ordered(ndvi_values$agg_level,
+                                levels = c(0.5,10,33.3))
+preds_df$agg_level <- ordered(preds_df$agg_level,
+                             levels = c(0.5, 10, 33.3))
+
+# Set colour ramp 
+col_ramp <- sequential_hcl(3, palette = "Blues3")[]
+
+# Plot predictions
+curve_plots <- ggplot(ndvi_values,
+       aes(x = doy, y = NDVI,
+                      group = cell_id,
+                      colour = agg_level)) +
+  geom_line(data = preds_df[preds_df$agg_level == 0.5,], 
+            mapping = aes(x= doy, y= preds, 
+                          group = cell_id,
+                          colour = agg_level),
+            alpha = 0.01,
+            size = 1) +
+  geom_line(data = preds_df[preds_df$agg_level == 10,], 
+            mapping = aes(x= doy, y= preds, 
+                          group = cell_id,
+                          colour = agg_level),
+            alpha = 0.5,
+            size = 1) +
+  geom_line(data = preds_df[preds_df$agg_level == 33.3,], 
+            mapping = aes(x= doy, y= preds, 
+                          group = cell_id,
+                          colour = agg_level),
+            alpha = 0.5,
+            size = 1) +
+  geom_point(alpha = 0.5, shape = 16) +
+  scale_color_manual(values = col_ramp) +
+  scale_y_continuous(limits = c(0.2, 0.9), breaks = seq(0.2, 0.9, 0.1)) +
+  xlab("Day of Year") +
+  ylab("NDVI") +
+  annotate("text", x = 200, y = 0.225,
+           color = "black",
+           label = parse(text = "'y = a x' ^ 2 * ' + b x + c'"),
+           size = 5) +
+  annotate("rect", xmin = 175, xmax = 186, ymin = 0.73, ymax = 0.90,
+           color = "black",
+           fill = "black", 
+           alpha = 0.5) +
+  annotate("point", x = 176.5, y = 0.865,
+            size = 2,
+            color = col_ramp[1]) +
+  annotate("point", x = 176.5, y = 0.815,
+           size = 2,
+           color = col_ramp[2]) +
+  annotate("point", x = 176.5, y = 0.765,
+           size = 2,
+           color = col_ramp[3]) +
+  annotate("text", x = 176.5, y = 0.865,
+           size = 5,
+           color = col_ramp[1],
+           hjust = 0,
+           label = "  0.5 m") +
+  annotate("text", x = 176.5, y = 0.815,
+           size = 5,
+           color = col_ramp[2],
+           hjust = 0,
+           label = "  10 m") +
+  annotate("text", x = 176.5, y = 0.765,
+           size = 5,
+           color = col_ramp[3],
+           hjust = 0,
+           label = "  33.3 m") +
+  theme_cowplot(15) +
+  theme(legend.position = "none")
+# curve_plots
+system.time(save_plot("figures/fig_4_curve_fits_resampled/fig_4_panel_b.png",
+          curve_plots,
+          base_aspect_ratio = 1.3))
