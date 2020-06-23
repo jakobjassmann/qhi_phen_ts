@@ -539,7 +539,7 @@ rgb_meta <- data.frame(
   stringsAsFactors = F
 )
 # Define function for creating plot time-series
-pretty_plots <- function(site_veg_es, year_es, agg_level) {  
+pretty_plots <- function(site_veg_es, year_es, agg_level, short = F) {  
   cat("starting: ", site_veg_es, "_", year_es, sep = "")
   # subset meta data
   ts_objects <- meta_data %>% 
@@ -547,9 +547,10 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
            format(date, "%Y") == year_es, 
            band == "NDVI")
   # filter multiples for the 3 August for PS1 in 2016 and remove PS4 HER 2017-07-17 (outlier)
-  if(site_veg_es == "PS2_KOM" & year_es == format(as.Date("2011", "%Y"),"%Y")) {
+  if(site_veg_es == "PS2_KOM" & year_es == format(as.Date("2017", "%Y"),"%Y")) {
     ts_objects <- ts_objects[c(2,3,4,5),]
-  } 
+  }  
+  
   # Load files
   list2env(
     lapply(
@@ -582,7 +583,7 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
   
   # plot_first in time series
   first_raster <- get(ts_objects$object_gbplot[1])
-  # aggregate too account for geo-locaiton error in the time series
+  # perhaps aggregate to account for geo-locaiton error in the time series
   if(agg_level != 1) {first_raster <- aggregate(first_raster, agg_level)}
   ndvi_min <- floor(10 * first_raster@data@min) / 10
   ndvi_max <- ceiling(10 * first_raster@data@max) / 10
@@ -620,10 +621,19 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
       names(diff_raster) <- x
       return(diff_raster)
     })
+  
   min_diff <- min(unlist(lapply(diff_rasters, function(x){x@data@min})))
   max_diff <- max(unlist(lapply(diff_rasters, function(x){x@data@max})))
   min_diff <- floor(min_diff * 10) / 10
   max_diff <- ceiling(max_diff * 10) / 10
+  
+  # For final figure 5 plot only 3 of the ndvi rasters. (option short = T)
+  if(site_veg_es == "PS2_HER" & year_es == format(as.Date("2017", "%Y"),"%Y") & 
+     short == T) {
+    ts_objects <- ts_objects[c(1,3,5),]
+    diff_rasters <- list(diff_rasters[[2]], diff_rasters[[4]])
+  }
+  
   diff_plots <- mapply(function(x, doy){
     levelplot(
       x, 
@@ -717,7 +727,7 @@ pretty_plots <- function(site_veg_es, year_es, agg_level) {
 
 # Execute function for time-series
 # with native resolution (agg = 1)
-pretty_plots("PS2_HER", "2017", 1)
+pretty_plots("PS2_HER", "2017", 1, short = T)
 pretty_plots("PS2_KOM", "2017", 1)
 
 # Also available with other aggregation steps
