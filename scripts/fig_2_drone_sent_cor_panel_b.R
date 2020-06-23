@@ -150,7 +150,7 @@ diff_breaks <- (diff_up - diff_low) / 100
 scale_breaks_native <- seq(native_low, native_up, by = native_breaks) 
 scale_breaks_resampled <- seq(resamp_low, resamp_up, by = resamp_breaks)
 scale_breaks_diff <- seq(diff_low, diff_up, by = diff_breaks)
-  
+
   
 # plots 
 plot_drone_native <- levelplot(
@@ -158,8 +158,20 @@ plot_drone_native <- levelplot(
   main = list(label = "Drone 0.05 m    ", cex = 2), 
   margin = F, # no margins
   maxpixels = 6e5,
-  xlab = list(label = "NDVI", cex = 1.5),
-  colorkey = list(draw = T, axis.line = list(lwd = 2), axis.text = list(cex = 1.5)), 
+  xlab = list(label = "NDVI", cex = 2),
+  colorkey = list(draw = T,
+                  labels=list(at = seq(native_low, native_up, 0.2),
+                              labels = formatC(
+                                seq(native_low,
+                                    native_up,
+                                    0.2),
+                                format = "f",
+                                width = 4, 
+                                digits = 1),
+                              font = 1,
+                              cex = 2),
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
   par.settings = viridis_no_borders, 
   scales = list(draw = F),
   at = scale_breaks_native)
@@ -169,8 +181,20 @@ plot_drone_resamp_magma <- levelplot(
   main = list(label = "Drone 10 m       ", cex = 2), 
   margin = F, # no margins
   maxpixels = 6e5,
-  xlab = list(label = "NDVI", cex = 1.5),
-  colorkey = list(draw = T, axis.line = list(lwd = 2), axis.text = list(cex = 1.5)), 
+  xlab = list(label = "NDVI", cex = 2),
+  colorkey = list(draw = T, 
+                  labels=list(at = seq(resamp_low, resamp_up, 0.1),
+                              labels = formatC(
+                                seq(resamp_low,
+                                    resamp_up,
+                                    0.1),
+                                format = "f",
+                                width = 4, 
+                                digits = 1),
+                              font = 1, 
+                              cex = 2),
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
   par.settings = magma_no_borders, 
   scales = list(draw = F),
   at = scale_breaks_resampled)
@@ -180,8 +204,20 @@ plot_sentinel_magma <- levelplot(
   main = list(label = "Sentinel 10 m      ", cex = 2), 
   margin = F, # no margins
   maxpixels = 6e5,
-  xlab = list(label = "NDVI", cex = 1.5),
-  colorkey = list(draw = T, axis.line = list(lwd = 2), axis.text = list(cex = 1.5)), 
+  xlab = list(label = "NDVI", cex = 2),
+  colorkey = list(draw = T, 
+                  labels=list(at = seq(resamp_low, resamp_up, 0.1),
+                              labels = formatC(
+                                seq(resamp_low,
+                                    resamp_up,
+                                    0.1),
+                                format = "f",
+                                width = 4, 
+                                digits = 1),
+                              font = 1, 
+                              cex = 2),
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
   par.settings = magma_no_borders, 
   scales = list(draw = F),
   at = scale_breaks_resampled)
@@ -191,7 +227,24 @@ plot_diff_purple <- levelplot(
   main = list(label = "Difference        ", cex = 2), 
   margin = F, # no margins
   maxpixels = 6e5,
-  colorkey = list(draw = T, axis.line = list(lwd = 2), axis.text = list(cex = 1.5)), 
+  xlab = list(label = "NDVI", cex = 2, col = "white"),
+  colorkey = list(draw = T, 
+                  labels = list(
+                    at = seq(diff_low,
+                             diff_up,
+                             0.1),
+                    labels = formatC(
+                      seq(diff_low,
+                          diff_up,
+                          0.1),
+                      format = "f",
+                      width = 4, 
+                      digits = 1),
+                    font = 1, 
+                    cex = 2
+                  ), 
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
   par.settings = purple_no_borders, 
   scales = list(draw = F),
   at = scale_breaks_diff)
