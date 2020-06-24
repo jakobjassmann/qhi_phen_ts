@@ -55,7 +55,7 @@ The original analysis and raster manipulations were carried out using R v. 3.6.0
 
 ## Reproducing the analyses, figures and statistics
 1. Run the three data preparation scripts (`scripts/prep_*`).
-2. Run the individual scripts (`scripts/fig_*`) to generate individual plots, associated statistics or a figure panel.
+2. Run the relevant scripts (`scripts/fig_*`) to generate individual plots, figure panels or associated statistics.
 3. Assemble the final figures from the individual plots / figure panels using the QGIS Layout Manager and the QGIS project files (`*.qgz`) in the `figures/fig_*/` folders.
 
 Note: There are two ways of generating Figure 4: 1) aggregation then interpolation (used in the manuscript) or 2) interpolation and then aggregation (not used in the manuscript). A detailed explanation can be found in the scripts. The interpretation of the results is not affected by the method, but both are included in this repository for transparency. 
