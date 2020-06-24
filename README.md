@@ -44,7 +44,7 @@ This code repository was designed to be as self-contained as possible. However, 
 ## Repository structure
 ```
 .
-├── data                     Tabular data produced by the analyses or essential data not contained in the Zenodo repository.
+├── data                     Tabular data produced or required by the analyses not contained in the Zenodo repository.
 │   ├── auxillary               Flight log summaries and solar noon tables.                  
 │   ├── modis                   MODIS time-series for the pixels covering the eight plots.
 │   └── site_boundaries         Study site boundaries.
@@ -52,6 +52,12 @@ This code repository was designed to be as self-contained as possible. However, 
 ├── log                      Log files for parallel processing.
 └── scripts                  Scripts to prepare the data and conduct the analysis.
 ```
+
+## Reproducing the analyses, figures and statistics
+1. Run the three data preparation scripts (`scripts/prep_*`).
+2. Run the individual scripts (`scripts/fig_*`) to generate individual plots, statistics or a figure panel.
+3. Assemble the final figures from the individual plots / figure panels using the QGIS Layout Manager and the QGIS project files (`*.qgz`) in the relevant `figures/fig_*/` folder.
+
 [to the top](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
 # License 
