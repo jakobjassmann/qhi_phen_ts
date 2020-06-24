@@ -3,19 +3,16 @@
 This code repository contains the analytical scripts required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal fine-scale variation of tundra greenness and phenology not captured by satellite and ground-based monitoring*. In execution of the code also requires the spatial data files found in this data repostiory on Zenodo [INSERT DOI](www.zenodo.org) to be completed.
 
 # Content
-1. [Contact](#Contact)
-2. [Authors](#Authors)
-3. [Citation](#Citation)
-4. [Acknowledgements](#Ackowledgements)
-5. [Getting started](#Getting-started)
-6. [License](#License)
+1. [Authors](#Authors)
+2. [Citation](#Citation)
+3. [Acknowledgements](#Ackowledgements)
+4. [Getting started](#Getting-started)
+5. [License](#License)
 ---
-
-# Contact
-Jakob J Assmann: j.assmann@bios.au.dk
-
 # Authors
 Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe, Gergana N. Daskalova
+
+Contact: j.assmann@bios.au.dk
 
 # Citation
 Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. **In prep**. Drone data reveal fine-scale variation of tundra greenness and phenology not captured by satellite and ground-based monitoring.
