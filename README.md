@@ -41,7 +41,7 @@ This code repository was designed to be as self-contained as possible. However, 
 ## Repository structure
 ```
 .
-├── data                     Tabular data produced or required by the analyses not contained in the Zenodo repository.
+├── data                     Tabular data produced or required by the analysis not in the Zenodo repository.
 │   ├── auxillary               Flight log summaries and solar noon tables.                  
 │   ├── modis                   MODIS time-series for the pixels covering the eight plots.
 │   └── site_boundaries         Study site boundaries.
