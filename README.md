@@ -55,8 +55,8 @@ This code repository was designed to be as self-contained as possible. However, 
 
 ## Reproducing the analyses, figures and statistics
 1. Run the three data preparation scripts (`scripts/prep_*`).
-2. Run the individual scripts (`scripts/fig_*`) to generate individual plots, statistics or a figure panel.
-3. Assemble the final figures from the individual plots / figure panels using the QGIS Layout Manager and the QGIS project files (`*.qgz`) in the relevant `figures/fig_*/` folder.
+2. Run the individual scripts (`scripts/fig_*`) to generate individual plots, associated statistics or a figure panel.
+3. Assemble the final figures from the individual plots / figure panels using the QGIS Layout Manager and the QGIS project files (`*.qgz`) in the `figures/fig_*/` folders.
 
 [to the top](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
