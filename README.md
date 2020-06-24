@@ -17,7 +17,7 @@ Contact: j.assmann@bios.au.dk
 # Citation
 Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. **In prep**. Drone data reveal fine-scale variation of tundra greenness and phenology not captured by satellite and ground-based monitoring.
 
-[to the top](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
+[\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
 # Acknowledgements 
 (from the manuscript)
@@ -30,7 +30,7 @@ Funding for this research was provided by NERC through the ShrubTundra standard 
 
 Finally, we would like to thank the Inuvialuit people for the opportunity to conduct research in the Inuvialuit Settlement Region.
 
-[to the top](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
+[\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
 # Getting started
 
@@ -61,9 +61,9 @@ The original analysis and raster manipulations were carried out using R v. 3.6.0
 
 Note: There are two ways of generating Figure 4: 1) aggregation then interpolation (used in the manuscript) or 2) interpolation and then aggregation (not used in the manuscript). A detailed explanation can be found in the scripts. The interpretation of the results is not affected by the method, but both are included in this repository for transparency. 
 
-[to the top](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
+[\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
 # License 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />The content of this repository is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
-[to the top](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
+[\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
