@@ -5,5 +5,7 @@ This code repository contains the analytical scripts required to generate the fi
 # Authors
 Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe, Gergana N. Daskalova
 
+# Citation
+Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. **In review**. Drone data reveal fine-scale variation of tundra greenness and phenology not captured by satellite and ground-based monitoring .
 # License 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />The content of this repository is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
