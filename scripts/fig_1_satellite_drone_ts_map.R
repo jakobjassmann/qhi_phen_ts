@@ -945,7 +945,8 @@ names(drone_flights) <- c("Site Name",
                           "Solar Azimuth",
                           "Drone Platform",
                           "Sensor",
-                          "Sky Code")
+                          "Sky Code",
+                          "Notes")
 
 write.csv(file = paste0(data_out_path, "drone_flights.csv"), 
           drone_flights, 
