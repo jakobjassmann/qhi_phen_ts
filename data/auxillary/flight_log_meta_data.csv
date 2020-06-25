@@ -1,123 +1,123 @@
-﻿flight_id,date,time,Aircraft_ID,Sensor_ID,Skye_Code
-PS1_HER_20170624,24/06/2017,NA,DJU Phantom 4 Pro (Will),Sequoia (WHITE),5-6
-PS1_HER_20170626,26/06/2017,19:44:00,DJU Phantom 4 Pro (Will),Sequoia (RED),NA
-PS1_HER_20170709,09/07/2017,18:48:00,Iris+ (TeamShrub),Sequoia (WHITE),7-8
-PS1_HER_20170711,11/07/2017,12:40:00,Iris+ (TeamShrub),Sequoia (RED),5-6
-PS1_HER_20170717,17/07/2017,15:48:00,Iris+ (TeamShrub),Sequoia (RED),1
-PS1_HER_20170726,26/07/2017,13:01:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS1_HER_20170809,09/08/2017,12:45:00,Iris+ (TeamShrub),Sequoia (RED),0
-PS1_KOM_20170624,24/06/2017,NA,DJU Phantom 4 Pro (Will),Sequioa (WHITE),6-5
-PS1_KOM_20170626,26/06/2017,18:47:00,DJU Phantom 4 Pro (Will),Sequoia (RED),3
-PS1_KOM_20170709,09/07/2017,19:19:00,Iris+ (TeamShrub),Sequioa (WHITE),7-8
-PS1_KOM_20170711,11/07/2017,12:25:00,Iris+ (TeamShrub),Sequoia (RED),5-6
-PS1_KOM_20170717,17/07/2017,15:34:00,Iris+ (TeamShrub),Sequoia (RED),1
-PS1_KOM_20170726,26/07/2017,13:10:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS1_KOM_20170809,09/08/2017,13:41:00,Iris+ (TeamShrub),Sequoia (RED),0
-PS2_HER_20170711,11/07/2017,14:08:00,Iris+ (TeamShrub),Sequoia (RED),5-6
-PS2_HER_20170717,17/07/2017,17:32:00,Iris+ (TeamShrub),Sequoia (RED),1
-PS2_HER_20170726,26/07/2017,14:12:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS2_HER_20170807,07/08/2017,18:24:00,Iris+ (TeamShrub),Sequoia (RED),9
-PS2_HER_20170809,09/08/2017,15:54:00,Iris+ (TeamShrub),Sequoia (RED),0
-PS2_HER_20170626,26/06/2017,17:31:00,DJU Phantom 4 Pro (Will),Sequoia (RED),3
-PS2_KOM_20170711,11/07/2017,15:28:00,Iris+ (TeamShrub),Sequoia (RED),2-3
-PS2_KOM_20170717,17/07/2017,18:30:00,Iris+ (TeamShrub),Sequoia (RED),1
-PS2_KOM_20170726,26/07/2017,14:22:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS2_KOM_20170807,07/08/2017,18:49:00,Iris+ (TeamShrub),Sequoia (RED),5-8
-PS2_KOM_20170809,09/08/2017,15:33:00,Iris+ (TeamShrub),Sequoia (RED),0
-PS2_KOM_20170626,26/06/2017,16:48:00,DJU Phantom 4 Pro (Will),Sequoia (RED),2
-PS3_HER_20170626,26/06/2017,13:26:00,DJU Phantom 4 Pro (Will),Sequoia (RED),
-PS3_HER_20170706,06/07/2017,20:00:00,DJU Phantom 4 Pro (Will),Sequoia (?),0-4
-PS3_HER_20170710,10/07/2017,15:05:00,Iris+ (TeamShrub),Sequioa (RED),6
-PS3_HER_20170718,18/07/2017,14:57:00,Iris+ (TeamShrub),Sequoia (RED),NA
-PS3_HER_20170726,26/07/2017,15:46:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS3_HER_20170807,07/08/2017,14:30:00,Iris+ (TeamShrub),Sequoia (RED),3
-PS3_KOM_20170626,26/06/2017,12:12:00,DJU Phantom 4 Pro (Will),Sequoia (RED),7
-PS3_KOM_20170710,10/07/2017,14:12:00,Iris+ (TeamShrub),Sequioa (RED),6
-PS3_KOM_20170718,18/07/2017,15:08:00,Iris+ (TeamShrub),Sequoia (RED),NA
-PS3_KOM_20170726,26/07/2017,15:52:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS3_KOM_20170807,07/08/2017,14:37:00,Iris+ (TeamShrub),Sequoia (RED),3
-PS3_KOM_20170809,09/08/2017,19:45:00,Iris+ (TeamShrub),Sequoia (RED),5-6
-PS4_HER_20170626,26/06/2017,14:48:00,DJU Phantom 4 Pro (Will),Sequoia (RED),7
-PS4_HER_20170706,06/07/2017,15:42:00,DJU Phantom 4 Pro (Will),Sequoia (?),0-1
-PS4_HER_20170710,10/07/2017,16:10:00,Iris+ (TeamShrub),Sequioa (RED),3
-PS4_HER_20170717,17/07/2017,20:08:00,Iris+ (TeamShrub),Sequioa (RED),4
-PS4_HER_20170726,26/07/2017,17:25:00,Iris+ (TeamShrub),Sequoia (RED),7
-PS4_HER_20170807,07/08/2017,15:18:00,Iris+ (TeamShrub),Sequoia (RED),3
-PS4_KOM_20170626,26/06/2017,14:20:00,DJU Phantom 4 Pro (Will),Sequoia (RED),7
-PS4_KOM_20170706,06/07/2017,18:55:00,DJU Phantom 4 Pro (Will),Sequoia (?),0-1
-PS4_KOM_20170710,10/07/2017,15:54:00,Iris+ (TeamShrub),Sequioa (RED),3
-PS4_KOM_20170717,17/07/2017,20:45:00,Iris+ (TeamShrub),Sequoia (RED),4
-PS4_KOM_20170728,28/07/2017,13:25:00,Iris+ (TeamShrub),Sequoia (RED),0-2
-PS4_KOM_20170807,07/08/2017,15:33:00,Iris+ (TeamShrub),Sequoia (RED),3
-JA20160624_01,24/06/2016,16:33:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160624_02,24/06/2016,16:26:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160624_03,24/06/2016,17:36:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160624_04,24/06/2016,17:44:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160624_05,24/06/2016,18:54:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160624_06,24/06/2016,19:22:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160628_01,28/06/2016,18:33:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160628_02,28/06/2016,19:10:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160628_03,28/06/2016,20:46:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160628_04,28/06/2016,21:09:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160630_01,30/06/2016,NA,Tarot 680 Pro,Sequoia (RED),NA
-JA20160630_02,30/06/2016,17:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160705_01,05/07/2016,21:20:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160705_02,05/07/2016,21:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160705_03,05/07/2016,21:35:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160706_01,06/07/2016,17:48:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160706_02,06/07/2016,18:28:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160706_03,06/07/2016,19:20:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160706_04,06/07/2016,19:40:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160708_01,08/07/2016,17:25:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160708_02,08/07/2016,17:40:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160708_03,08/07/2016,18:35:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160708_04,08/07/2016,18:50:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160709_01,09/07/2016,15:15:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160709_02,09/07/2016,15:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160709_03,09/07/2016,15:56:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160709_04,09/07/2016,16:32:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160709_05,09/07/2016,16:50:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160714_01,14/07/2016,20:55:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160714_02,14/07/2016,21:06:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160722_01,22/07/2016,15:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160722_02,22/07/2016,15:40:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160722_03,22/07/2016,17:10:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160723_02,23/07/2016,17:50:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160723_03,23/07/2016,20:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160723_04,23/07/2016,21:05:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160724_01,24/07/2016,14:40:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160724_02,24/07/2016,15:10:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160724_03,24/07/2016,17:05:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160724_04,24/07/2016,17:11:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160724_05,24/07/2016,17:22:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160724_06,24/07/2016,18:20:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160725_01,25/07/2016,15:08:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160725_02,25/07/2016,16:15:00,Tarot 680 Pro,Sequoia (RED),NA
-JA27072016_01,27/07/2016,14:41:00,Tarot 680 Pro,Sequoia (RED),NA
-JA27072016_02,27/07/2016,15:15:00,Tarot 680 Pro,Sequoia (RED),NA
-JA27072016_03,27/07/2016,15:58:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160729_01,29/07/2016,13:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160729_02,29/07/2016,14:20:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160730_01,30/07/2016,15:06:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160730_02,30/07/2016,16:47:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160730_03,30/07/2016,17:11:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160730_04,30/07/2016,19:20:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160730_05,30/07/2016,19:53:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160730_06,30/07/2016,20:33:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160801_01,01/08/2016,18:15:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160801_02,01/08/2016,19:00:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_01,03/08/2016,14:10:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_02,03/08/2016,14:37:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_03,03/08/2016,15:09:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_04,03/08/2016,16:30:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_05,03/08/2016,17:36:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_06,03/08/2016,18:04:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_07,03/08/2016,20:08:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_08,03/08/2016,21:11:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160803_09,03/08/2016,21:16:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160804_01,04/08/2016,15:17:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160804_02,04/08/2016,15:37:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160804_03,04/08/2016,17:19:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160804_04,04/08/2016,17:55:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160805_01,05/08/2016,13:03:00,Tarot 680 Pro,Sequoia (RED),NA
-JA20160805_02,05/08/2016,13:43:00,Tarot 680 Pro,Sequoia (RED),NA
+﻿flight_id,date,time,Aircraft_ID,Sensor_ID,Skye_Code,Notes
+PS1_HER_20170624,24/06/2017,20:29:00,DJI Phantom 4 Pro (Will),Sequoia #2,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",time approximate
+PS1_HER_20170626,26/06/2017,19:44:00,DJI Phantom 4 Pro (Will),Sequoia #1,-,
+PS1_HER_20170709,09/07/2017,18:48:00,3DR Iris+ (TeamShrub),Sequoia #2,"Complete cumulus cover (7) to Stratus, sun obscured (8)",
+PS1_HER_20170711,11/07/2017,12:40:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+PS1_HER_20170717,17/07/2017,15:48:00,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+PS1_HER_20170726,26/07/2017,13:01:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS1_HER_20170809,09/08/2017,12:45:00,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+PS1_KOM_20170624,24/06/2017,22:51:00,DJI Phantom 4 Pro (Will),Sequoia #2,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",time approximate
+PS1_KOM_20170626,26/06/2017,18:47:00,DJI Phantom 4 Pro (Will),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS1_KOM_20170709,09/07/2017,19:19:00,3DR Iris+ (TeamShrub),Sequoia #2,"Complete cumulus cover (7) to Stratus, sun obscured (8)",
+PS1_KOM_20170711,11/07/2017,12:25:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+PS1_KOM_20170717,17/07/2017,15:34:00,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+PS1_KOM_20170726,26/07/2017,13:10:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS1_KOM_20170809,09/08/2017,13:41:00,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+PS2_HER_20170711,11/07/2017,14:08:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+PS2_HER_20170717,17/07/2017,17:32:00,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+PS2_HER_20170726,26/07/2017,14:12:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS2_HER_20170807,07/08/2017,18:24:00,3DR Iris+ (TeamShrub),Sequoia #1,Drizzle (9),
+PS2_HER_20170809,09/08/2017,15:54:00,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+PS2_HER_20170626,26/06/2017,17:31:00,DJI Phantom 4 Pro (Will),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS2_KOM_20170711,11/07/2017,15:28:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun not obscured (2) to Thin cirrus, sun obscured (3)",
+PS2_KOM_20170717,17/07/2017,18:30:00,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+PS2_KOM_20170726,26/07/2017,14:22:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS2_KOM_20170807,07/08/2017,18:49:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Stratus, sun obscured (8)",
+PS2_KOM_20170809,09/08/2017,15:33:00,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+PS2_KOM_20170626,26/06/2017,16:48:00,DJI Phantom 4 Pro (Will),Sequoia #1,"Thin cirrus, sun not obscured (2)",
+PS3_HER_20170626,26/06/2017,13:26:00,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+PS3_HER_20170706,06/07/2017,20:00:00,DJI Phantom 4 Pro (Will),Sequoia ?,"Clear sky (0) to Scattered cumulus, sun not obscured (4)",
+PS3_HER_20170710,10/07/2017,15:05:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus, sun obscured (6)",
+PS3_HER_20170718,18/07/2017,14:57:00,3DR Iris+ (TeamShrub),Sequoia #1,fast moving clouds,
+PS3_HER_20170726,26/07/2017,15:46:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS3_HER_20170807,07/08/2017,14:30:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS3_KOM_20170626,26/06/2017,12:12:00,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+PS3_KOM_20170710,10/07/2017,14:12:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus, sun obscured (6)",
+PS3_KOM_20170718,18/07/2017,15:08:00,3DR Iris+ (TeamShrub),Sequoia #1,fast moving clouds,
+PS3_KOM_20170726,26/07/2017,15:52:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS3_KOM_20170807,07/08/2017,14:37:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS3_KOM_20170809,09/08/2017,19:45:00,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+PS4_HER_20170626,26/06/2017,14:48:00,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+PS4_HER_20170706,06/07/2017,15:42:00,DJI Phantom 4 Pro (Will),Sequoia (?),Clear sky (0) to Haze (1),
+PS4_HER_20170710,10/07/2017,16:10:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS4_HER_20170717,17/07/2017,20:08:00,3DR Iris+ (TeamShrub),Sequoia #1,"Scattered cumulus, sun not obscured (4)",In two segments
+PS4_HER_20170726,26/07/2017,17:25:00,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+PS4_HER_20170807,07/08/2017,15:18:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS4_KOM_20170626,26/06/2017,14:20:00,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+PS4_KOM_20170706,06/07/2017,18:55:00,DJI Phantom 4 Pro (Will),Sequoia (?),Clear sky (0) to Haze (1),
+PS4_KOM_20170710,10/07/2017,15:54:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+PS4_KOM_20170717,17/07/2017,20:45:00,3DR Iris+ (TeamShrub),Sequoia #1,"Scattered cumulus, sun not obscured (4)",
+PS4_KOM_20170728,28/07/2017,13:25:00,3DR Iris+ (TeamShrub),Sequoia #1,"Clear sky (0) to Thin cirrus, sun not obscured (2)",
+PS4_KOM_20170807,07/08/2017,15:33:00,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+JA20160624_01,24/06/2016,16:33:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160624_02,24/06/2016,16:26:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160624_03,24/06/2016,17:36:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160624_04,24/06/2016,17:44:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160624_05,24/06/2016,18:54:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160624_06,24/06/2016,19:22:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160628_01,28/06/2016,18:33:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160628_02,28/06/2016,19:10:00,Tarot 680 Pro,Sequoia #1,clear,
+JA20160628_03,28/06/2016,20:46:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160628_04,28/06/2016,21:09:00,Tarot 680 Pro,Sequoia #1,clear,
+JA20160630_01,30/06/2016,16:30:00,Tarot 680 Pro,Sequoia #1,continous cloud,time approximate
+JA20160630_02,30/06/2016,17:30:00,Tarot 680 Pro,Sequoia #1,continous cloud,No calibration
+JA20160705_01,05/07/2016,21:20:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160705_02,05/07/2016,21:30:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160705_03,05/07/2016,21:35:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160706_01,06/07/2016,17:48:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160706_02,06/07/2016,18:28:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160706_03,06/07/2016,19:20:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160706_04,06/07/2016,19:40:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160708_01,08/07/2016,17:25:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160708_02,08/07/2016,17:40:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160708_03,08/07/2016,18:35:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160708_04,08/07/2016,18:50:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160709_01,09/07/2016,15:15:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160709_02,09/07/2016,15:30:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA20160709_03,09/07/2016,15:56:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160709_04,09/07/2016,16:32:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160709_05,09/07/2016,16:50:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160714_01,14/07/2016,20:55:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160714_02,14/07/2016,21:06:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160722_01,22/07/2016,15:30:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160722_02,22/07/2016,15:40:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160722_03,22/07/2016,17:10:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160723_02,23/07/2016,17:50:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160723_03,23/07/2016,20:30:00,Tarot 680 Pro,Sequoia #1,partially cloudy,
+JA20160723_04,23/07/2016,21:05:00,Tarot 680 Pro,Sequoia #1,partially cloudy,
+JA20160724_01,24/07/2016,14:40:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160724_02,24/07/2016,15:10:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160724_03,24/07/2016,17:05:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160724_04,24/07/2016,17:11:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160724_05,24/07/2016,17:22:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160724_06,24/07/2016,18:20:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160725_01,25/07/2016,15:08:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA20160725_02,25/07/2016,16:15:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA27072016_01,27/07/2016,14:41:00,Tarot 680 Pro,Sequoia #1,NA,
+JA27072016_02,27/07/2016,15:15:00,Tarot 680 Pro,Sequoia #1,NA,
+JA27072016_03,27/07/2016,15:58:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160729_01,29/07/2016,13:30:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA20160729_02,29/07/2016,14:20:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA20160730_01,30/07/2016,15:06:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160730_02,30/07/2016,16:47:00,Tarot 680 Pro,Sequoia #1,partially cloudy,No Calibration
+JA20160730_03,30/07/2016,17:11:00,Tarot 680 Pro,Sequoia #1,partially cloudy,No Calibration
+JA20160730_04,30/07/2016,19:20:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160730_05,30/07/2016,19:53:00,Tarot 680 Pro,Sequoia #1,partially cloudy,
+JA20160730_06,30/07/2016,20:33:00,Tarot 680 Pro,Sequoia #1,partially cloudy,
+JA20160801_01,01/08/2016,18:15:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160801_02,01/08/2016,19:00:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_01,03/08/2016,14:10:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA20160803_02,03/08/2016,14:37:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_03,03/08/2016,15:09:00,Tarot 680 Pro,Sequoia #1,continous cloud,
+JA20160803_04,03/08/2016,16:30:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_05,03/08/2016,17:36:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_06,03/08/2016,18:04:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_07,03/08/2016,20:08:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_08,03/08/2016,21:11:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160803_09,03/08/2016,21:16:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160804_01,04/08/2016,15:17:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160804_02,04/08/2016,15:37:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160804_03,04/08/2016,17:19:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160804_04,04/08/2016,17:55:00,Tarot 680 Pro,Sequoia #1,NA,
+JA20160805_01,05/08/2016,13:03:00,Tarot 680 Pro,Sequoia #1,partially cloudy,
+JA20160805_02,05/08/2016,13:43:00,Tarot 680 Pro,Sequoia #1,partially cloudy,

@@ -63,7 +63,6 @@ get_sent_extent <- function(site_veg_id, sent_boundaries) {
 ## Function to create satellite + drone time-series plots for 2016
 plot_ts_2016 <- function(site_name, veg_type){
   
-  # !!!!!!!!!!!!!!!!!!! The following section needs to be revised !!!!!!!!!!!!!
   # Prep MODIS data
   site_coords_key <- read.csv("data/modis/Modis_plot_key.csv")
   MODIS6_data <- read.csv("data/modis/PS_centre_plots_v6_2000-2017.csv")
@@ -94,8 +93,6 @@ plot_ts_2016 <- function(site_name, veg_type){
     sensor = rep("MODIS", length(MODIS6_site$date))
   )
   
-  ### !!!!!!!!!!!!!!!! End of revsions needed !!!!!!!!!!!!!!!!!!!!!!!!!
-  
   ## Prepare loading of drone files
   
   # generate site-specific path to drone files
@@ -120,7 +117,7 @@ plot_ts_2016 <- function(site_name, veg_type){
   if(site_name == "PS1" & veg_type == "HER"){
     drone_meta <- drone_meta[1:6,]
   } else if(site_name == "PS1" & veg_type == "KOM"){
-    drone_meta <- drone_meta[1:4,]
+    drone_meta <- drone_meta[1:5,]
   }
   
   ## Prepare loading of sentinel files
@@ -347,8 +344,6 @@ plot_ts_2016 <- function(site_name, veg_type){
 ## Function to create satellite + drone time-series plots for 2016
 plot_ts_2017 <- function(site_name, veg_type){
   
-  ##### !!!! The following section needs to be revised !!!!
-  
   # Prepare MODIS data
   site_coords_key <- read.csv("data/modis/Modis_plot_key.csv")
   MODIS6_data <- read.csv("data/modis/PS_centre_plots_v6_2000-2017.csv")
@@ -379,9 +374,6 @@ plot_ts_2017 <- function(site_name, veg_type){
                            date = as.Date(MODIS6_site$date, "%d/%m/%Y"),
                            sensor = rep("MODIS", length(MODIS6_site$date))
   )
-  
-  
-  ### !!!!!!!!!! End of revision section !!!!!
   
   ##  Prepare drone file meta data 
   
@@ -741,19 +733,7 @@ canada_map <- ggplot() + geom_sf(data = world, fill = "#ffffffFF", size = 0.5) +
 save_plot(canada_map, filename = "figures/fig_1_ts_plots/canada_map.png",
           base_aspect_ratio = 1, base_height = 5)  
 
-### 5 Prepare final map figure ----
-
-# Load qhi / yukon boundaries
-qhi_boundaries_shp <- readOGR("data/auxillary/yukon_bounds_utmz7.shp")
-crs(qhi_boundaries_shp) <- 
-  crs("+proj=utm +zone=7 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-
-# convert into a spatial points object to allow for seamless cropping
-lines_df <- as(qhi_boundaries_shp, "SpatialLinesDataFrame")
-points_df <- as(lines_df, "SpatialPointsDataFrame")
-points_df <- data.frame(group = points_df@data$ID,
-                        x = points_df@coords[,1],
-                        y = points_df@coords[,2]) 
+### 5 Prepare study site boundaries
 
 # Load ps site boundaries
 load("data/site_boundaries/ps_sent_site_bounds.Rda")
@@ -866,18 +846,19 @@ drone_flights <- meta_data_global %>%
   group_by(site_name, veg_type, flight_id) %>%
   distinct(date) %>%
   ungroup() %>%
-  select(site_name, veg_type, date, flight_id) %>%
+  dplyr::select(site_name, veg_type, date, flight_id) %>%
   arrange(site_name, veg_type, date, flight_id)
 
 # Add meta-data from flight logs
 flight_log_meta <- read.csv("data/auxillary/flight_log_meta_data.csv", 
                             stringsAsFactors = F)
+flight_log_meta$date <- as.Date(flight_log_meta$date, "%d/%m/%Y")
 drone_flights <- merge(drone_flights, flight_log_meta,
                        by.x = "flight_id",
                        by.y = "flight_id") 
-drone_flights$date.x == drone_fligths$date.y
+drone_flights$date.x == drone_flights$date.y
 drone_flights$date <- drone_flights$date.x
-drone_flights <- select(drone_flights, -date.x, -date.y)
+drone_flights <- dplyr::select(drone_flights, -date.x, -date.y)
 # Calculate solar elevation
 drone_flights$posix <- as.POSIXct(paste(drone_flights$date, drone_flights$time),
                                   format = "%Y-%m-%d %H:%M:%OS",
@@ -908,7 +889,7 @@ drone_flights$solar_noon_diff <- difftime(drone_flights$posix_utc,
                                           units = "hours")
 
 # Tidy up
-drone_flights <- select(drone_flights,
+drone_flights <- dplyr::select(drone_flights,
                         site_name,
                         veg_type,
                         date,
@@ -918,7 +899,8 @@ drone_flights <- select(drone_flights,
                         solar_azimuth,
                         Aircraft_ID,
                         Sensor_ID,
-                        Skye_Code) 
+                        Skye_Code,
+                        Notes) 
 
 drone_flights <- arrange(drone_flights,
                          site_name, veg_type, date)
@@ -928,7 +910,7 @@ drone_flights$solar_elevation <- round(drone_flights$solar_elevation)
 drone_flights$solar_azimuth <- round(drone_flights$solar_azimuth)
 
 # Calculate mean difference to solar noon
-mean(drone_flights$solar_noon_diff, na.rm = T)
+mean(abs(drone_flights$solar_noon_diff), na.rm = T)
 
 # Filter time 
 # Helper function to produce pretty names
@@ -937,7 +919,7 @@ pretty_name <- function(value){
     site_name = as.character(unique(drone_flights$site_name)),
     site_pretty = c(
       "Site 1 - Collinson Head",
-      "Site 2 - Bowehead Ridge",
+      "Site 2 - Bowhead Ridge",
       "Site 3 - Hawk Valley",
       "Site 4 - Hawk Ridge"
     ), stringsAsFactors = F)
@@ -978,7 +960,7 @@ sentinel_scenes <- meta_data_global %>%
            sensor == "Sentinel") %>%
   group_by(sensor) %>% 
   distinct(date) %>% 
-  select(sensor, date) %>%
+  dplyr::select(sensor, date) %>%
   arrange(sensor, date)  
 write.csv(file = paste0(data_out_path, "sentinel_scenes.csv"), 
           sentinel_scenes, 
@@ -997,7 +979,7 @@ modis_pixels <- meta_data_global %>%
   group_by(site_name, veg_type) %>%
   distinct(date) %>%
   ungroup() %>%
-  select(site_name, veg_type, date) %>%
+  dplyr::select(site_name, veg_type, date) %>%
   arrange(site_name, veg_type, date)
 
 # Helper function to produce pretty names
@@ -1006,7 +988,7 @@ pretty_name <- function(value){
     site_name = as.character(unique(modis_pixels$site_name)),
     site_pretty = c(
       "Site 1 - Collinson Head",
-      "Site 2 - Bowehead Ridge",
+      "Site 2 - Bowhead Ridge",
       "Site 3 - Hawk Valley",
       "Site 4 - Hawk Ridge"
     ), stringsAsFactors = F)
