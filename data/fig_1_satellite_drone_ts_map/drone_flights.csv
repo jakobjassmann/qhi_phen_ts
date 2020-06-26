@@ -1,67 +1,67 @@
-"Site Name","Vegetation Type","Date","Time (UTC-6)","Diff. to Solar Noon (h)","Solar Elevation","Solar Azimuth","Drone Platform","Sensor","Sky Code","Notes"
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2016-06-28,"19:10:00",3.85,33,247,"Tarot 680 Pro","Sequoia #1","clear",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2016-07-09,"15:30:00",0.15,43,183,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2016-07-23,"20:30:00",5.13,23,265,"Tarot 680 Pro","Sequoia #1","partially cloudy",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2016-07-29,"13:30:00",-1.87,36,147,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2016-07-30,"16:47:00",1.42,37,206,"Tarot 680 Pro","Sequoia #1","partially cloudy","No Calibration"
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2016-08-03,"14:10:00",-1.2,36,159,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-06-24,"20:29:00",5.18,26,267,"DJI Phantom 4 Pro (Will)","Sequoia #2","Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)","time approximate"
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-06-26,"19:44:00",4.42,30,256,"DJI Phantom 4 Pro (Will)","Sequoia #1","-",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-07-09,"18:48:00",3.45,34,241,"3DR Iris+ (TeamShrub)","Sequoia #2","Complete cumulus cover (7) to Stratus, sun obscured (8)",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-07-11,"12:40:00",-2.69,37,132,"3DR Iris+ (TeamShrub)","Sequoia #1","Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-07-17,"15:48:00",0.44,41,188,"3DR Iris+ (TeamShrub)","Sequoia #1","Haze (1)",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-07-26,"13:01:00",-2.35,35,138,"3DR Iris+ (TeamShrub)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 1 - Collinson Head","Tussock Sedge Tundra",2017-08-09,"12:45:00",-2.6,31,135,"3DR Iris+ (TeamShrub)","Sequoia #1","Clear sky (0)",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2016-06-28,"21:09:00",5.83,23,276,"Tarot 680 Pro","Sequoia #1","clear",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2016-07-23,"21:05:00",5.71,20,273,"Tarot 680 Pro","Sequoia #1","partially cloudy",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2016-07-29,"14:20:00",-1.03,38,161,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2016-07-30,"17:11:00",1.82,36,213,"Tarot 680 Pro","Sequoia #1","partially cloudy","No Calibration"
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2016-08-03,"15:09:00",-0.21,38,176,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-06-24,"22:51:00",7.55,14,299,"DJI Phantom 4 Pro (Will)","Sequoia #2","Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)","time approximate"
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-06-26,"18:47:00",3.47,35,242,"DJI Phantom 4 Pro (Will)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-07-09,"19:19:00",3.97,31,249,"3DR Iris+ (TeamShrub)","Sequoia #2","Complete cumulus cover (7) to Stratus, sun obscured (8)",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-07-11,"12:25:00",-2.94,36,127,"3DR Iris+ (TeamShrub)","Sequoia #1","Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-07-17,"15:34:00",0.2,41,184,"3DR Iris+ (TeamShrub)","Sequoia #1","Haze (1)",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-07-26,"13:10:00",-2.2,36,141,"3DR Iris+ (TeamShrub)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 1 - Collinson Head","Dryas-Vetch Tundra",2017-08-09,"13:41:00",-1.67,34,151,"3DR Iris+ (TeamShrub)","Sequoia #1","Clear sky (0)",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2016-06-30,"16:30:00",1.18,42,202,"Tarot 680 Pro","Sequoia #1","continous cloud","time approximate"
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2016-07-25,"15:08:00",-0.24,40,176,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2016-07-30,"19:53:00",4.52,25,255,"Tarot 680 Pro","Sequoia #1","partially cloudy",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2016-08-05,"13:03:00",-2.31,33,140,"Tarot 680 Pro","Sequoia #1","partially cloudy",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2017-06-26,"17:31:00",2.21,40,221,"DJI Phantom 4 Pro (Will)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2017-07-11,"14:08:00",-1.22,41,157,"3DR Iris+ (TeamShrub)","Sequoia #1","Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2017-07-17,"17:32:00",2.17,38,219,"3DR Iris+ (TeamShrub)","Sequoia #1","Haze (1)",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2017-07-26,"14:12:00",-1.17,39,159,"3DR Iris+ (TeamShrub)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2017-08-07,"18:24:00",3.04,30,232,"3DR Iris+ (TeamShrub)","Sequoia #1","Drizzle (9)",""
-"Site 2 - Bowhead Ridge","Tussock Sedge Tundra",2017-08-09,"15:54:00",0.55,36,190,"3DR Iris+ (TeamShrub)","Sequoia #1","Clear sky (0)",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2016-06-30,"17:30:00",2.18,40,220,"Tarot 680 Pro","Sequoia #1","continous cloud","No calibration"
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2016-07-25,"16:15:00",0.88,39,196,"Tarot 680 Pro","Sequoia #1","continous cloud",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2016-07-30,"20:33:00",5.18,21,265,"Tarot 680 Pro","Sequoia #1","partially cloudy",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2016-08-05,"13:43:00",-1.64,35,151,"Tarot 680 Pro","Sequoia #1","partially cloudy",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2017-06-26,"16:48:00",1.49,42,208,"DJI Phantom 4 Pro (Will)","Sequoia #1","Thin cirrus, sun not obscured (2)",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2017-07-11,"15:28:00",0.11,42,182,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun not obscured (2) to Thin cirrus, sun obscured (3)",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2017-07-17,"18:30:00",3.14,34,235,"3DR Iris+ (TeamShrub)","Sequoia #1","Haze (1)",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2017-07-26,"14:22:00",-1,39,162,"3DR Iris+ (TeamShrub)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 2 - Bowhead Ridge","Dryas-Vetch Tundra",2017-08-09,"15:33:00",0.2,36,184,"3DR Iris+ (TeamShrub)","Sequoia #1","Clear sky (0)",""
-"Site 3 - Hawk Valley","Tussock Sedge Tundra",2017-06-26,"13:26:00",-1.88,41,145,"DJI Phantom 4 Pro (Will)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 3 - Hawk Valley","Tussock Sedge Tundra",2017-07-06,"20:00:00",4.66,28,259,"DJI Phantom 4 Pro (Will)","Sequoia ?","Clear sky (0) to Scattered cumulus, sun not obscured (4)",""
-"Site 3 - Hawk Valley","Tussock Sedge Tundra",2017-07-10,"15:05:00",-0.27,42,175,"3DR Iris+ (TeamShrub)","Sequoia #1","Cumulus, sun obscured (6)",""
-"Site 3 - Hawk Valley","Tussock Sedge Tundra",2017-07-18,"14:57:00",-0.42,41,172,"3DR Iris+ (TeamShrub)","Sequoia #1","fast moving clouds",""
-"Site 3 - Hawk Valley","Tussock Sedge Tundra",2017-08-07,"14:30:00",-0.86,36,165,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 3 - Hawk Valley","Dryas-Vetch Tundra",2017-06-26,"12:12:00",-3.11,36,124,"DJI Phantom 4 Pro (Will)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 3 - Hawk Valley","Dryas-Vetch Tundra",2017-07-10,"14:12:00",-1.15,41,158,"3DR Iris+ (TeamShrub)","Sequoia #1","Cumulus, sun obscured (6)",""
-"Site 3 - Hawk Valley","Dryas-Vetch Tundra",2017-07-18,"15:08:00",-0.23,41,176,"3DR Iris+ (TeamShrub)","Sequoia #1","fast moving clouds",""
-"Site 3 - Hawk Valley","Dryas-Vetch Tundra",2017-07-26,"15:52:00",0.5,39,189,"3DR Iris+ (TeamShrub)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 3 - Hawk Valley","Dryas-Vetch Tundra",2017-08-07,"14:37:00",-0.74,36,167,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 3 - Hawk Valley","Dryas-Vetch Tundra",2017-08-09,"19:45:00",4.4,23,253,"3DR Iris+ (TeamShrub)","Sequoia #1","Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",""
-"Site 4 - Hawk Ridge","Tussock Sedge Tundra",2017-06-26,"14:48:00",-0.51,44,170,"DJI Phantom 4 Pro (Will)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 4 - Hawk Ridge","Tussock Sedge Tundra",2017-07-06,"15:42:00",0.36,43,187,"DJI Phantom 4 Pro (Will)","Sequoia (?)","Clear sky (0) to Haze (1)",""
-"Site 4 - Hawk Ridge","Tussock Sedge Tundra",2017-07-10,"16:10:00",0.81,42,195,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 4 - Hawk Ridge","Tussock Sedge Tundra",2017-07-17,"20:08:00",4.77,26,260,"3DR Iris+ (TeamShrub)","Sequoia #1","Scattered cumulus, sun not obscured (4)","In two segments"
-"Site 4 - Hawk Ridge","Tussock Sedge Tundra",2017-07-26,"17:25:00",2.05,36,217,"3DR Iris+ (TeamShrub)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 4 - Hawk Ridge","Tussock Sedge Tundra",2017-08-07,"15:18:00",-0.06,37,179,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 4 - Hawk Ridge","Dryas-Vetch Tundra",2017-06-26,"14:20:00",-0.98,43,161,"DJI Phantom 4 Pro (Will)","Sequoia #1","Complete cumulus cover (7)",""
-"Site 4 - Hawk Ridge","Dryas-Vetch Tundra",2017-07-10,"15:54:00",0.55,42,190,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun obscured (3)",""
-"Site 4 - Hawk Ridge","Dryas-Vetch Tundra",2017-07-17,"20:45:00",5.39,23,269,"3DR Iris+ (TeamShrub)","Sequoia #1","Scattered cumulus, sun not obscured (4)",""
-"Site 4 - Hawk Ridge","Dryas-Vetch Tundra",2017-07-28,"13:25:00",-1.95,36,145,"3DR Iris+ (TeamShrub)","Sequoia #1","Clear sky (0) to Thin cirrus, sun not obscured (2)",""
-"Site 4 - Hawk Ridge","Dryas-Vetch Tundra",2017-08-07,"15:33:00",0.19,37,183,"3DR Iris+ (TeamShrub)","Sequoia #1","Thin cirrus, sun obscured (3)",""
+Site Name,Vegetation Type,Date,Time (UTC-6),Diff. to Solar Noon (h),Solar Elevation,Solar Azimuth,Drone Platform,Sensor,Sky Code,Notes
+Site 1 - Collinson Head,Tussock Sedge Tundra,28/06/2016,19:10:00,3.85,33,247,Tarot 680 Pro,Sequoia #1,clear,
+Site 1 - Collinson Head,Tussock Sedge Tundra,09/07/2016,15:30:00,0.15,43,183,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 1 - Collinson Head,Tussock Sedge Tundra,23/07/2016,20:30:00,5.13,23,265,Tarot 680 Pro,Sequoia #1,partially cloudy,
+Site 1 - Collinson Head,Tussock Sedge Tundra,29/07/2016,13:30:00,-1.87,36,147,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 1 - Collinson Head,Tussock Sedge Tundra,30/07/2016,16:47:00,1.42,37,206,Tarot 680 Pro,Sequoia #1,partially cloudy,No Calibration
+Site 1 - Collinson Head,Tussock Sedge Tundra,03/08/2016,14:10:00,-1.2,36,159,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 1 - Collinson Head,Tussock Sedge Tundra,24/06/2017,20:29:00,5.18,26,267,DJI Phantom 4 Pro (Will),Sequoia #2,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",time approximate
+Site 1 - Collinson Head,Tussock Sedge Tundra,26/06/2017,19:44:00,4.42,30,256,DJI Phantom 4 Pro (Will),Sequoia #1,-,
+Site 1 - Collinson Head,Tussock Sedge Tundra,09/07/2017,18:48:00,3.45,34,241,3DR Iris+ (TeamShrub),Sequoia #2,"Complete cumulus cover (7) to Stratus, sun obscured (8)",
+Site 1 - Collinson Head,Tussock Sedge Tundra,11/07/2017,12:40:00,-2.69,37,132,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+Site 1 - Collinson Head,Tussock Sedge Tundra,17/07/2017,15:48:00,0.44,41,188,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+Site 1 - Collinson Head,Tussock Sedge Tundra,26/07/2017,13:01:00,-2.35,35,138,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+Site 1 - Collinson Head,Tussock Sedge Tundra,09/08/2017,12:45:00,-2.6,31,135,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+Site 1 - Collinson Head,Dryas-Vetch Tundra,28/06/2016,21:09:00,5.83,23,276,Tarot 680 Pro,Sequoia #1,clear,
+Site 1 - Collinson Head,Dryas-Vetch Tundra,23/07/2016,21:05:00,5.71,20,273,Tarot 680 Pro,Sequoia #1,partially cloudy,
+Site 1 - Collinson Head,Dryas-Vetch Tundra,29/07/2016,14:20:00,-1.03,38,161,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 1 - Collinson Head,Dryas-Vetch Tundra,30/07/2016,17:11:00,1.82,36,213,Tarot 680 Pro,Sequoia #1,partially cloudy,No Calibration
+Site 1 - Collinson Head,Dryas-Vetch Tundra,03/08/2016,15:09:00,-0.21,38,176,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 1 - Collinson Head,Dryas-Vetch Tundra,24/06/2017,22:51:00,7.55,14,299,DJI Phantom 4 Pro (Will),Sequoia #2,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",time approximate
+Site 1 - Collinson Head,Dryas-Vetch Tundra,26/06/2017,18:47:00,3.47,35,242,DJI Phantom 4 Pro (Will),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 1 - Collinson Head,Dryas-Vetch Tundra,09/07/2017,19:19:00,3.97,31,249,3DR Iris+ (TeamShrub),Sequoia #2,"Complete cumulus cover (7) to Stratus, sun obscured (8)",
+Site 1 - Collinson Head,Dryas-Vetch Tundra,11/07/2017,12:25:00,-2.94,36,127,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+Site 1 - Collinson Head,Dryas-Vetch Tundra,17/07/2017,15:34:00,0.2,41,184,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+Site 1 - Collinson Head,Dryas-Vetch Tundra,26/07/2017,13:10:00,-2.2,36,141,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+Site 1 - Collinson Head,Dryas-Vetch Tundra,09/08/2017,13:41:00,-1.67,34,151,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,30/06/2016,16:30:00,1.18,42,202,Tarot 680 Pro,Sequoia #1,continous cloud,time approximate
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,25/07/2016,15:08:00,-0.24,40,176,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,30/07/2016,19:53:00,4.52,25,255,Tarot 680 Pro,Sequoia #1,partially cloudy,
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,05/08/2016,13:03:00,-2.31,33,140,Tarot 680 Pro,Sequoia #1,partially cloudy,
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,26/06/2017,17:31:00,2.21,40,221,DJI Phantom 4 Pro (Will),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,11/07/2017,14:08:00,-1.22,41,157,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,17/07/2017,17:32:00,2.17,38,219,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,26/07/2017,14:12:00,-1.17,39,159,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,07/08/2017,18:24:00,3.04,30,232,3DR Iris+ (TeamShrub),Sequoia #1,Drizzle (9),
+Site 2 - Bowhead Ridge,Tussock Sedge Tundra,09/08/2017,15:54:00,0.55,36,190,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,30/06/2016,17:30:00,2.18,40,220,Tarot 680 Pro,Sequoia #1,continous cloud,No calibration
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,25/07/2016,16:15:00,0.88,39,196,Tarot 680 Pro,Sequoia #1,continous cloud,
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,30/07/2016,20:33:00,5.18,21,265,Tarot 680 Pro,Sequoia #1,partially cloudy,
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,05/08/2016,13:43:00,-1.64,35,151,Tarot 680 Pro,Sequoia #1,partially cloudy,
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,26/06/2017,16:48:00,1.49,42,208,DJI Phantom 4 Pro (Will),Sequoia #1,"Thin cirrus, sun not obscured (2)",
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,11/07/2017,15:28:00,0.11,42,182,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun not obscured (2) to Thin cirrus, sun obscured (3)",
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,17/07/2017,18:30:00,3.14,34,235,3DR Iris+ (TeamShrub),Sequoia #1,Haze (1),
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,26/07/2017,14:22:00,-1,39,162,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+Site 2 - Bowhead Ridge,Dryas-Vetch Tundra,09/08/2017,15:33:00,0.2,36,184,3DR Iris+ (TeamShrub),Sequoia #1,Clear sky (0),
+Site 3 - Hawk Valley,Tussock Sedge Tundra,26/06/2017,13:26:00,-1.88,41,145,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+Site 3 - Hawk Valley,Tussock Sedge Tundra,06/07/2017,20:00:00,4.66,28,259,DJI Phantom 4 Pro (Will),Sequoia #1,"Clear sky (0) to Scattered cumulus, sun not obscured (4)",
+Site 3 - Hawk Valley,Tussock Sedge Tundra,10/07/2017,15:05:00,-0.27,42,175,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus, sun obscured (6)",
+Site 3 - Hawk Valley,Tussock Sedge Tundra,18/07/2017,14:57:00,-0.42,41,172,3DR Iris+ (TeamShrub),Sequoia #1,fast moving clouds,
+Site 3 - Hawk Valley,Tussock Sedge Tundra,07/08/2017,14:30:00,-0.86,36,165,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 3 - Hawk Valley,Dryas-Vetch Tundra,26/06/2017,12:12:00,-3.11,36,124,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+Site 3 - Hawk Valley,Dryas-Vetch Tundra,10/07/2017,14:12:00,-1.15,41,158,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus, sun obscured (6)",
+Site 3 - Hawk Valley,Dryas-Vetch Tundra,18/07/2017,15:08:00,-0.23,41,176,3DR Iris+ (TeamShrub),Sequoia #1,fast moving clouds,
+Site 3 - Hawk Valley,Dryas-Vetch Tundra,26/07/2017,15:52:00,0.5,39,189,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+Site 3 - Hawk Valley,Dryas-Vetch Tundra,07/08/2017,14:37:00,-0.74,36,167,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 3 - Hawk Valley,Dryas-Vetch Tundra,09/08/2017,19:45:00,4.4,23,253,3DR Iris+ (TeamShrub),Sequoia #1,"Cumulus over most of sky, sun not obscured (5) to Cumulus, sun obscured (6)",
+Site 4 - Hawk Ridge,Tussock Sedge Tundra,26/06/2017,14:48:00,-0.51,44,170,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+Site 4 - Hawk Ridge,Tussock Sedge Tundra,06/07/2017,15:42:00,0.36,43,187,DJI Phantom 4 Pro (Will),Sequoia #1,Clear sky (0) to Haze (1),
+Site 4 - Hawk Ridge,Tussock Sedge Tundra,10/07/2017,16:10:00,0.81,42,195,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 4 - Hawk Ridge,Tussock Sedge Tundra,17/07/2017,20:08:00,4.77,26,260,3DR Iris+ (TeamShrub),Sequoia #1,"Scattered cumulus, sun not obscured (4)",In two segments
+Site 4 - Hawk Ridge,Tussock Sedge Tundra,26/07/2017,17:25:00,2.05,36,217,3DR Iris+ (TeamShrub),Sequoia #1,Complete cumulus cover (7),
+Site 4 - Hawk Ridge,Tussock Sedge Tundra,07/08/2017,15:18:00,-0.06,37,179,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 4 - Hawk Ridge,Dryas-Vetch Tundra,26/06/2017,14:20:00,-0.98,43,161,DJI Phantom 4 Pro (Will),Sequoia #1,Complete cumulus cover (7),
+Site 4 - Hawk Ridge,Dryas-Vetch Tundra,10/07/2017,15:54:00,0.55,42,190,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
+Site 4 - Hawk Ridge,Dryas-Vetch Tundra,17/07/2017,20:45:00,5.39,23,269,3DR Iris+ (TeamShrub),Sequoia #1,"Scattered cumulus, sun not obscured (4)",
+Site 4 - Hawk Ridge,Dryas-Vetch Tundra,28/07/2017,13:25:00,-1.95,36,145,3DR Iris+ (TeamShrub),Sequoia #1,"Clear sky (0) to Thin cirrus, sun not obscured (2)",
+Site 4 - Hawk Ridge,Dryas-Vetch Tundra,07/08/2017,15:33:00,0.19,37,183,3DR Iris+ (TeamShrub),Sequoia #1,"Thin cirrus, sun obscured (3)",
