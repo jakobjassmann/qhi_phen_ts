@@ -688,7 +688,7 @@ preds_df$agg_level <- ordered(preds_df$agg_level,
                              levels = c(0.5, 10, 33.3))
 
 # Set colour ramp 
-col_ramp <- sequential_hcl(3, palette = "Blues3")[]
+col_ramp <- sequential_hcl(4, palette = "Blues3")[1:3]
 
 # Plot predictions
 curve_plots <- ggplot(ndvi_values,
@@ -722,10 +722,10 @@ curve_plots <- ggplot(ndvi_values,
            color = "black",
            label = parse(text = "'y = a x' ^ 2 * ' + b x + c'"),
            size = 5) +
-  annotate("rect", xmin = 175, xmax = 186, ymin = 0.73, ymax = 0.90,
-           color = "black",
-           fill = "black", 
-           alpha = 0.5) +
+  # annotate("rect", xmin = 175, xmax = 186, ymin = 0.73, ymax = 0.90,
+  #          color = "black",
+  #          fill = "black",
+  #          alpha = 0.25) +
   annotate("point", x = 176.5, y = 0.865,
             size = 2,
             color = col_ramp[1]) +
