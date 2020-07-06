@@ -688,8 +688,8 @@ preds_df$agg_level <- ordered(preds_df$agg_level,
                              levels = c(0.5, 10, 33.3))
 
 # Set colour ramp 
-col_ramp <- sequential_hcl(4, palette = "Blues3")[1:3]
-
+col_ramp <- sequential_hcl(5, palette = "Blues3")[1:3]
+# col_ramp[3] <- "#00dbfe"  
 # Plot predictions
 curve_plots <- ggplot(ndvi_values,
        aes(x = doy, y = NDVI,
