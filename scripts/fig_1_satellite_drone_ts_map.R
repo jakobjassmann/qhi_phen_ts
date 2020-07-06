@@ -213,7 +213,7 @@ plot_ts_2016 <- function(site_name, veg_type){
   if((site_name == "PS2" & veg_type == "HER")){
     plot_scale = viridis(5)[c(5,2,3)]
   } else if(site_name == "PS2" & veg_type == "KOM"){
-    plot_scale = viridis(5)[c(5,2,4,3)]
+    plot_scale = viridis(5)[c(5,2,3,4)]
   }
   
   # Set y-axis label
@@ -228,7 +228,7 @@ plot_ts_2016 <- function(site_name, veg_type){
   
   ## Generate plot
   ts_plot <- ggplot(
-    data = meta_data, 
+    data = filter(meta_data, sensor != "drone_nocalib"), 
     mapping = aes(x = date, 
                   y = mean_NDVI, 
                   color = sensor, 
@@ -501,7 +501,7 @@ plot_ts_2017 <- function(site_name, veg_type){
   
   ## Plot full time series for site
   ts_plot <- ggplot(
-    data = meta_data, 
+    data = filter(meta_data, !(date == "2017-07-17" & site_veg == "PS4_HER")), 
     mapping = aes(x = date, 
                   y = mean_NDVI, 
                   color = sensor, 
@@ -515,7 +515,8 @@ plot_ts_2017 <- function(site_name, veg_type){
     
     geom_smooth(
       mapping = aes(x = date, y= mean_NDVI), 
-      data = filter(meta_data, sensor != "drone_nocalib"),
+      data = filter(meta_data, sensor != "drone_nocalib", 
+                    !(date == "2017-07-17" & site_veg == "PS4_HER")),
       se= F, 
       method = "glm",
       formula= y ~ poly(x,2), 
@@ -657,7 +658,7 @@ save_plot(paste0(ts_out_path,"PS4_KOM_2017_tsplot.png"),
           PS4_KOM_tsplot_2017, base_aspect_ratio = 1)
 
 ## 3 Create legend plot ----
-plot_scale = viridis(5)[c(3,4,2,1,5)]
+plot_scale <- viridis(5)[c(3,4,2,1,5)]
 label_plot <- ggplot() + 
   scale_y_continuous(expand = c(0,0), limits = c(0, 3)) +
   scale_x_continuous(expand = c(0,0), 
@@ -683,20 +684,20 @@ label_plot <- ggplot() +
            shape = 21, colour = "black", 
            fill = plot_scale[4], size = 15) +
   
-  annotate("text", x = 15, y = 1.3, 
+  annotate("text", x = 44, y = 1.3, 
            label = "Drone", colour = plot_scale[1] , 
            fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 12, y = 1.3, 
+  annotate("point", x = 41, y = 1.3, 
            shape = 21, colour = "black", 
            fill = plot_scale[1], size = 15) +
   
-  annotate("text", x = 39, y = 1.3, 
-           label = "Drone, not calibrated", 
-           colour = plot_scale[2] , fontface = "bold", 
-           size = 15, hjust = 0) +
-  annotate("point", x = 36, y = 1.3, 
-           shape = 21, colour = "black", 
-           fill = plot_scale[2], size = 15) +
+  # annotate("text", x = 39, y = 1.3, 
+  #          label = "Drone, not calibrated", 
+  #          colour = plot_scale[2] , fontface = "bold", 
+  #          size = 15, hjust = 0) +
+  # annotate("point", x = 36, y = 1.3, 
+  #          shape = 21, colour = "black", 
+  #          fill = plot_scale[2], size = 15) +
   
   xlab("") +
   ylab("") +
@@ -842,7 +843,7 @@ save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
 
 ## Drone flights
 drone_flights <- meta_data_global %>% 
-  filter(sensor == "drone" | sensor == "drone_nocalib") %>%
+  filter(sensor == "drone") %>%
   group_by(site_name, veg_type, flight_id) %>%
   distinct(date) %>%
   ungroup() %>%
@@ -900,7 +901,7 @@ drone_flights <- dplyr::select(drone_flights,
                         Aircraft_ID,
                         Sensor_ID,
                         Skye_Code,
-                        Notes) 
+                        Notes)
 
 drone_flights <- arrange(drone_flights,
                          site_name, veg_type, date)
@@ -918,10 +919,10 @@ pretty_name <- function(value){
   site_names_pretty <- data.frame(
     site_name = as.character(unique(drone_flights$site_name)),
     site_pretty = c(
-      "Site 1 - Collinson Head",
-      "Site 2 - Bowhead Ridge",
-      "Site 3 - Hawk Valley",
-      "Site 4 - Hawk Ridge"
+      "Area 1 - Collinson Head",
+      "Area 2 - Bowhead Ridge",
+      "Area 3 - Hawk Valley",
+      "Area 4 - Hawk Ridge"
     ), stringsAsFactors = F)
   if(value == site_names_pretty[1,1]) return_value <- site_names_pretty[1,2]
   if(value == site_names_pretty[2,1]) return_value <- site_names_pretty[2,2]
@@ -936,7 +937,7 @@ drone_flights$veg_type <- as.character(drone_flights$veg_type)
 drone_flights$site_name <- modify(drone_flights$site_name, pretty_name)
 drone_flights$veg_type <- modify(drone_flights$veg_type, pretty_name)
 
-names(drone_flights) <- c("Site Name", 
+names(drone_flights) <- c("Area Name", 
                           "Vegetation Type", 
                           "Date",
                           "Time (UTC-6)",
@@ -988,10 +989,10 @@ pretty_name <- function(value){
   site_names_pretty <- data.frame(
     site_name = as.character(unique(modis_pixels$site_name)),
     site_pretty = c(
-      "Site 1 - Collinson Head",
-      "Site 2 - Bowhead Ridge",
-      "Site 3 - Hawk Valley",
-      "Site 4 - Hawk Ridge"
+      "Area 1 - Collinson Head",
+      "Area 2 - Bowhead Ridge",
+      "Area 3 - Hawk Valley",
+      "Area 4 - Hawk Ridge"
     ), stringsAsFactors = F)
   if(value == site_names_pretty[1,1]) return_value <- site_names_pretty[1,2]
   if(value == site_names_pretty[2,1]) return_value <- site_names_pretty[2,2]
@@ -1007,7 +1008,7 @@ modis_pixels$veg_type <- as.character(modis_pixels$veg_type)
 modis_pixels$site_name <- modify(modis_pixels$site_name, pretty_name)
 modis_pixels$veg_type <- modify(modis_pixels$veg_type, pretty_name)
 
-names(modis_pixels) <- c("Site Name", "Vegetation Type", "Date")
+names(modis_pixels) <- c("Area Name", "Vegetation Type", "Date")
 
 write.csv(file = paste0(data_out_path, "modis_pixels.csv"), 
           modis_pixels,
