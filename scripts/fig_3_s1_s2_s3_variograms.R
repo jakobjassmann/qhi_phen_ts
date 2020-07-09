@@ -12,6 +12,7 @@ library(usdm)
 library(parallel)
 library(gstat)
 library(cowplot)
+library(colorspace)
 
 # Set global parameters / load site boundaries and meta data
 figure_out_path <- "figures/"
@@ -601,11 +602,11 @@ vario_plot_her <- ggplot(filter(varios, veg == "HER"),
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Peak-Season Variograms", subtitle ="Tussock Sedge Tundra") +
-  annotate("text", x = 45, y = 0.0018, label = "Site 1", 
+  annotate("text", x = 45, y = 0.0018, label = "Area 1", 
            hjust = 1, colour = palette[1]	, size = 6) +    
-  annotate("text", x = 45, y = 0.001, label = "Site 2", 
+  annotate("text", x = 45, y = 0.001, label = "Area 2", 
            hjust = 1, colour = palette[2]	, size = 6) +    
-  annotate("text", x = 45, y = 0.0002, label = "Site 4", 
+  annotate("text", x = 45, y = 0.0002, label = "Area 4", 
            hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
@@ -633,11 +634,11 @@ vario_plot_kom <- ggplot(filter(varios, veg == "KOM" & site_veg != "PS3_KOM"),
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   ggtitle("Peak-Season Variograms", subtitle ="Dryas-Vetch Tundra") +
-  annotate("text", x = 45, y = 0.0018, label = "Site 1", 
+  annotate("text", x = 45, y = 0.0018, label = "Area 1", 
            hjust = 1, colour = palette[1], size = 6) +    
-  annotate("text", x = 45, y = 0.001, label = "Site 2", 
+  annotate("text", x = 45, y = 0.001, label = "Area 2", 
            hjust = 1, colour = palette[2]	, size = 6) +    
-  annotate("text", x = 45, y = 0.0002, label = "Site 4", 
+  annotate("text", x = 45, y = 0.0002, label = "Area 4", 
            hjust = 1, colour = palette[3]	, size = 6) +    
   theme_cowplot(18) +
   theme(legend.position = "none",
@@ -679,7 +680,7 @@ vario_plot_ps1_her <- ggplot(filter(varios, veg == "HER" & site_name == "PS1"),
   scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
-  ggtitle("Site 1 - Collinson Head", subtitle ="Tussock Sedge Tundra") +
+  ggtitle("Area 1 - Collinson Head", subtitle ="Tussock Sedge Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
            hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
@@ -709,7 +710,7 @@ vario_plot_ps1_kom <- ggplot(filter(varios, veg == "KOM" & site_name == "PS1"),
   scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
-  ggtitle("Site 1 - Collinson Head", subtitle ="Dryas-Vetch Tundra") +
+  ggtitle("Area 1 - Collinson Head", subtitle ="Dryas-Vetch Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
            hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
@@ -739,7 +740,7 @@ vario_plot_ps2_her <- ggplot(filter(varios, veg == "HER" & site_name == "PS1"),
   scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
-  ggtitle("Site 2 - Bowhead Ridge", subtitle ="Tussock Sedge Tundra") +
+  ggtitle("Area 2 - Bowhead Ridge", subtitle ="Tussock Sedge Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
            hjust = 1, colour = palette[1], size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
@@ -769,7 +770,7 @@ vario_plot_ps2_kom <- ggplot(filter(varios, veg == "KOM" & site_name == "PS1"),
   scale_colour_manual(values = palette) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
-  ggtitle("Site 2 - Bowhead Ridge", subtitle ="Dryas-Vetch Tundra") +
+  ggtitle("Area 2 - Bowhead Ridge", subtitle ="Dryas-Vetch Tundra") +
   annotate("text", x = 45, y = 0.0018, label = "2017-06-26", 
            hjust = 1, colour = palette[1]	, size = 6) +    
   annotate("text", x = 45, y = 0.001, label = "2017-07-26", 
@@ -826,7 +827,7 @@ vario_plot_45m_PS3 <- ggplot(varios,
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.005), 
                      breaks = seq(0.000, 0.005,0.001)) +
-  ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full, " 18 July 2020")) +
+  ggtitle(paste0("Area ", substr(site_name, 3, 3), " - ", site_name_full, " 18 July 2020")) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   annotate("text", x = 45, y = her_sill, label = "Tussock Sedge Tundra", 
@@ -842,7 +843,15 @@ save_plot(vario_plot_45m_PS3,
           base_aspect_ratio = 1.6)
 
 # Back up commands to allow loading of already calculated variograms and fits 
-# cat(unlist(lapply(meta_sub$object_15m_vario, function(x) paste0("load(\"data/fig_3_variograms/", x, "_fit.Rda\")"))), sep = "\n")
+# cat(unlist(lapply(meta_sub$object_15m_vario, function(x) paste0("load('data/fig_3_variograms/", x, "_fit.Rda')"))), sep = "\n")
 # cat(unlist(lapply(meta_sub$object_45m_vario, function(x) paste0("load(\"data/fig_3_variograms/", x, "_fit.Rda\")"))), sep = "\n")
 # cat(unlist(lapply(meta_sub$object_15m_vario, function(x) paste0("load(\"data/fig_3_variograms/", x, ".Rda\")"))), sep = "\n")
 # cat(unlist(lapply(meta_sub$object_45m_vario, function(x) paste0("load(\"data/fig_3_variograms/", x, ".Rda\")"))), sep = "\n")
+# PS2_HER_20170626_50m_ndvi_cropped_spdf_15m_vario <- PS2_HER_2017_06_26_50m_ndvi_cropped_spdf_15m_vario
+# PS2_HER_20170626_50m_ndvi_cropped_spdf_45m_vario <- PS2_HER_2017_06_26_50m_ndvi_cropped_spdf_45m_vario
+# PS2_HER_20170626_50m_ndvi_cropped_spdf_15m_vario_fit <- PS2_HER_2017_06_26_50m_ndvi_cropped_spdf_15m_vario_fit
+# PS2_HER_20170626_50m_ndvi_cropped_spdf_45m_vario_fit <- PS2_HER_2017_06_26_50m_ndvi_cropped_spdf_45m_vario_fit
+# PS2_KOM_20170626_50m_ndvi_cropped_spdf_15m_vario <- PS2_KOM_2017_06_26_50m_ndvi_cropped_spdf_15m_vario
+# PS2_KOM_20170626_50m_ndvi_cropped_spdf_45m_vario <- PS2_KOM_2017_06_26_50m_ndvi_cropped_spdf_45m_vario
+# PS2_KOM_20170626_50m_ndvi_cropped_spdf_15m_vario_fit <- PS2_KOM_2017_06_26_50m_ndvi_cropped_spdf_15m_vario_fit
+# PS2_KOM_20170626_50m_ndvi_cropped_spdf_45m_vario_fit <- PS2_KOM_2017_06_26_50m_ndvi_cropped_spdf_45m_vario_fit
