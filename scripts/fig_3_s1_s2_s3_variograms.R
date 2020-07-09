@@ -546,10 +546,9 @@ vario_plot_45m <- ggplot(varios,
             size = 1.5,
             inherit.aes = F) +
   scale_colour_manual(values = c(her_col, kom_col)) +
-  scale_x_continuous(limits = c(0,45), 
-                     breaks = seq(0,45,5)) +
+  scale_x_continuous(breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,max_gamma), 
-                     breaks = seq(0.000, max_gamma,0.002)) +
+                     breaks = seq(0.000, max_gamma,0.001)) +
   #ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
@@ -557,9 +556,12 @@ vario_plot_45m <- ggplot(varios,
            hjust = 1, colour = her_col, size = 6) +    
   annotate("text", x = 45, y = kom_sill, label = "Dryas-Vetch Tundra", 
            hjust = 1, colour = kom_col, size = 6) +
+  annotate("segment", x = rep(-2.3, 13), xend = rep(-2.6, 13), yend = seq(0, max_gamma, 0.0005), y = seq(0, max_gamma, 0.0005)) +
   theme_cowplot(18) +
   theme(legend.position = "none",
-        plot.title = element_text(hjust = 0)) 
+        plot.title = element_text(hjust = 0)) +
+  coord_cartesian(xlim = c(0, 45),
+                  clip = 'off') 
 save_plot(vario_plot_45m, 
           filename = paste0(figure_out_path, 
                             "/fig_3_variograms/",
