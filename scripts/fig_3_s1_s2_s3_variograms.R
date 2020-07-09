@@ -507,10 +507,8 @@ vario_plot_4m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
             inherit.aes = F) +
   geom_vline(xintercept = range_mean, colour = "black", size = 1, alpha = 0.6) +
   scale_colour_manual(values = c(her_col, kom_col)) +
-  scale_x_continuous(limits = c(0,4), 
-                     breaks = seq(0,4,1)) +
-  scale_y_continuous(limits = c(0,max_gamma), 
-                     breaks = seq(0.000, max_gamma,0.002)) +
+  scale_x_continuous(breaks = seq(0,4,0.5)) +
+  scale_y_continuous(breaks = seq(0.000, max_gamma,0.001)) +
   #ggtitle(paste0("Site ", substr(site_name, 3, 3), " - ", site_name_full)) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
@@ -520,9 +518,15 @@ vario_plot_4m <- ggplot(filter(varios, max_dist == "15m" & dist < 4),
            hjust = 1, colour = kom_col, size = 6) +
   annotate("text", x = range_mean + 0.1, y = 0, label = paste0(round(range_mean, 2), " m"), 
            hjust = 0, vjust = 0, colour = "black", size = 5) +
+  annotate("segment", x = rep(-0.2, 13), xend = rep(-0.23, 13), yend = seq(0, max_gamma, 0.0005), y = seq(0, max_gamma, 0.0005)) +
+  annotate("segment", x = seq(0, 4, 0.1), xend = seq(0, 4, 0.1), yend = rep(-0.0003, 41), y = rep(-0.000375, 41)) +
   theme_cowplot(18) +
   theme(legend.position = "none",
-        plot.title = element_text(hjust = 0)) 
+        plot.title = element_text(hjust = 0)) +
+  coord_cartesian(xlim = c(0, 4),
+                  ylim = c(0, max_gamma),
+                  clip = 'off') 
+
 save_plot(vario_plot_4m, 
           filename = paste0(figure_out_path, 
                             "/fig_3_variograms/",
