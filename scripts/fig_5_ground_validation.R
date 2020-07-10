@@ -594,11 +594,11 @@ pretty_plots <- function(site_veg_es, year_es, agg_level, short = F) {
     colorkey= list(
       space='bottom',
       labels=list(at=seq(ndvi_min, ndvi_max, 0.1),
-                  font=2, cex = 1.5)
+                  font=1, cex = 1.5)
     ),
     par.settings = list(
       axis.line=list(col='transparent'),
-      par.main.text = list(font = 2, # make it bold
+      par.main.text = list(font = 1,
                            just = "left",
                            cex = 1.5,
                            x = grid::unit(15, "mm"))
@@ -608,8 +608,7 @@ pretty_plots <- function(site_veg_es, year_es, agg_level, short = F) {
     col.regions=viridis(100),                  
     at=seq(ndvi_min, ndvi_max, (ndvi_max - ndvi_min) / 100),
     legend=list(left=list(fun=grid::textGrob("NDVI", y=0.05, x = 1.4, 
-                                             gp=gpar(cex=1.5, 
-                                                     fontface = "bold"))))
+                                             gp=gpar(cex=1.5))))
   )
   
   # Calculate raster differences per doy. 
@@ -641,11 +640,11 @@ pretty_plots <- function(site_veg_es, year_es, agg_level, short = F) {
       colorkey= list(
         space='bottom',
         labels=list(at=seq(min_diff, max_diff,0.2),
-                    font=2, cex = 1.5)
+                    font=1, cex = 1.5)
       ),
       par.settings = list(
         axis.line=list(col='transparent'),
-        par.main.text = list(font = 2, # make it bold
+        par.main.text = list(font = 1, 
                              just = "left",
                              x = grid::unit(26, "mm"),
                              cex = 1.5
@@ -657,8 +656,7 @@ pretty_plots <- function(site_veg_es, year_es, agg_level, short = F) {
       
       at=seq(min_diff, max_diff, (max_diff - min_diff) / 100),
       legend=list(left=list(fun=grid::textGrob("Δ NDVI", y=0.05, x = 1.425, 
-                                               gp=gpar(cex=1.5, 
-                                                       fontface = "bold")))))
+                                               gp=gpar(cex=1.5)))))
   }, diff_rasters, ts_objects$doy[2:length(ts_objects$doy)], SIMPLIFY = F)
   gbplots <- list(first_doy_plot)
   for(i in 1:length(diff_plots)){gbplots[[1+i]] <- diff_plots[[i]]}
@@ -692,7 +690,7 @@ pretty_plots <- function(site_veg_es, year_es, agg_level, short = F) {
     colorkey=FALSE,
     par.settings = list(
       axis.line=list(col='transparent'),
-      par.main.text = list(font = 2, # make it bold
+      par.main.text = list(font = 1,
                            just = "left",
                            x = grid::unit(26, "mm"),
                            cex = 1.5
