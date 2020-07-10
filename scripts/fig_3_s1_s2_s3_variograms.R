@@ -827,7 +827,7 @@ vario_plot_45m_PS3 <- ggplot(varios,
                      breaks = seq(0,45,5)) +
   scale_y_continuous(limits = c(0,0.005), 
                      breaks = seq(0.000, 0.005,0.001)) +
-  ggtitle(paste0("Area ", substr(site_name, 3, 3), " - ", site_name_full, " 18 July 2020")) +
+  ggtitle(paste0("Area ", substr(site_name, 3, 3), " - ", site_name_full, " 18 July 2017")) +
   ylab("NDVI semivariance") +
   xlab("Distance (m)") +
   annotate("text", x = 45, y = her_sill, label = "Tussock Sedge Tundra", 
