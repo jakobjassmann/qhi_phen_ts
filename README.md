@@ -1,6 +1,6 @@
 # Qikiqtaruk Phenology Time-Series code repository
 
-This code repository contains the analytical scripts required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal fine-scale variation of tundra greenness and phenology not captured by satellite and ground-based monitoring*. In execution of the code also requires the spatial data files found in this data repostiory on Zenodo [INSERT DOI](www.zenodo.org) to be completed.
+This code repository contains the analytical scripts required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. In execution of the code also requires the spatial data files found in this data repostiory on Zenodo [Released upon publication - INSERT DOI](www.zenodo.org) to be completed.
 
 # Content
 1. [Authors](#Authors)
@@ -36,7 +36,7 @@ Finally, we would like to thank the Inuvialuit people for the opportunity to con
 
 ## Disclaimer
 
-This code repository was designed to be as self-contained as possible. However, due to the limiations of git and GitHub in storing and version controlling large files we had to outsource the spatial data to a Zenodo repository. To complete the analysis these data need to be downloaded and all local references to the spatial data folder need to be updated. The relevant path variable is contained at the top of each script.
+This code repository was designed to be as self-contained as possible. However, due to the limiations of git and GitHub in storing and version controlling large files we had to outsource the spatial data to a Zenodo repository. To complete the analysis these data need to be downloaded and all local references to the spatial data folder need to be updated. The relevant path variables are declared at the top of each script.
 
 ## Software
 The original analysis and raster manipulations were carried out using R v. 3.6.0 (R Core Team 2019) and the raster package v. 3.0-12 (Hijmans 2016). Visualisations were produced using the packages rasterVis v. 0.45 (Perpiñán and Hijmans 2018), ggplot v. 3.2.1 (Wickham 2016), cowplot v. 0.9.4 (Wilke 2019), and QGIS v. 3.10 (QGIS Development Team 2020).
