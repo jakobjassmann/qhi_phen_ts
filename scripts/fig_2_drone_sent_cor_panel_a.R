@@ -393,14 +393,10 @@ preds <- cbind(preds,
 # Specify difference in days for plotting (little = big, a lot = small)
 pixel_combos_sample$diff_plot <- abs(pixel_combos_sample$diff)
 max(pixel_combos_sample$diff_plot)
-# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 0] <-
-#   3
-# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 2] <-
-#   -5
-# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 1] <-
-#   2
-# pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == -5] <-
-#   1
+pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 0] <- 3
+pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 2] <- -5
+pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == 1] <- 2
+pixel_combos_sample$diff_plot[pixel_combos_sample$diff_plot == -5] <- 1
 
 sentinel_drone_plot <- ggplot(data = pixel_combos_sample, 
                               mapping = aes(x = drone_ndvi, 
@@ -468,13 +464,13 @@ sentinel_drone_plot <- ggplot(data = pixel_combos_sample,
            label = "   2 days difference", hjust = 0,
            colour = "black", size = 4) +
   annotate("point", x = 0.3, y = 0.9, 
-           size = 2, shape = 21,
+           size = 4, shape = 21,
            colour = "black") +
   annotate("point", x = 0.3, y = 0.86, 
            size = 3, shape = 21,
            colour = "black") +
   annotate("point", x = 0.3, y = 0.82, 
-           size = 4, shape = 21,
+           size = 2, shape = 21,
            colour = "black") +
   xlab('Drone NDVI')+
   ylab("Sentinel NDVI") +
