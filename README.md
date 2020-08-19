@@ -1,6 +1,6 @@
 # Qikiqtaruk Phenology Time-Series code repository
 
-This code repository contains the analytical scripts and tabular data required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. The execution of the code also requires the spatial data files found in the accompanying data repository on Zenodo [INSERT DOI - released upon publication](www.zenodo.org).
+This code repository contains the analytical scripts and tabular data required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. The execution of the code also requires the spatial data files found in the accompanying data repository on Zenodo [(INSERT DOI)](www.zenodo.org), which will be released upon publication. To aid review, the spatial data contained in the Zenodo repository has been made available to the reviewers via a confidential link in the submitted manuscript draft.
 
 # Content
 1. [Authors](#Authors)
@@ -15,7 +15,7 @@ Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe, Ger
 Contact: j.assmann@bios.au.dk
 
 # Citation
-Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. **In prep**. Drone data reveal fine-scale variation of tundra greenness and phenology not captured by satellite and ground-based monitoring.
+Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. **In prep**. Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites.
 
 [\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
