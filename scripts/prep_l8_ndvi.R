@@ -1,6 +1,7 @@
 # QHI Pehnology time-series Landsat 8 prep
 
 # Dependencies
+library(dplyr)
 library(raster)
 library(sf)
 
@@ -40,7 +41,8 @@ lapply(ls8$scene_id, function(scene_id){
   ls8_recent <- read.csv("data/auxillary/ls8_cloud_data.csv",
                          stringsAsFactors = F)
   # Load filenames
-  file_list <- list.files(ls8$folder_path[ls8$scene_id == scene_id], full.names = T)
+  file_list <- list.files(ls8$folder_path[ls8$scene_id == scene_id], 
+                          full.names = T)
   
   # Status update
   cat(paste0("Scene date: ", ls8$date[ls8$scene_id == scene_id], "\n"))
@@ -82,7 +84,8 @@ lapply(ls8$scene_id, function(scene_id){
   
   # Prompt
   answer <- readline(prompt = "AoI cloud free and inlcuded in scene? [y/n]:")
-  while(!sum(answer %in% c("y", "n"))) answer <- readline(prompt = "Invalid answer! - AoI cloud free and inlcuded in scene? [y/n]:")
+  while(!sum(answer %in% c("y", "n"))) answer <- 
+    readline(prompt = "Invalid answer! - AoI cloud free and inlcuded in scene? [y/n]:")
   
   # Assign answer and write out to file
   ls8_recent$cloud_free[ls8_recent$scene_id == scene_id] <- answer
@@ -99,7 +102,8 @@ ls8 <- read.csv("data/auxillary/ls8_cloud_data.csv",
 # produce NDVI rasters
 lapply(ls8$scene_id[ls8$cloud_free == "y"], function(scene_id){
   # Load filenames
-  file_list <- list.files(ls8$folder_path[ls8$scene_id == scene_id], full.names = T)
+  file_list <- list.files(ls8$folder_path[ls8$scene_id == scene_id],
+                          full.names = T)
   
   # Status update
   cat(paste0("Processing scene date: ", ls8$date[ls8$scene_id == scene_id], "\n",
@@ -120,14 +124,18 @@ lapply(ls8$scene_id[ls8$cloud_free == "y"], function(scene_id){
   # Export raster
   writeRaster(ndvi, 
               paste0(ls8$folder_path[ls8$scene_id == scene_id],
-                gsub(".*/(LC08_.*)_sr_band4.tif","/\\1_", file_list[grepl("band4", file_list)]),
+                gsub(".*/(LC08_.*)_sr_band4.tif","/\\1_", 
+                     file_list[grepl("band4", file_list)]),
                      "ndvi.tif"))
   # return northing
   return(NULL)
 })
 
 # Quick QC of NDVI rasters
-ndvi_rasters <- list.files("/Volumes/BowheadRdge/phen_time_series/L8/", pattern = "ndvi.tif", recursive = T, full.names = T)
+ndvi_rasters <- list.files("/Volumes/BowheadRdge/phen_time_series/L8/", 
+                           pattern = "ndvi.tif",
+                           recursive = T, 
+                           full.names = T)
 lapply(ndvi_rasters,
        function(x){
          cat(paste0(x, "\n"))
@@ -138,9 +146,45 @@ lapply(ndvi_rasters,
          readline(prompt = "Hit a key for next raster")
        })  
 
-# Get stats
-library(dplyr)
+# Get summary stats per season
 ls8 %>% filter(cloud_free == "y") %>% 
   mutate(year = format.Date(date, "%Y")) %>%
   group_by(year) %>%
   summarise(n = n())
+
+## Calculate mean NDVI per scene and site ----
+
+# Load site coords
+site_boundaries <- read_sf("data/site_boundaries/ps_site_bounds.shp")
+
+meta_data_ls8_with_mean <- bind_rows(lapply(
+  ls8$scene_id[ls8$cloud_free == "y"],
+  function(scene_id){
+    meta_data_ls8 <- data.frame(
+      flight_id = scene_id,
+      site_veg = site_boundaries$site_veg,
+      site_name = substr(site_boundaries$site_veg, 1,3),
+      veg_type = substr(site_boundaries$site_veg, 5,7),
+      file_path = list.files(ls8$folder_path[ls8$scene_id == scene_id], 
+                             pattern = "_ndvi.tif",
+                             full.names = T),
+      object_name = scene_id,
+      sensor = "Landsat8",
+      date = ls8$date[ls8$scene_id == scene_id],
+      mean_NDVI = NA
+    )  
+    ndvi_raster <- raster(list.files(ls8$folder_path[ls8$scene_id == scene_id], 
+                                     pattern = "_ndvi.tif",
+                                     full.names = T))
+    meta_data_ls8$mean_NDVI <- raster::extract(ndvi_raster, 
+                                               as_Spatial(site_boundaries),
+                                       fun = mean,
+                                       weighted = T)
+    return(meta_data_ls8)
+  }))
+
+# Save mean
+save(meta_data_ls8_with_mean, 
+     file = "data/landsat8/meta_data_ls8_with_mean.Rda")
+write.csv(meta_data_ls8_with_mean, 
+          "data/landsat8/meta_data_ls8_with_mean.csv")

@@ -139,7 +139,7 @@ plot_ts_2016 <- function(site_name, veg_type){
   sentinel_meta$object_name <- as.character(sentinel_meta$object_name)
   
   # merge drone and sentinel meta data data frames
-  sensor_id <- c(rep("sentinel", 
+  sensor_id <- c(rep("Sentinel 2A", 
                      nrow(sentinel_meta)), 
                  rep("drone", nrow(drone_meta)))
   meta_data <- rbind(sentinel_meta, drone_meta)
@@ -199,22 +199,33 @@ plot_ts_2016 <- function(site_name, veg_type){
     MODIS_meta[,match(names(meta_data), names(MODIS_meta))],
     meta_data)
   
+  ## Load Landsat 8 data
+  load("data/landsat8/meta_data_ls8_with_mean.Rda")
+  meta_data_ls8_with_mean <- meta_data_ls8_with_mean[
+    meta_data_ls8_with_mean$site_name == site_name &
+      meta_data_ls8_with_mean$veg_type == veg_type &
+      format(as.Date(meta_data_ls8_with_mean$date), "%Y") == "2016",] 
+  
+  # Merge with sentinel, drone and MODIS data
+  meta_data <- rbind(meta_data, meta_data_ls8_with_mean)
+  
   # Filter from May to September
   meta_data <- meta_data %>%  
     filter(date >= as.Date("01/05/2016", "%d/%m/%Y") & 
              date <= as.Date("30/09/2016", "%d/%m/%Y"))
   
   ## Prepare plotting
-  # Set colour scale
-  plot_scale = viridis(5)[c(5,2,3,4)]
-  
-  # There is no calibration data for Ps2 HER for some dates, 
-  # adjust colour scale and KOM is messed up correct!
-  if((site_name == "PS2" & veg_type == "HER")){
-    plot_scale = viridis(5)[c(5,2,3)]
-  } else if(site_name == "PS2" & veg_type == "KOM"){
-    plot_scale = viridis(5)[c(5,2,3,4)]
-  }
+  # Set colour scale and sort dataframe
+  meta_data$sensor <- ordered(meta_data$sensor,
+                              levels = c(
+                                         "Landsat8",
+                                         "Sentinel 2A",
+                                         #"Sentinel 2B",
+                                         "MODIS",
+                                         "drone",
+                                         "drone_nocalib"))
+  meta_data <- meta_data[order(meta_data$sensor),]
+  plot_scale = viridis(6)[c(1,2,6,5)]
   
   # Set y-axis label
   y_label <- "NDVI"
@@ -246,9 +257,9 @@ plot_ts_2016 <- function(site_name, veg_type){
       se= F, 
       method = "glm",
       formula= y ~ poly(x,2), 
-      colour = "grey28", 
+      colour = "gray50", 
       linetype = "dashed", 
-      size = 2,
+      size = 1.5,
       span = 1, 
       fullrange = T,
       inherit.aes = F) +
@@ -256,11 +267,11 @@ plot_ts_2016 <- function(site_name, veg_type){
     geom_point() +
     
     scale_size_manual(
-      values = c(rep(5, 4))) +
+      values = c(rep(5, 5))) +
     scale_colour_manual(
-      values = rep("black",4)) +
+      values = rep("black",5)) +
     scale_shape_manual(
-      values = c(21, 21, 21, 21)) +
+      values = c(21, 21, 21, 21, 21)) +
     scale_fill_manual(
       values = plot_scale) +
     scale_y_continuous(
@@ -329,10 +340,15 @@ plot_ts_2016 <- function(site_name, veg_type){
       legend.position = "none") 
   
   # Tidy up removing all the rasters loaded
-  rm(list = c(meta_data[meta_data$sensor != "MODIS",]$object_name, 
-              paste0(meta_data[meta_data$sensor != "MODIS",]$object_name, 
-                     "_cropped")), 
-     envir = .GlobalEnv)
+  rm(list = c(
+    meta_data[meta_data$sensor != "MODIS" & 
+                meta_data$sensor != "Landsat8" & 
+                !is.na(meta_data$object_name),]$object_name, 
+    paste0(meta_data[meta_data$sensor != "MODIS" & 
+                       meta_data$sensor != "Landsat8" &
+                       !is.na(meta_data$object_name),]$object_name, 
+           "_cropped")), 
+    envir = .GlobalEnv)
   
   # Export meta data to global meta_data df
   meta_data_global <<- rbind(meta_data_global, meta_data)
@@ -470,6 +486,16 @@ plot_ts_2017 <- function(site_name, veg_type){
     MODIS_meta[,match(names(meta_data), names(MODIS_meta))], 
     meta_data)
   
+  ## Load Landsat 8 data
+  load("data/landsat8/meta_data_ls8_with_mean.Rda")
+  meta_data_ls8_with_mean <- meta_data_ls8_with_mean[
+    meta_data_ls8_with_mean$site_name == site_name &
+    meta_data_ls8_with_mean$veg_type == veg_type &
+      format(as.Date(meta_data_ls8_with_mean$date), "%Y") == "2017",] 
+  
+  # Merge with sentinel, drone and MODIS data
+  meta_data <- rbind(meta_data, meta_data_ls8_with_mean)
+  
   # Filter from May to September
   meta_data <- meta_data %>%  
     filter(date >= as.Date("01/05/2017", "%d/%m/%Y") & 
@@ -477,8 +503,16 @@ plot_ts_2017 <- function(site_name, veg_type){
   
   ## Prepare plotting
   
-  # Define scale
-  plot_scale = viridis(5)[c(5,2,1,3)]
+  # Define sorting and scale for plot
+  meta_data$sensor <- ordered(meta_data$sensor,
+                              levels = c(#"drone_nocalib",
+                                         "Landsat8",
+                                         "Sentinel 2A",
+                                         "Sentinel 2B",
+                                         "MODIS",
+                                         "drone"))
+  meta_data <- meta_data[order(meta_data$sensor),]
+  plot_scale = viridis(6)[c(1,2,3,6,5)]
   
   # Set y axis label and colour colour
   if(site_name == "PS1" | site_name == "PS2"){
@@ -520,18 +554,18 @@ plot_ts_2017 <- function(site_name, veg_type){
       se= F, 
       method = "glm",
       formula= y ~ poly(x,2), 
-      colour = "grey28", 
+      colour = "gray50", 
       linetype = "dashed", 
       span = 1, 
-      size = 2,
+      size = 1.5,
       fullrange = T,
       inherit.aes = F) +
     
     geom_point() +
     
-    scale_size_manual(values = c(rep(5, 4))) +
-    scale_colour_manual(values = rep("black",4)) +
-    scale_shape_manual(values = c(21, 21, 21, 21)) +
+    scale_size_manual(values = c(rep(5, 5))) +
+    scale_colour_manual(values = rep("black",5)) +
+    scale_shape_manual(values = c(21, 21, 21, 21, 21)) +
     scale_fill_manual(values = plot_scale) +
     scale_y_continuous(
       expand = c(0,0), 
@@ -601,8 +635,12 @@ plot_ts_2017 <- function(site_name, veg_type){
   
   # Tidy up removing all the rasters loaded
   rm(list = c(
-    meta_data[meta_data$sensor != "MODIS",]$object_name, 
-    paste0(meta_data[meta_data$sensor != "MODIS",]$object_name, 
+    meta_data[meta_data$sensor != "MODIS" & 
+                meta_data$sensor != "Landsat8" & 
+                !is.na(meta_data$object_name),]$object_name, 
+    paste0(meta_data[meta_data$sensor != "MODIS" & 
+                       meta_data$sensor != "Landsat8" &
+                       !is.na(meta_data$object_name),]$object_name, 
            "_cropped")), 
     envir = .GlobalEnv)
   
@@ -658,7 +696,8 @@ save_plot(paste0(ts_out_path,"PS4_KOM_2017_tsplot.png"),
           PS4_KOM_tsplot_2017, base_aspect_ratio = 1)
 
 ## 3 Create legend plot ----
-plot_scale <- viridis(5)[c(3,4,2,1,5)]
+# drone Landsat8 MODIS Sentinel 2A Sentinel 2B
+plot_scale <- viridis(6)
 label_plot <- ggplot() + 
   scale_y_continuous(expand = c(0,0), limits = c(0, 3)) +
   scale_x_continuous(expand = c(0,0), 
@@ -668,28 +707,35 @@ label_plot <- ggplot() +
            size = 15, hjust = 0) +
   annotate("point", x = 5, y = 2, 
            shape = 21, colour = "black", 
-           fill = plot_scale[5], size = 15) +
+           fill = plot_scale[6], size = 15) +
   
   annotate("text", x = 33, y = 2, 
            label = "Sentinel 2A", colour = plot_scale[3] , 
            fontface = "bold",size = 15,  hjust = 0) +
   annotate("point", x = 30, y = 2,
            shape = 21, colour = "black", 
-           fill = plot_scale[3], size = 15) +
+           fill = plot_scale[2], size = 15) +
   
   annotate("text", x = 68, y = 2, 
            label = "Sentinel 2B", colour = plot_scale[4] , 
            fontface = "bold",size = 15,  hjust = 0) +
   annotate("point", x = 65, y = 2, 
            shape = 21, colour = "black", 
-           fill = plot_scale[4], size = 15) +
+           fill = plot_scale[3], size = 15) +
   
-  annotate("text", x = 44, y = 1.3, 
-           label = "Drone", colour = plot_scale[1] , 
+  annotate("text", x = 28, y = 1.3, 
+           label = "Landsat 8", colour = plot_scale[1] , 
            fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 41, y = 1.3, 
+  annotate("point", x = 25, y = 1.3, 
            shape = 21, colour = "black", 
            fill = plot_scale[1], size = 15) +
+  
+  annotate("text", x = 60, y = 1.3, 
+           label = "Drone", colour = plot_scale[5] , 
+           fontface = "bold", size = 15, hjust = 0) +
+  annotate("point", x = 57, y = 1.3, 
+           shape = 21, colour = "black", 
+           fill = plot_scale[5], size = 15) +
   
   # annotate("text", x = 39, y = 1.3, 
   #          label = "Drone, not calibrated", 
@@ -783,61 +829,253 @@ st_write(sites_coords_sf, "data/site_boundaries/ps_site_bounds.shp",
 ### See QGIS project file and layout in:
 ### figures/fig_1_ts_plots/fig_1_drone_satellite_ts_map.qgz
 
-### 6) Calculate peak-growing season offset between sensors: ----
-sensor_peak_season_mean <- meta_data_global %>% 
-  filter(as.numeric(format.Date(date, "%j")) >= 201 & 
-           as.numeric(format.Date(date, "%j")) <= 221 &
-           as.numeric(format.Date(date, "%Y")) == 2017) %>%
-  group_by(site_name, veg_type, sensor) %>%
-  summarise(mean_NDVI = mean(mean_NDVI, na.rm = T)) %>%
-  filter(sensor != "drone_nocalib")
+### 6) Calculate correlations and offsets between sensors: ----
 
-combine_sentinel <- function(x) {
-  if(x == "sentinel") return("sentinel")
-  else if(x == "Sentinel 2A") return("sentinel")
-  else if(x == "Sentinel 2B") return("sentinel")
-  else return(x)
+
+# sensor_peak_season_mean <- meta_data_global %>% 
+#   mutate(year = as.numeric(format.Date(date, "%Y"))) 
+# sensor_peak_season_mean$sensor[sensor_peak_season_mean$sensor == "Sentinel 2A"] <- "sentinel"
+# sensor_peak_season_mean$sensor[sensor_peak_season_mean$sensor == "Sentinel 2B"] <- "sentinel"
+# 
+# sensor_peak_season_mean <- sensor_peak_season_mean %>%
+#   filter(as.numeric(format.Date(date, "%j")) >= 196 & 
+#            as.numeric(format.Date(date, "%j")) <= 217 # &
+#            # as.numeric(format.Date(date, "%Y")) == 2017
+#          ) %>%
+#   group_by(site_name, veg_type, sensor, year) %>%
+#   summarise(mean_NDVI = mean(mean_NDVI, na.rm = T)) %>%
+#   filter(sensor != "drone_nocalib")
+# 
+# 
+# # combine_sentinel <- function(x) {
+# #   if(x == "sentinel") return("sentinel")
+# #   else if(x == "Sentinel 2A") return("sentinel")
+# #   else if(x == "Sentinel 2B") return("sentinel")
+# #   else return(x)
+# # }
+# # sensor_peak_season_mean$sensor <- 
+#   # modify(sensor_peak_season_mean$sensor, combine_sentinel) 
+#   # sensor_peak_season_mean$sensor <- 
+#   #   modify(sensor_peak_season_mean$sensor, combine_sentinel) 
+#   
+#   
+# sensor_peak_season_mean_wide <- pivot_wider(sensor_peak_season_mean,
+#             names_from = "sensor",
+#             values_from = "mean_NDVI") %>% na.omit()
+# peak_season_cor <- sensor_peak_season_mean_wide %>%
+#   ungroup() %>%
+#   dplyr::select(drone, sentinel, MODIS, Landsat8) %>% as.data.frame() %>%
+#   cor() %>% round(2)
+# 
+# sensor_peak_season_diff <- sensor_peak_season_mean %>%
+#   group_by(site_name, veg_type) %>%
+#   group_map(function(subset, groupings){
+#     return(data.frame(
+#       site_name = groupings[1],
+#       veg_type = groupings[2],
+#       modis_drone = abs(subset[subset$sensor == "MODIS",]$mean_NDVI) -
+#         abs(subset[subset$sensor == "drone",]$mean_NDVI),
+#       modis_sentinel = abs(subset[subset$sensor == "MODIS",]$mean_NDVI -
+#         subset[subset$sensor == "sentinel",]$mean_NDVI),
+#       sentinel_drone = abs(subset[subset$sensor == "sentinel",]$mean_NDVI -
+#         subset[subset$sensor == "drone",]$mean_NDVI)
+#     ))
+#   }) %>% bind_rows()
+# sensor_peak_season_diff_mean <- sensor_peak_season_diff %>% 
+#   summarise('difference MODIS:drone' = round(mean(modis_drone),3),
+#             'difference MODIS:sentinel' = round(mean(modis_sentinel),3),
+#             'difference Sentinel:drone' = round(mean(sentinel_drone),3))
+# # Save / export data
+# write.csv(peak_season_cor,
+#           file = paste0(data_out_path, "sensor_peak_season_cor.csv"))
+# write.csv(sensor_peak_season_diff_mean,
+#           file = paste0(data_out_path, "sensor_peak_season_mean_diff.csv"))
+# 
+# save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
+#      meta_data_global)
+# # load(paste0(data_out_path, "meta_data_with_means.Rda"))
+
+# Divide season into 7 day block startin on the Set doy range
+first_march <- c(122, 121) # 2016 was a leap year, 2017
+last_sept <- c(274, 273) # 2016, 2017
+week_blocks <- data.frame(year = c(rep(2016, length(seq(first_march[1], last_sept[1], 7))),
+                    rep(2017, length(seq(first_march[2], last_sept[2], 7)))),
+  block_no = c(paste0("2016_", 1:length(seq(first_march[1], last_sept[1], 7))),
+               paste0("2017_", 1:length(seq(first_march[2], last_sept[2], 7)))),
+  block_strat_doy = c(seq(first_march[1], last_sept[1], 7),
+                      seq(first_march[2], last_sept[2], 7)),
+  block_end_doy = c(seq(first_march[1], last_sept[1], 7) + 6,
+                    seq(first_march[2], last_sept[2], 7) + 6),
+  stringsAsFactors = F)
+
+# Create doy columns for easier handling
+meta_data_global <- meta_data_global %>% mutate(doy = as.numeric(format.Date(date, "%j")),
+                            year = as.numeric(format.Date(date, "%Y")))
+
+# Calculate weekly averges
+weekly_means <- lapply(week_blocks$block_no, function(block_no){
+  start_doy <- week_blocks$block_strat_doy[week_blocks$block_no == block_no]
+  end_doy <- week_blocks$block_end_doy[week_blocks$block_no == block_no]
+  year <- week_blocks$year[week_blocks$block_no == block_no]
+  
+  block_mean <- meta_data_global %>% 
+    filter(doy >= start_doy, doy <= end_doy, year == year) %>%
+    filter(sensor != "drone_nocalib") %>%
+    group_by(sensor) %>% 
+    summarise(mean_NDVI = mean(mean_NDVI))
+  
+  if(nrow(block_mean) != 0) {
+    block_mean$year <- year
+    block_mean$block_no <- block_no
+  } else {
+    block_mean <- data.frame(
+      sensor = NA,
+      mean_NDVI = NA,
+      year = year,
+      block_no = block_no
+    )
+  }
+  return(block_mean)
+}) %>% bind_rows %>%
+  na.omit
+
+# Determine sensor combinations
+sensor_combinations <- expand.grid(unique(weekly_means$sensor),
+                                   unique(weekly_means$sensor))
+
+# Calculate correlations
+correlations <- bind_rows(apply(
+  sensor_combinations, 
+  1, 
+  function(sensors){
+    sensor_1 <- sensors[1]
+    sensor_2 <- sensors[2]
+    sensor_1_means <- filter(weekly_means, sensor == sensor_1) %>%
+      mutate(sensor_1 = sensor,
+             mean_NDVI_1 = mean_NDVI) %>% 
+      dplyr::select(-sensor, -mean_NDVI)
+    sensor_2_means <- filter(weekly_means, sensor == sensor_2) %>%
+      mutate(sensor_2 = sensor,
+             mean_NDVI_2 = mean_NDVI) %>% 
+      dplyr::select(-sensor, -mean_NDVI)
+    combo_means <- full_join(sensor_1_means, sensor_2_means) %>% 
+      na.omit()
+    sensor_cor <- combo_means %>% 
+      group_by(sensor_1, sensor_2) %>% 
+      summarise(cor = cor(mean_NDVI_1, mean_NDVI_2, 
+                          method = "spearman"),
+                n = n())
+    return(sensor_cor)
+}))
+
+# Convert into cor matrix
+cor_matrix <- correlations %>% 
+  arrange(sensor_1, sensor_2) %>%
+  dplyr::select(-n) %>%
+  pivot_wider(names_from = sensor_2, values_from = cor) 
+n_pairs <-  correlations %>% 
+  arrange(sensor_1, sensor_2) %>%
+  dplyr::select(-cor) %>%
+  pivot_wider(names_from = sensor_2, values_from = n)
+
+# Prepare for output
+cor_matrix_for_output <- cor_matrix
+for(i in 2:ncol(cor_matrix_for_output)){
+  for(j in 1:nrow(cor_matrix_for_output)){
+    cor_matrix_for_output[j,i] <- paste0(formatC(round(as.numeric(cor_matrix[j,i]),2),
+                                                 digits = 2,
+                                                 format = "f"), 
+                                      " (", 
+                                      formatC(as.numeric(n_pairs[j,i]),
+                                              width = 2), ")")
+    }
 }
-sensor_peak_season_mean$sensor <- 
-  modify(sensor_peak_season_mean$sensor, combine_sentinel) 
-sensor_peak_season_mean <- sensor_peak_season_mean %>%
-  group_by(site_name, veg_type, sensor) %>%
-  summarise(mean_NDVI = mean(mean_NDVI))
-sensor_peak_season_mean_wide <- pivot_wider(sensor_peak_season_mean,
-            names_from = "sensor",
-            values_from = "mean_NDVI") %>% na.omit()
-peak_season_cor <- sensor_peak_season_mean_wide %>%
-  ungroup() %>%
-  dplyr::select(drone, sentinel, MODIS) %>% as.data.frame() %>%
-  cor() %>% round(2)
 
-sensor_peak_season_diff <- sensor_peak_season_mean %>%
-  group_by(site_name, veg_type) %>%
-  group_map(function(subset, groupings){
-    return(data.frame(
-      site_name = groupings[1],
-      veg_type = groupings[2],
-      modis_drone = abs(subset[subset$sensor == "MODIS",]$mean_NDVI) -
-        abs(subset[subset$sensor == "drone",]$mean_NDVI),
-      modis_sentinel = abs(subset[subset$sensor == "MODIS",]$mean_NDVI -
-        subset[subset$sensor == "sentinel",]$mean_NDVI),
-      sentinel_drone = abs(subset[subset$sensor == "sentinel",]$mean_NDVI -
-        subset[subset$sensor == "drone",]$mean_NDVI)
-    ))
-  }) %>% bind_rows()
-sensor_peak_season_diff_mean <- sensor_peak_season_diff %>% 
-  summarise('difference MODIS:drone' = round(mean(modis_drone),3),
-            'difference MODIS:sentinel' = round(mean(modis_sentinel),3),
-            'difference Sentinel:drone' = round(mean(sentinel_drone),3))
-# Save / export data
-write.csv(peak_season_cor,
-          file = paste0(data_out_path, "sensor_peak_season_cor.csv"))
-write.csv(sensor_peak_season_diff_mean,
-          file = paste0(data_out_path, "sensor_peak_season_mean_diff.csv"))
+names(cor_matrix_for_output) <- c("Sensor",
+                                  "Drone",
+                                  "Landsat 8",
+                                  "MODIS",
+                                  "Sentinel 2A",
+                                  "Sentinel 2B")
+cor_matrix_for_output$Sensor <- c(
+  "Drone",
+  "Landsat 8",
+  "MODIS",
+  "Sentinel 2A",
+  "Sentinel 2B")
 
-save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
-     meta_data_global)
-# load(paste0(data_out_path, "meta_data_with_means.Rda"))
+# Export
+write.csv(cor_matrix_for_output, 
+          "data/fig_1_satellite_drone_ts_map/sensor_cor.csv",
+          row.names = F)
+
+# Calculate mean differences per weekly block
+mean_diffs <- bind_rows(apply(
+  sensor_combinations, 
+  1, 
+  function(sensors){
+    sensor_1 <- sensors[1]
+    sensor_2 <- sensors[2]
+    sensor_1_means <- filter(weekly_means, sensor == sensor_1) %>%
+      mutate(sensor_1 = sensor,
+             mean_NDVI_1 = mean_NDVI) %>% 
+      dplyr::select(-sensor, -mean_NDVI)
+    sensor_2_means <- filter(weekly_means, sensor == sensor_2) %>%
+      mutate(sensor_2 = sensor,
+             mean_NDVI_2 = mean_NDVI) %>% 
+      dplyr::select(-sensor, -mean_NDVI)
+    combo_means <- full_join(sensor_1_means, sensor_2_means) %>% 
+      na.omit()
+    sensor_cor <- combo_means %>% 
+      group_by(sensor_1, sensor_2) %>% 
+      summarise(mean_diff = mean(mean_NDVI_1 - mean_NDVI_2),
+                n = n())
+    return(sensor_cor)
+  }))
+
+# Convert into diff matrix
+diff_matrix <- mean_diffs %>% 
+  arrange(sensor_1, sensor_2) %>%
+  dplyr::select(-n) %>%
+  pivot_wider(names_from = sensor_2, values_from = mean_diff) 
+n_pairs <-  mean_diffs %>% 
+  arrange(sensor_1, sensor_2) %>%
+  dplyr::select(-mean_diff) %>%
+  pivot_wider(names_from = sensor_2, values_from = n)
+
+# Prepare for output
+diff_matrix_for_output <- as.data.frame(diff_matrix)
+for(i in 2:ncol(diff_matrix_for_output)){
+  for(j in 1:nrow(diff_matrix_for_output)){
+    diff_matrix_for_output[j,i] <- paste0(formatC(as.numeric(round(diff_matrix[j,i],3)),
+                                                 digits = 3,
+                                                 flag = " ",
+                                                 format = "f"), 
+                                         " (", 
+                                         formatC(as.numeric(n_pairs[j,i]),
+                                                 width = 2), ")")
+  }
+}
+
+
+names(diff_matrix_for_output) <- c("Sensor",
+                                  "Drone",
+                                  "Landsat 8",
+                                  "MODIS",
+                                  "Sentinel 2A",
+                                  "Sentinel 2B")
+diff_matrix_for_output$Sensor <- c(
+  "Drone",
+  "Landsat 8",
+  "MODIS",
+  "Sentinel 2A",
+  "Sentinel 2B")
+
+# Export
+write.csv(diff_matrix_for_output, 
+          "data/fig_1_satellite_drone_ts_map/sensor_diff.csv",
+          row.names = F)
+
 
 ### 7) Data overview tables ----
 
