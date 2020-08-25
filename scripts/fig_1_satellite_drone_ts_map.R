@@ -921,7 +921,10 @@ weekly_means <- lapply(week_blocks$block_no, function(block_no){
   block_mean <- meta_data_global %>% 
     filter(doy >= start_doy, doy <= end_doy, year == year) %>%
     filter(sensor != "drone_nocalib") %>%
-    group_by(sensor) %>% 
+    filter(!(object_name %in% c("PS4_HER_20170717_50m_merged_ndvi",
+                                "PS4_HER_20170717_50m_sega_ndvi",
+                                "PS4_HER_20170717_50m_segb_ndvi"))) %>%
+    group_by(sensor, site_veg) %>% 
     summarise(mean_NDVI = mean(mean_NDVI))
   
   if(nrow(block_mean) != 0) {
@@ -932,7 +935,8 @@ weekly_means <- lapply(week_blocks$block_no, function(block_no){
       sensor = NA,
       mean_NDVI = NA,
       year = year,
-      block_no = block_no
+      block_no = block_no,
+      stringsAsFactors = F
     )
   }
   return(block_mean)
@@ -958,7 +962,8 @@ correlations <- bind_rows(apply(
       mutate(sensor_2 = sensor,
              mean_NDVI_2 = mean_NDVI) %>% 
       dplyr::select(-sensor, -mean_NDVI)
-    combo_means <- full_join(sensor_1_means, sensor_2_means) %>% 
+    combo_means <- full_join(sensor_1_means, sensor_2_means,
+                             by = c("block_no", "site_veg")) %>% 
       na.omit()
     sensor_cor <- combo_means %>% 
       group_by(sensor_1, sensor_2) %>% 
@@ -1009,6 +1014,69 @@ write.csv(cor_matrix_for_output,
           "data/fig_1_satellite_drone_ts_map/sensor_cor.csv",
           row.names = F)
 
+# Quic pretty plot to show the correlations
+weekly_means_plot <- ggplot(weekly_means %>% pivot_wider(names_from = sensor,
+                                                         values_from = mean_NDVI) %>%
+                              setNames(c("site_veg",
+                                         "year",
+                                         "block_no",
+                                         "MODIS",
+                                         "Landsat8",
+                                         "Sentinel.2A",
+                                         "drone",
+                                         "Sentinel.2B")) %>%
+                              mutate(veg_type = substr(site_veg, 5,7)) %>%
+                              filter(!is.na(drone)) %>%
+                              filter(!(is.na(MODIS) & is.na(Landsat8) & is.na(Sentinel.2A)  & is.na(Sentinel.2B)))) +
+  geom_point(aes(x = drone, y = Landsat8, 
+                 #shape = veg_type
+  ), fill = "#440154FF", colour = "#00000044", size = 1.5, shape = 21) + 
+  geom_point(aes(x = drone, y = Sentinel.2A, 
+                 #shape = veg_type
+  ), fill = "#414487FF", colour = "#00000044", size = 1.5, shape = 21) + 
+  geom_point(aes(x = drone, y = Sentinel.2B, 
+                 #shape = veg_type
+  ), fill = "#2A788EFF", colour = "#00000044", size = 1.5, shape = 21) + 
+  geom_point(aes(x = drone, y = MODIS, 
+                 #shape = veg_type
+  ), fill = "#FDE725FF", colour = "#00000044", size = 1.5, shape = 21) +
+  # geom_smooth(aes(x = drone, y = Landsat8), colour = "#440154FF",
+  #             method = "lm", se = F, size = 0.5) +
+  # geom_smooth(aes(x = drone, y = Sentinel.2A), colour = "#414487FF",
+  #             method = "lm", se = F, size = 0.5) +
+  # geom_smooth(aes(x = drone, y = Sentinel.2B), colour = "#2A788EFF",
+  #             method = "lm", se = F, size = 0.5) +
+  # geom_smooth(aes(x = drone, y = MODIS), colour = "#FDE725FF",
+  #             method = "lm", se = F, size = 0.5) +
+  labs(x = "Drone NDVI", y = "Satellite NDVI") +
+  scale_x_continuous(limits = c(0.375,0.8), breaks = seq(0.3,0.8,0.1)) +
+  scale_y_continuous(limits = c(0.375, 0.8), breaks = seq(0.3,0.8,0.1)) +
+  # annotate("point", x= 0.6, y = 0.425, shape = 1) +
+  # annotate("text", x= 0.61, y = 0.425, label = "Tussock Sedge Tundra", hjust = 0) +
+  # annotate("point", x= 0.6, y = 0.4, shape = 2) +
+  # annotate("text", x= 0.61, y = 0.4, label = "Dryas-vetch Tundra", hjust = 0) +
+  annotate("point", x= 0.7, y = 0.475, fill = "#440154FF", colour = "#00000044", size = 1.5, shape = 21) +
+  annotate("text", x= 0.71, y = 0.475, label = paste0("Landsat 8"
+                                                      #, " ρ = ", cor_matrix_for_output[2,2]
+                                                      ), hjust = 0) +
+  annotate("point", x= 0.7, y = 0.45, fill = "#414487FF", colour = "#00000044", size = 1.5, shape = 21) +
+  annotate("text", x= 0.71, y = 0.45, label = paste0("Sentinel-2A" 
+                                                     #, " ρ = ", cor_matrix_for_output[4,2]
+                                                     ), hjust = 0) +
+  annotate("point", x= 0.7, y = 0.425, fill = "#2A788EFF", colour = "#00000044", size = 1.5, shape = 21) +
+  annotate("text", x= 0.71, y = 0.425, label = paste0("Sentinel-2B"
+                                                      #, " ρ = ", cor_matrix_for_output[5,2]
+                                                      ), hjust = 0) +
+  annotate("point", x= 0.7, y = 0.4, fill = "#FDE725FF",  colour = "#00000044", size = 1.5, shape = 21) +
+  annotate("text", x= 0.71, y = 0.4, label = paste0("MODIS" 
+                                                    #," ρ = ", cor_matrix_for_output[3,2]
+                                                    ), hjust = 0) +
+  theme_cowplot(15) +
+  theme(legend.position = "none")
+
+save_plot("figures/fig_s1a_satellite_drone_weekly.png",
+          weekly_means_plot)
+
 # Calculate mean differences per weekly block
 mean_diffs <- bind_rows(apply(
   sensor_combinations, 
@@ -1024,7 +1092,8 @@ mean_diffs <- bind_rows(apply(
       mutate(sensor_2 = sensor,
              mean_NDVI_2 = mean_NDVI) %>% 
       dplyr::select(-sensor, -mean_NDVI)
-    combo_means <- full_join(sensor_1_means, sensor_2_means) %>% 
+    combo_means <- full_join(sensor_1_means, sensor_2_means,
+                             by = c("block_no", "site_veg")) %>% 
       na.omit()
     sensor_cor <- combo_means %>% 
       group_by(sensor_1, sensor_2) %>% 
@@ -1193,7 +1262,7 @@ write.csv(file = paste0(data_out_path, "drone_flights.csv"),
 
 
 # Satellite Data Sensing dates
-# These are the same for all site veg combinations
+# For Sentinel-2 These are the same for all site veg combinations
 meta_data_global$sensor[meta_data_global$sensor == "sentinel"] <- "Sentinel 2A"
 sentinel_scenes <- meta_data_global %>% 
   filter(sensor == "Sentinel 2A" | sensor ==  "Sentinel 2B" |
@@ -1206,6 +1275,15 @@ write.csv(file = paste0(data_out_path, "sentinel_scenes.csv"),
           sentinel_scenes, 
           row.names = F)
 
+# For Landsat 8 these are also the same for all site-veg combinations
+llandsat8_scenes <- meta_data_global %>% 
+  filter(sensor == "Landsat8") %>%
+  distinct(sensor, date) %>%
+  arrange(sensor, date)  %>%
+  setNames(c("Sensor", "Date"))
+write.csv(file = paste0(data_out_path, "landsat8_scenes.csv"), 
+          llandsat8_scenes, 
+          row.names = F)
 
 # Modis Pixels
 # Due to quality control the dates are not the same for all sites
