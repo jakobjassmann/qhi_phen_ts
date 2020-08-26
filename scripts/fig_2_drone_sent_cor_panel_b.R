@@ -77,13 +77,15 @@ list2env(
     brick), 
   envir = .GlobalEnv)
 
-
+# Landsat 8 NDVI
+load("data/landsat8/meta_data_ls8_with_mean.Rda")
+PS2_landsat8 <- raster(unique(meta_data_ls8_with_mean$file_path[grep("2017-07-17", meta_data_ls8_with_mean$date)]))
 
 # Crop rasters / brick to site extent
 PS2_KOM_20170717_50m_red_cropped <- crop(PS2_KOM_20170717_50m_red, PS2_KOM_extent)
 PS2_KOM_20170717_50m_nir_cropped <- crop(PS2_KOM_20170717_50m_nir, PS2_KOM_extent)
 PS2_KOM_sentinel <- crop(L2A_QHI_20170717_cldsmskd_10m_brick, PS2_KOM_extent)
-
+PS2_KOM_landsat8 <- crop(PS2_landsat8, PS2_KOM_extent, snap = "in")
 
 # Aggregate drone rasters to sentinel grid and resolution then resample to 
 # using nearest neighbour to match senntinel grid
@@ -93,6 +95,12 @@ PS2_KOM_20170717_50m_red_cropped_resamp <- resample(
 PS2_KOM_20170717_50m_nir_cropped_resamp <- resample(
   PS2_KOM_20170717_50m_nir_cropped,
   PS2_KOM_sentinel, method = 'bilinear')
+PS2_KOM_20170717_50m_red_cropped_resamp_ls8 <- resample(
+  PS2_KOM_20170717_50m_red_cropped,
+  PS2_KOM_landsat8, method = 'bilinear')
+PS2_KOM_20170717_50m_nir_cropped_resamp_ls8 <- resample(
+  PS2_KOM_20170717_50m_nir_cropped,
+  PS2_KOM_landsat8, method = 'bilinear')
 
 # Calcuate NDVI for drone and sentinel data
 # NDVI =  (NIR - RED) / (NIR + RED)
@@ -100,9 +108,11 @@ NDVI <- function(red_band, nir_band) {(nir_band - red_band) / (nir_band + red_ba
 
 PS2_KOM_20170717_ndvi <- NDVI(PS2_KOM_20170717_50m_red_cropped, PS2_KOM_20170717_50m_nir_cropped)
 PS2_KOM_20170717_ndvi_resamp <- NDVI(PS2_KOM_20170717_50m_red_cropped_resamp, PS2_KOM_20170717_50m_nir_cropped_resamp)
+PS2_KOM_20170717_ndvi_resamp_ls8 <- NDVI(PS2_KOM_20170717_50m_red_cropped_resamp_ls8, PS2_KOM_20170717_50m_nir_cropped_resamp_ls8)
 PS2_KOM_20170717_sentinel_ndvi <- NDVI(PS2_KOM_sentinel[[3]], PS2_KOM_sentinel[[4]])
+PS2_KOM_20170717_landsat8_ndvi <- PS2_KOM_landsat8
 PS2_KOM_20170717_diff <- PS2_KOM_20170717_sentinel_ndvi - PS2_KOM_20170717_ndvi_resamp
-
+PS2_KOM_20170717_diff_ls8 <- PS2_KOM_20170717_landsat8_ndvi - PS2_KOM_20170717_ndvi_resamp_ls8
 ### 3) Plot NDVI Rasters ----
 
 # Set global variables
@@ -127,8 +137,11 @@ purple_no_borders <- rasterTheme(
 scale_limits <-  sapply(
   c(paste0(site_name, "_", veg_type, "_", observation_date, "_ndvi"),
     paste0(site_name, "_", veg_type, "_", observation_date, "_ndvi_resamp"),
+    paste0(site_name, "_", veg_type, "_", observation_date, "_ndvi_resamp_ls8"),
     paste0(site_name, "_", veg_type, "_", observation_date,"_sentinel_ndvi"),
-    paste0(site_name, "_", veg_type, "_", observation_date,"_diff")),
+    paste0(site_name, "_", veg_type, "_", observation_date,"_landsat8_ndvi"),
+    paste0(site_name, "_", veg_type, "_", observation_date,"_diff"),
+    paste0(site_name, "_", veg_type, "_", observation_date,"_diff_ls8")),
   function(x) {
     cat(paste(x, 
               "min:", round(minValue(get(x)),3), 
@@ -140,16 +153,25 @@ scale_limits <-  sapply(
 native_low <- 0
 native_up <- 1
 native_breaks <- (native_up - native_low) / 100
-resamp_low <- min(scale_limits[1,2:3]) 
-resamp_up <- max(scale_limits[2,2:3])
+resamp_low <- min(scale_limits[1,c(2,4)]) 
+resamp_up <- max(scale_limits[2,c(2,4)])
 resamp_breaks <- (resamp_up - resamp_low) / 100
-diff_low <- -1* max(c(-1*scale_limits[1,4], scale_limits[2,4]))
-diff_up <- max(c(-1*scale_limits[1,4], scale_limits[2,4]))
+resamp_low_ls8 <- min(scale_limits[1,c(3,5)]) 
+resamp_up_ls8 <- max(scale_limits[2,c(3,5)])
+resamp_breaks_ls8 <- (resamp_up_ls8 - resamp_low_ls8) / 100
+
+diff_low <- -1* max(c(-1*scale_limits[1,6], scale_limits[2,6]))
+diff_up <- max(c(-1*scale_limits[1,6], scale_limits[2,6]))
 diff_breaks <- (diff_up - diff_low) / 100
-  
+diff_low_ls8 <- -1* max(c(-1*scale_limits[1,7], scale_limits[2,7]))
+diff_up_ls8 <- max(c(-1*scale_limits[1,7], scale_limits[2,7]))
+diff_breaks_ls8 <- (diff_up_ls8 - diff_low_ls8) / 100  
+
 scale_breaks_native <- seq(native_low, native_up, by = native_breaks) 
 scale_breaks_resampled <- seq(resamp_low, resamp_up, by = resamp_breaks)
+scale_breaks_resampled_ls8 <- seq(resamp_low_ls8, resamp_up_ls8, by = resamp_breaks_ls8)
 scale_breaks_diff <- seq(diff_low, diff_up, by = diff_breaks)
+scale_breaks_diff_ls8 <- seq(diff_low_ls8, diff_up_ls8, by = diff_breaks_ls8)
 
   
 # plots 
@@ -249,6 +271,79 @@ plot_diff_purple <- levelplot(
   scales = list(draw = F),
   at = scale_breaks_diff)
 
+plot_drone_resamp_magma_ls8 <- levelplot(
+  get(paste0(site_name, "_", veg_type, "_", observation_date, "_ndvi_resamp_ls8")),
+  main = list(label = "Drone 30 m       ", cex = 2), 
+  margin = F, # no margins
+  maxpixels = 6e5,
+  xlab = list(label = "NDVI", cex = 2),
+  colorkey = list(draw = T, 
+                  labels=list(at = seq(resamp_low_ls8, resamp_up_ls8, 0.1),
+                              labels = formatC(
+                                seq(resamp_low_ls8,
+                                    resamp_up_ls8,
+                                    0.1),
+                                format = "f",
+                                width = 4, 
+                                digits = 1),
+                              font = 1, 
+                              cex = 2),
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
+  par.settings = magma_no_borders, 
+  scales = list(draw = F),
+  at = scale_breaks_resampled_ls8)
+
+plot_sentinel_magma_ls8 <- levelplot(
+  get(paste0(site_name, "_", veg_type, "_", observation_date,"_landsat8_ndvi")),
+  main = list(label = "Landsat 30 m      ", cex = 2), 
+  margin = F, # no margins
+  maxpixels = 6e5,
+  xlab = list(label = "NDVI", cex = 2),
+  colorkey = list(draw = T, 
+                  labels=list(at = seq(resamp_low_ls8, resamp_up_ls8, 0.1),
+                              labels = formatC(
+                                seq(resamp_low_ls8,
+                                    resamp_up_ls8,
+                                    0.1),
+                                format = "f",
+                                width = 4, 
+                                digits = 1),
+                              font = 1, 
+                              cex = 2),
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
+  par.settings = magma_no_borders, 
+  scales = list(draw = F),
+  at = scale_breaks_resampled_ls8)
+
+plot_diff_purple_ls8 <- levelplot(
+  get(paste0(site_name, "_", veg_type, "_", observation_date, "_diff_ls8")),
+  main = list(label = "Difference        ", cex = 2), 
+  margin = F, # no margins
+  maxpixels = 6e5,
+  xlab = list(label = "NDVI", cex = 2, col = "white"),
+  colorkey = list(draw = T, 
+                  labels = list(
+                    at = seq(diff_low_ls8,
+                             diff_up_ls8,
+                             0.1),
+                    labels = formatC(
+                      seq(diff_low_ls8,
+                          diff_up_ls8,
+                          0.1),
+                      format = "f",
+                      width = 4, 
+                      digits = 1),
+                    font = 1, 
+                    cex = 2
+                  ), 
+                  axis.line = list(lwd = 2), 
+                  axis.text = list(cex = 1.5)), 
+  par.settings = purple_no_borders, 
+  scales = list(draw = F),
+  at = scale_breaks_diff_ls8)
+
 ### 4) Export plots ----
 png(paste0(figure_out_path, "fig_2_panel_b/plot_drone_rgb.png"), 
     width = 4,
@@ -298,4 +393,28 @@ png(paste0(figure_out_path, "fig_2_panel_b/plot_diff_purple.png"),
     units = "in",
     res = 300)
 plot_diff_purple
+dev.off()
+
+png(paste0(figure_out_path, "fig_2_panel_b/plot_drone_resamp_ls8_magma.png"), 
+    width = 4,
+    height = 4,
+    units = "in",
+    res = 300)
+plot_drone_resamp_magma_ls8
+dev.off()
+
+png(paste0(figure_out_path, "fig_2_panel_b/plot_landsat8_magma.png"), 
+    width = 4,
+    height = 4,
+    units = "in",
+    res = 300)
+plot_sentinel_magma_ls8
+dev.off()
+
+png(paste0(figure_out_path, "fig_2_panel_b/plot_diff_ls8_purple.png"), 
+    width = 4,
+    height = 4,
+    units = "in",
+    res = 300)
+plot_diff_purple_ls8
 dev.off()
