@@ -18,7 +18,7 @@ data_path <- "data/fig_5_ground_based_phenology/"
 
 ## Load required datasets
 # Ground based phenology plot coordinates
-plot_coords <- read.csv("data/ground_based_phenology/gb_plot_coordinates.csv")
+plot_coords <- read.csv("data/fig_5_ground_based_phenology//gb_plot_coordinates.csv")
 # Meta data
 load("data/meta_data.Rda")
 
@@ -254,7 +254,7 @@ save(gbstats_df, file = paste0(data_path, "gbstats_drone.Rda"))
 ### 2) Prepare ground-based phenology validation data ----
 
 # Load File
-phenology <- read.csv(file = paste0(data_out_path,
+phenology <- read.csv(file = paste0(data_path,
                                     "ps_gb_phenology_2017_clean.csv"), 
                       stringsAsFactors = F)
 # Fromat date colfumns
@@ -268,18 +268,29 @@ phenology$doy <- format(phenology$date, "%j")
 phenology$site_veg <- paste0(phenology$plot, "_", phenology$veg_type)
 # Convert flower_stalk into integer
 phenology$flower_stalk <- as.integer(phenology$flower_stalk)
-save(phenology, file = paste0(data_out_path,
+# standardise mean_leaf length within species
+phenology <- bind_rows(
+  lapply(unique(phenology$species), 
+         function(species_group){
+           phenology_subset <- filter(phenology, species == species_group)
+           phenology_subset$longest_leaf_stand <- scale(phenology_subset$longest_leaf)
+  return(phenology_subset)
+}))
+
+save(phenology, file = paste0(data_path,
                               "gb_phenology.Rda"))
+
 
 # Create plot means per date and reformat columns (which will be lost)
 phen_means <- phenology %>% group_by(site_veg, date, species) %>% filter(!is.na(species)) %>%
   summarise(mean_flower_stalk = mean(flower_stalk, na.rm = T),
             mean_leaf = mean(longest_leaf, na.rm = T),
+            mean_leaf_stand = mean(longest_leaf_stand, na.rm = T),
             mean_growth = mean(new_growth, na.rm = T),
             sd_leaf = sd(longest_leaf, na.rm = T))
 phen_means$doy <- format(phen_means$date, "%j")
 phen_means$year <- format(phen_means$date, "%Y")
-save(phen_means, file = paste0(data_out_path, "gb_phenmeans_abs.Rda"))
+save(phen_means, file = paste0(data_path, "gb_phenmeans_abs.Rda"))
 
 # ggplot(phen_means, aes(x = doy, y = mean_leaf, group = site_veg,
 #                        colour = site_veg)) + geom_point() +

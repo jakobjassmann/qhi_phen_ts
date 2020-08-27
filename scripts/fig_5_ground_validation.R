@@ -105,13 +105,151 @@ gb_phen_ndvi <- data.frame(site = substr(gbstats_df$site_veg, 1,3),
                            doy = as.integer(gbstats_df$doy),
                            species = phen_means_matching$species,
                            mean_leaf = phen_means_matching$mean_leaf,
+                           mean_leaf_stand = phen_means_matching$mean_leaf_stand,
                            sd_leaf = phen_means_matching$sd_leaf,
                            mean_ndvi = gbstats_df$ndvi_mean,
                            sd_ndvi = gbstats_df$ndvi_sd)
 
+gb_phen_ndvi <- mutate(gb_phen_ndvi, veg_type = substr(site_veg, 5,7))
+
 save(gb_phen_ndvi, file = paste0(data_out_path, "gb_phen_ndvi.Rda"))
 
 ### 2) Leav Length vs. NDVI correlation ----
+
+# Community level mean_ndvi
+gb_phen_ndvi_com <- gb_phen_ndvi %>% 
+  group_by(site_veg_year, site, veg_type, year, doy) %>% 
+  summarise(comm_mean_leaf_stand = mean(mean_leaf_stand)
+            )
+
+# Calculate spearmans correlation for each time-series
+cor_spear_com <- gb_phen_ndvi_com %>% 
+  group_by(site_veg_year) %>%
+  group_map(function(x, y) {
+    data.frame(
+      site_veg_year = y[1],
+      cor_coef = cor(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman"),
+      p_value = cor.test(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman")$p.value)
+  }) %>%
+  bind_rows() 
+
+# Calculate mean community correlation across all time-series
+cor_spear_com_mean <- round(mean(cor_spear_com$cor_coef), 2)
+
+# Plot time-series for all sites and years
+colour_scale_sites <- c("#4A44F2FF",
+                        "#F20505FF", 
+                        "#F2BE22FF",
+                        "#9C9DA6FF")
+com_mean_leaf_vs_ndvi_plot <- ggplot(gb_phen_ndvi_com, 
+       aes(x = comm_mean_leaf_stand, 
+           y = mean_ndvi, 
+           colour = site, 
+           group = site_veg_year,
+           linetype = year,
+           shape = veg_type)) + 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Community mean of\nlongest leaf (standardised)",
+       y = "\nMean NDVI",
+       shape = "Vegetation Type",
+       linetype = "Year",
+       colour = "Site") +
+  scale_y_continuous(limits = c(0.4, 0.8), breaks = seq(0.4,0.8,0.1)) +
+  scale_x_continuous(limits = c(-1.25,1.25), breaks = seq(-2, 2, 0.5)) +
+  scale_shape_manual(values = c(16, 17),
+                     labels = c("Tussock Sedge", "Dryas-Vetch"))+
+  scale_color_manual(values = colour_scale_sites,
+                     labels = c("Site 1", "Site 2", "Site 3", "Site 4")) +
+  scale_linetype_manual(values = c(2,1)) +
+  guides(color = guide_legend(order = 1,
+                              title = NULL),
+         linetype = guide_legend(order = 2,
+                                 title = NULL,
+                                 override.aes = list(color = "black")),
+         shape = guide_legend(order = 3, title = NULL)) +
+  annotate("text", x = 1.25, y = 0.41, hjust = 1, size = 5.5,
+           label = paste0("mean ρ = ", cor_spear_com_mean)) +
+  theme_cowplot(18) +
+  theme(legend.position = "none")
+
+save_plot("figures/fig_5_ground_based_phenology/com_mean_leaf_vs_ndvi_plot.png",
+          com_mean_leaf_vs_ndvi_plot,
+          base_height = 5,
+          base_aspect_ratio = 1.3 - 0.455)
+
+
+# Doy vs. com mean leaf
+com_doy_vs_mean_leaf_plot <- ggplot(gb_phen_ndvi_com, 
+                                     aes(x = doy, 
+                                         y = comm_mean_leaf_stand, 
+                                         colour = site, 
+                                         group = site_veg_year,
+                                         linetype = year,
+                                         shape = veg_type)) + 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Day of year\n",
+       y =  "Community mean of\nlongest leaf (standardised)",
+       shape = "Vegetation Type",
+       linetype = "Year",
+       colour = "Site") +
+  scale_y_continuous(limits = c(-1.25,1.25), breaks = seq(-2, 2, 0.5)) +
+  scale_x_continuous(limits = c(170,230), breaks = seq(170, 230, 10)) +
+  scale_shape_manual(values = c(16, 17),
+                     labels = c("Tussock Sedge", "Dryas-Vetch"))+
+  scale_color_manual(values = colour_scale_sites,
+                     labels = c("Site 1", "Site 2", "Site 3", "Site 4")) +
+  scale_linetype_manual(values = c(2,1)) +
+  guides(color = guide_legend(order = 1,
+                              title = NULL),
+         linetype = guide_legend(order = 2,
+                                 title = NULL,
+                                 override.aes = list(color = "black")),
+         shape = guide_legend(order = 3, title = NULL)) +
+  theme_cowplot(18) +
+  theme(legend.position = "none")
+
+save_plot("figures/fig_5_ground_based_phenology/com_doy_vs_mean_leaf_plot.png",
+          com_doy_vs_mean_leaf_plot,
+          base_height = 5,
+          base_aspect_ratio = 1.35 - 0.455)
+
+# Doy vs. mean NDVI
+com_doy_vs_ndvi_plot <- ggplot(gb_phen_ndvi_com, 
+                               aes(x = doy, 
+                                   y = mean_ndvi, 
+                                   colour = site, 
+                                   group = site_veg_year,
+                                   linetype = year,
+                                   shape = veg_type)) + 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Day of year\n",
+       y =  "\nMean NDVI",
+       shape = "Vegetation Type",
+       linetype = "Year",
+       colour = "Site") +
+  scale_y_continuous(limits = c(0.4,0.8), breaks = seq(0.4, 0.8, 0.1)) +
+  scale_x_continuous(limits = c(170,230), breaks = seq(170, 230, 10)) +
+  scale_shape_manual(values = c(16, 17),
+                     labels = c("Tussock Sedge", "Dryas-Vetch"))+
+  scale_color_manual(values = colour_scale_sites,
+                     labels = c("Area 1", "Area 2", "Area 3", "Area 4")) +
+  scale_linetype_manual(values = c(2,1)) +
+  guides(color = guide_legend(order = 1,
+                              title = NULL),
+         linetype = guide_legend(order = 2,
+                                 title = NULL,
+                                 override.aes = list(color = "black")),
+         shape = guide_legend(order = 3, title = NULL)) +
+  theme_cowplot(18) +
+  theme(legend.key.width=unit(0.455,"inch"))
+
+save_plot("figures/fig_5_ground_based_phenology/com_doy_vs_ndvi_plot.png",
+          com_doy_vs_ndvi_plot,
+          base_height = 5,
+          base_aspect_ratio = 1.35)
 
 # Calculate spearmans correlation for each time-series
 cor_spear <- gb_phen_ndvi %>% 
