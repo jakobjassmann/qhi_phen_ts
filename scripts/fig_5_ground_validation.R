@@ -10,6 +10,7 @@ library(rasterVis)
 library(gridExtra)
 library(grid)
 library(viridis)
+library(sf)
 
 #### 1) Preparations ----
 data_out_path <- "data/fig_5_ground_based_phenology/"
@@ -114,12 +115,13 @@ gb_phen_ndvi <- mutate(gb_phen_ndvi, veg_type = substr(site_veg, 5,7))
 
 save(gb_phen_ndvi, file = paste0(data_out_path, "gb_phen_ndvi.Rda"))
 
-### 2) Leav Length vs. NDVI correlation ----
+### 2) Leaf Length vs. NDVI correlation ----
 
 # Community level mean_ndvi
 gb_phen_ndvi_com <- gb_phen_ndvi %>% 
   group_by(site_veg_year, site, veg_type, year, doy) %>% 
-  summarise(comm_mean_leaf_stand = mean(mean_leaf_stand)
+  summarise(comm_mean_leaf_stand = mean(mean_leaf_stand),
+            mean_ndvi = mean(mean_ndvi)
             )
 
 # Calculate spearmans correlation for each time-series
@@ -872,3 +874,324 @@ pretty_plots("PS2_KOM", "2017", 1)
 # 
 # pretty_plots("PS2_HER", "2017", 6)
 # pretty_plots("PS2_KOM", "2017", 6)
+
+
+### 6) Sentinel-2 Ground-based phenology analysis ----
+
+# retrieve distinct drone dates
+doy_distinct_phen <- phen_means %>% ungroup() %>% 
+  dplyr::select(site_veg, year, doy) %>% distinct() %>%
+  mutate(doy_plus3 = as.numeric(doy) + 3,
+         doy_minus3 = as.numeric(doy) - 3)
+# ... adding columns with doy +- 3 days to match with sentinel data
+# 3 days is the maximum day difference between drone and ground based phenology
+# boservations
+
+# retrieve distinc sentinel-2 dates
+doy_distinct_sentinel <- meta_data %>%
+  filter(sensor_id == "Sentinel 2A" | sensor_id == "Sentinel 2B") %>%
+  mutate(doy = format.Date(date, "%j"),
+         year = format.Date(date, "%Y")) %>%
+  distinct()
+
+gb_phen_sent_combos <- bind_rows(
+  lapply(doy_distinct_sentinel$object_name, 
+         function(scene_id){
+           cat("Scene id: ", scene_id, "\n")
+           scene_doy <- as.numeric(doy_distinct_sentinel$doy[doy_distinct_sentinel$object_name == scene_id])
+           scene_year <- as.numeric(doy_distinct_sentinel$year[doy_distinct_sentinel$object_name == scene_id])
+           scene_stats <- doy_distinct_sentinel[doy_distinct_sentinel$object_name == scene_id,]
+           phen_date <- doy_distinct_phen %>%
+             filter(year == scene_year & 
+                      scene_doy >= doy_minus3 & 
+                      scene_doy <= doy_plus3) 
+           
+           if(nrow(phen_date) == 0) {
+             cat("Matching gb obs in +- 3 days: 0\n")
+             phen_date[1,] <- NA
+             names(phen_date) <- paste0("gb_", names(phen_date))
+             names(scene_stats) <- paste0("sentinel_", names(scene_stats))
+             phen_combo <- bind_cols(scene_stats,
+                                     phen_date)
+           } else{
+             cat("Matching gb obs in +- 3 days: ", nrow(phen_date), "\n")
+             phen_date$diff <- as.numeric(phen_date$doy) - scene_doy
+             # For each site select the matching gb phen entry with the lowest
+             # absolute date difference, if there are multiple ones, arrange by absolute difference
+             # and take the earlier one.
+             phen_date <- bind_rows(
+               lapply(
+                 unique(phen_date$site_veg),
+                 function(site_id){
+                   phen_date_sub <- phen_date %>% filter(site_veg == site_id)
+                   phen_date_sub <- phen_date_sub[phen_date_sub$diff == min(abs(phen_date_sub$diff)),] %>%
+                     arrange(diff)
+                   phen_date_sub <- phen_date_sub[1,]
+                   return(phen_date_sub)
+                 }))
+             names(phen_date) <- paste0("gb_", names(phen_date))
+             names(scene_stats) <- paste0("sentinel_", names(scene_stats))
+             scene_stats <- do.call("rbind", replicate(nrow(phen_date), 
+                                                       scene_stats, 
+                                                       simplify = FALSE))
+             phen_combo <- bind_cols(scene_stats,
+                                     phen_date) 
+             
+           }
+           return(phen_combo)
+         }))
+
+# Next check how many sentinel scenes don't ahve a matching gb phen record:
+gb_phen_sent_combos %>% filter(is.na(gb_site_veg)) %>%
+  distinct(sentinel_doy) %>%
+  summarise(n = n())
+# 18 / 24 scenes don't have gb phen data! i.e. 6 do
+
+# Throw out scenes without gb phen data.
+gb_phen_sent_combos <- gb_phen_sent_combos %>% filter(!is.na(gb_site_veg))
+
+
+## Load gb_plot geometries
+# Ground based phenology plot coordinates
+plot_coords <- read.csv("data/fig_5_ground_based_phenology//gb_plot_coordinates.csv")
+# grab utm zone 7 prj4 data
+epsg <- make_EPSG()
+utm_z7N <- as.character(epsg %>% filter(code == 32607) %>% dplyr::select(prj4))
+rm(epsg)
+
+# Define a function to create a polygon from for coordinate pairs
+plot_bound_poly <- function(site_veg){
+  plot_bound_coords <- as.matrix(
+    plot_coords[plot_coords$site_veg == site_veg,4:5])
+  plot_bound_poly <- spPolygons(plot_bound_coords, crs=utm_z7N)
+  return(plot_bound_poly)
+}
+
+# Apply function to all plots
+plot_bound_poly_list <- lapply(unique(plot_coords$site_veg), plot_bound_poly)
+names(plot_bound_poly_list) <- paste0(unique(plot_coords$site_veg), 
+                                      "_gbplot_poly")
+list2env(plot_bound_poly_list, envir = .GlobalEnv)
+
+# And create one sf containing all the geometries
+gb_polys <- lapply(plot_bound_poly_list, st_as_sf)
+gb_polys <- do.call(rbind, gb_polys)
+gb_polys$id <- unique(plot_coords$site_veg)
+
+# NDVI helper function
+NDVI <- function(red_band, nir_band) {
+  (nir_band - red_band) / (nir_band + red_band) 
+}
+
+## Visualise the position of the plots on the sentinel grid
+# load asentinel scene
+sentinel_brick <- brick(
+  unique(gb_phen_sent_combos$sentinel_file_path[1]))
+sentinel_brick <- crop(sentinel_brick,
+                       as_Spatial(st_buffer(gb_polys, 1000)))
+# Calculate NDVI
+sentinel_ndvi <- NDVI(sentinel_brick[[3]], sentinel_brick[[4]])
+
+lapply(gb_polys$id,
+       function(site){
+         site_poly <- gb_polys[gb_polys$id == site,]
+         sentinel_crop <- crop(sentinel_ndvi, as_Spatial(st_buffer(site_poly,10)))
+         png(paste0("data/fig_5_ground_based_phenology/gb_phen_sentinel/", 
+                    site, ".png"), 
+             width = 4,
+             height = 4,
+             units = "in",
+             res = 300)
+         plot(sentinel_crop, main = site)
+         plot(site_poly, add = T)
+         dev.off()
+       })
+# Not all polygons fall into a single pixel -> weighted mean extraction.
+
+# Extract sentinel NDVI gb plot ndvi mean for each scene
+gb_phen_sent_combos <- bind_rows(lapply(unique(gb_phen_sent_combos$sentinel_object_name),
+       function(scene_id){
+         gb_phen_sent_combos_sub <- gb_phen_sent_combos %>% 
+           filter(sentinel_object_name == scene_id)
+         # load sentinel scene
+         sentinel_brick <- brick(
+           unique(gb_phen_sent_combos_sub$sentinel_file_path))
+         # Crop to something managable
+         sentinel_brick <- crop(sentinel_brick,
+                                as_Spatial(st_buffer(gb_polys, 1000)))
+         # Calculate NDVI
+         sentinel_ndvi <- NDVI(sentinel_brick[[3]], sentinel_brick[[4]])
+         # Extract mean weighted NDVI
+         gb_plot_polys <- gb_polys %>% 
+           filter(id %in% gb_phen_sent_combos_sub$gb_site_veg)
+         gb_sentinel_ndvi <- raster::extract(sentinel_ndvi, as_Spatial(gb_plot_polys),
+                         fun = mean, weights = T, sp = T) %>% st_as_sf %>%
+           setNames(c("gb_site_veg", "mean_NDVI", "geometry")) %>%
+           st_drop_geometry() %>% 
+           dplyr::select(gb_site_veg, mean_NDVI)
+         gb_phen_sent_combos_sub <- full_join(gb_phen_sent_combos_sub, gb_sentinel_ndvi)
+       }))
+
+# Save for later use
+save(gb_phen_sent_combos, file = "data/fig_5_ground_based_phenology/gb_phen_sentinel/gb_phen_sent_combos.Rda")
+
+ggplot(gb_phen_sent_combos, aes(x = gb_doy, y = mean_NDVI, color = gb_site_veg)) +
+  geom_point() +
+  facet_wrap(~gb_year)
+# Combine with phenology data
+names(phen_means)
+gb_phen_sent <- phen_means %>% inner_join(gb_phen_sent_combos, by = c("year" = "gb_year",
+                                                      "doy" = "gb_doy", "site_veg" = "gb_site_veg"))
+
+# summarise to community mean
+gb_phen_sent_com <- gb_phen_sent %>% 
+  mutate(site_veg_year = paste0(site_veg, year),
+         site = substr(site_veg, 1,3),
+         veg_type = substr(site_veg, 5,7)) %>%
+  group_by(site_veg_year, site, veg_type, year, doy) %>% 
+  summarise(comm_mean_leaf_stand = mean(mean_leaf_stand),
+            mean_ndvi = mean(mean_NDVI),
+            sd_ndvi = sd(mean_NDVI)) 
+
+# Check data points available
+gb_phen_sent_com %>% group_by(site_veg_year) %>%
+  summarise(n = n())
+
+# Filter out all site site_veg_year with less than 4 data points
+gb_phen_sent_com <- gb_phen_sent_com%>% 
+  filter(site_veg_year %in% (gb_phen_sent_com %>% group_by(site_veg_year) %>%
+                               summarise(n = n()) %>% filter(n >= 4) %>% pull(site_veg_year)))
+
+# Remove single outlier for site 3 above 0.75
+# PS3 KOM 2017 DOY 185 - 0.790 
+gb_phen_sent_com <- filter(gb_phen_sent_com, comm_mean_leaf_stand <= 0.75)
+gb_phen_sent_com %>% filter(site_veg_year == "PS3_KOM2017") %>% summarise(mean = mean(comm_mean_leaf_stand))
+# Calculate spearmans correlation for those time-series with more than 5 data
+# points
+cor_spear_com_sent <- gb_phen_sent_com %>%
+  group_by(site_veg_year) %>%
+  group_map(function(x, y) {
+    data.frame(
+      site_veg_year = y[1],
+      cor_coef = cor(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman"),
+      p_value = cor.test(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman")$p.value)
+  }) %>%
+  bind_rows()
+
+# Calculate mean community correlation across all time-series
+cor_spear_com_mean_sent <- round(mean(cor_spear_com_sent$cor_coef), 2)
+
+# Plot time-series for all sites and years
+colour_scale_sites <- c("#4A44F2FF",
+                        "#F20505FF", 
+                        "#F2BE22FF",
+                        "#9C9DA6FF")
+com_mean_leaf_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com, 
+                                     aes(x = comm_mean_leaf_stand, 
+                                         y = mean_ndvi, 
+                                         colour = site, 
+                                         group = site_veg_year,
+                                         linetype = year,
+                                         shape = veg_type)) + 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Community mean of\nlongest leaf (standardised)",
+       y = "\nMean NDVI",
+       shape = "Vegetation Type",
+       linetype = "Year",
+       colour = "Site") +
+  scale_y_continuous(limits = c(0.5, 0.8), breaks = seq(0.4,0.8,0.1)) +
+  scale_x_continuous(limits = c(-1.25,1.25), breaks = seq(-2, 2, 0.5)) +
+  scale_shape_manual(values = c(16, 17),
+                     labels = c("Tussock Sedge", "Dryas-Vetch"))+
+  scale_color_manual(values = colour_scale_sites,
+                     labels = c("Site 1", "Site 2", "Site 3", "Site 4")) +
+  scale_linetype_manual(values = c(2,1)) +
+  guides(color = guide_legend(order = 1,
+                              title = NULL),
+         linetype = guide_legend(order = 2,
+                                 title = NULL,
+                                 override.aes = list(color = "black")),
+         shape = guide_legend(order = 3, title = NULL)) +
+  annotate("text", x = 1.25, y = 0.51, hjust = 1, size = 5.5,
+            label = paste0("mean ρ = ", cor_spear_com_mean_sent)) +
+  theme_cowplot(18) +
+  theme(legend.position = "none")
+
+save_plot("figures/fig_5_ground_based_phenology/sent_com_mean_leaf_vs_ndvi_plot.png",
+          com_mean_leaf_vs_ndvi_plot_sent,
+          base_height = 5,
+          base_aspect_ratio = 1.35 - 0.455)
+
+
+# Doy vs. com mean leaf
+com_doy_vs_mean_leaf_plots_sent <- ggplot(gb_phen_sent_com, 
+                                    aes(x = as.numeric(doy), 
+                                        y = comm_mean_leaf_stand, 
+                                        colour = site, 
+                                        group = site_veg_year,
+                                        linetype = year,
+                                        shape = veg_type)) + 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Day of year\n",
+       y =  "Community mean of\nlongest leaf (standardised)",
+       shape = "Vegetation Type",
+       linetype = "Year",
+       colour = "Site") +
+  scale_y_continuous(limits = c(-1.25,1.25), breaks = seq(-2, 2, 0.5)) +
+  scale_x_continuous(limits = c(170,230), breaks = seq(170, 230, 10)) +
+  scale_shape_manual(values = c(16, 17),
+                     labels = c("Tussock Sedge", "Dryas-Vetch"))+
+  scale_color_manual(values = colour_scale_sites,
+                     labels = c("Site 1", "Site 2", "Site 3", "Site 4")) +
+  scale_linetype_manual(values = c(2,1)) +
+  guides(color = guide_legend(order = 1,
+                              title = NULL),
+         linetype = guide_legend(order = 2,
+                                 title = NULL,
+                                 override.aes = list(color = "black")),
+         shape = guide_legend(order = 3, title = NULL)) +
+  theme_cowplot(18) +
+  theme(legend.position = "none")
+
+save_plot("figures/fig_5_ground_based_phenology/sent_com_doy_vs_mean_leaf_plot.png",
+          com_doy_vs_mean_leaf_plots_sent,
+          base_height = 5,
+          base_aspect_ratio = 1.35 - 0.455)
+
+# Doy vs. mean NDVI
+com_doy_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com, 
+                               aes(x = as.numeric(doy), 
+                                   y = mean_ndvi, 
+                                   colour = site, 
+                                   group = site_veg_year,
+                                   linetype = year,
+                                   shape = veg_type)) + 
+  geom_point(size = 3) + 
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Day of year\n",
+       y =  "\nMean NDVI",
+       shape = "Vegetation Type",
+       linetype = "Year",
+       colour = "Site") +
+  scale_y_continuous(limits = c(0.4,0.8), breaks = seq(0.4, 0.8, 0.1)) +
+  scale_x_continuous(limits = c(170,230), breaks = seq(170, 230, 10)) +
+  scale_shape_manual(values = c(16, 17),
+                     labels = c("Tussock Sedge", "Dryas-Vetch"))+
+  scale_color_manual(values = colour_scale_sites,
+                     labels = c("Area 1", "Area 2", "Area 3", "Area 4")) +
+  scale_linetype_manual(values = c(2,1)) +
+  guides(color = guide_legend(order = 1,
+                              title = NULL),
+         linetype = guide_legend(order = 2,
+                                 title = NULL,
+                                 override.aes = list(color = "black")),
+         shape = guide_legend(order = 3, title = NULL)) +
+  theme_cowplot(18) +
+  theme(legend.key.width=unit(0.455,"inch"))
+
+save_plot("figures/fig_5_ground_based_phenology/sent_com_doy_vs_ndvi_plot.png",
+          com_doy_vs_ndvi_plot_sent,
+          base_height = 5,
+          base_aspect_ratio = 1.35)
