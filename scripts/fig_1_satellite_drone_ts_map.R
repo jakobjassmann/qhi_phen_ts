@@ -77,7 +77,8 @@ plot_ts_2016 <- function(site_name, veg_type){
              VegType == veg_type & 
              year == 2016, 
            SummaryQA < 3 & SummaryQA > -1) %>%
-    mutate(date = format(as.Date(paste0(DOY, "/2016"), format = "%j/%Y"), "%d/%m/%Y"))
+    mutate(date = format(as.Date(paste0(DOY, "/2016"), 
+                                 format = "%j/%Y"), "%d/%m/%Y"))
   rm(MODIS6_data, MODIS6_qikiqtaruk)
   # prep meta_data frame for MODIS
   MODIS_meta <- data.frame(
@@ -226,7 +227,7 @@ plot_ts_2016 <- function(site_name, veg_type){
                                          "drone_nocalib"))
   meta_data <- meta_data[order(meta_data$sensor),]
   plot_scale = viridis(6)[c(1,2,6,5)]
-  
+  plot_scale[1] <- "#A9A9A9FF" # Landsat 8 to grey set apart from Sentinel 2
   # Set y-axis label
   y_label <- "NDVI"
   
@@ -257,7 +258,7 @@ plot_ts_2016 <- function(site_name, veg_type){
       se= F, 
       method = "glm",
       formula= y ~ poly(x,2), 
-      colour = "gray50", 
+      colour = "#D3D3D3FF", 
       linetype = "dashed", 
       size = 1.5,
       span = 1, 
@@ -513,6 +514,7 @@ plot_ts_2017 <- function(site_name, veg_type){
                                          "drone"))
   meta_data <- meta_data[order(meta_data$sensor),]
   plot_scale = viridis(6)[c(1,2,3,6,5)]
+  plot_scale[1] <- "#A9A9A9FF" # Landsat 8 to grey set apart from Sentinel 2
   
   # Set y axis label and colour colour
   if(site_name == "PS1" | site_name == "PS2"){
@@ -554,7 +556,7 @@ plot_ts_2017 <- function(site_name, veg_type){
       se= F, 
       method = "glm",
       formula= y ~ poly(x,2), 
-      colour = "gray50", 
+      colour = "#D3D3D3FF", 
       linetype = "dashed", 
       span = 1, 
       size = 1.5,
@@ -698,6 +700,7 @@ save_plot(paste0(ts_out_path,"PS4_KOM_2017_tsplot.png"),
 ## 3 Create legend plot ----
 # drone Landsat8 MODIS Sentinel 2A Sentinel 2B
 plot_scale <- viridis(6)
+plot_scale[1] <- "#A9A9A9FF" # Landsat 8 to black set apart from Sentinel 2
 label_plot <- ggplot() + 
   scale_y_continuous(expand = c(0,0), limits = c(0, 3)) +
   scale_x_continuous(expand = c(0,0), 
@@ -898,8 +901,9 @@ st_write(sites_coords_sf, "data/site_boundaries/ps_site_bounds.shp",
 # Divide season into 7 day block startin on the Set doy range
 first_march <- c(122, 121) # 2016 was a leap year, 2017
 last_sept <- c(274, 273) # 2016, 2017
-week_blocks <- data.frame(year = c(rep(2016, length(seq(first_march[1], last_sept[1], 7))),
-                    rep(2017, length(seq(first_march[2], last_sept[2], 7)))),
+week_blocks <- data.frame(
+  year = c(rep(2016, length(seq(first_march[1], last_sept[1], 7))),
+           rep(2017, length(seq(first_march[2], last_sept[2], 7)))),
   block_no = c(paste0("2016_", 1:length(seq(first_march[1], last_sept[1], 7))),
                paste0("2017_", 1:length(seq(first_march[2], last_sept[2], 7)))),
   block_strat_doy = c(seq(first_march[1], last_sept[1], 7),
@@ -909,8 +913,9 @@ week_blocks <- data.frame(year = c(rep(2016, length(seq(first_march[1], last_sep
   stringsAsFactors = F)
 
 # Create doy columns for easier handling
-meta_data_global <- meta_data_global %>% mutate(doy = as.numeric(format.Date(date, "%j")),
-                            year = as.numeric(format.Date(date, "%Y")))
+meta_data_global <- meta_data_global %>% 
+  mutate(doy = as.numeric(format.Date(date, "%j")),
+         year = as.numeric(format.Date(date, "%Y")))
 
 # Calculate weekly averges
 weekly_means <- lapply(week_blocks$block_no, function(block_no){
@@ -987,13 +992,14 @@ n_pairs <-  correlations %>%
 cor_matrix_for_output <- cor_matrix
 for(i in 2:ncol(cor_matrix_for_output)){
   for(j in 1:nrow(cor_matrix_for_output)){
-    cor_matrix_for_output[j,i] <- paste0(formatC(round(as.numeric(cor_matrix[j,i]),2),
-                                                 digits = 2,
-                                                 format = "f"), 
-                                      " (", 
-                                      formatC(as.numeric(n_pairs[j,i]),
-                                              width = 2), ")")
-    }
+    cor_matrix_for_output[j,i] <- paste0(
+      formatC(round(as.numeric(cor_matrix[j,i]),2),
+              digits = 2,
+              format = "f"), 
+      " (", 
+      formatC(as.numeric(n_pairs[j,i]),
+              width = 2), ")")
+  }
 }
 
 names(cor_matrix_for_output) <- c("Sensor",
@@ -1015,8 +1021,9 @@ write.csv(cor_matrix_for_output,
           row.names = F)
 
 # Quic pretty plot to show the correlations
-weekly_means_plot <- ggplot(weekly_means %>% pivot_wider(names_from = sensor,
-                                                         values_from = mean_NDVI) %>%
+weekly_means_plot <- ggplot(weekly_means %>% 
+                              pivot_wider(names_from = sensor,
+                                          values_from = mean_NDVI) %>%
                               setNames(c("site_veg",
                                          "year",
                                          "block_no",
@@ -1027,27 +1034,33 @@ weekly_means_plot <- ggplot(weekly_means %>% pivot_wider(names_from = sensor,
                                          "Sentinel.2B")) %>%
                               mutate(veg_type = substr(site_veg, 5,7)) %>%
                               filter(!is.na(drone)) %>%
-                              filter(!(is.na(MODIS) & is.na(Landsat8) & is.na(Sentinel.2A)  & is.na(Sentinel.2B)))) +
+                              filter(!(is.na(MODIS) & 
+                                         is.na(Landsat8) & 
+                                         is.na(Sentinel.2A) & 
+                                         is.na(Sentinel.2B)))) +
+  geom_abline(intercept = 0, slope = 1, 
+              color="#D3D3D3FF", linetype="dashed", 
+              size= 1, alpha = 1 ) +
   geom_point(aes(x = drone, y = Landsat8, 
                  #shape = veg_type
-  ), fill = "#440154FF", colour = "#00000044", size = 1.5, shape = 21) + 
+  ), fill = "#A9A9A9FF", colour = "#00000088", size = 2.5, shape = 21) + 
   geom_point(aes(x = drone, y = Sentinel.2A, 
                  #shape = veg_type
-  ), fill = "#414487FF", colour = "#00000044", size = 1.5, shape = 21) + 
+  ), fill = "#414487FF", colour = "#00000088", size = 2.5, shape = 21) + 
   geom_point(aes(x = drone, y = Sentinel.2B, 
                  #shape = veg_type
-  ), fill = "#2A788EFF", colour = "#00000044", size = 1.5, shape = 21) + 
+  ), fill = "#2A788EFF", colour = "#00000088", size = 2.5, shape = 21) + 
   geom_point(aes(x = drone, y = MODIS, 
                  #shape = veg_type
-  ), fill = "#FDE725FF", colour = "#00000044", size = 1.5, shape = 21) +
-  # geom_smooth(aes(x = drone, y = Landsat8), colour = "#440154FF",
-  #             method = "lm", se = F, size = 0.5) +
-  # geom_smooth(aes(x = drone, y = Sentinel.2A), colour = "#414487FF",
-  #             method = "lm", se = F, size = 0.5) +
-  # geom_smooth(aes(x = drone, y = Sentinel.2B), colour = "#2A788EFF",
-  #             method = "lm", se = F, size = 0.5) +
-  # geom_smooth(aes(x = drone, y = MODIS), colour = "#FDE725FF",
-  #             method = "lm", se = F, size = 0.5) +
+  ), fill = "#FDE725FF", colour = "#00000088", size = 2.5, shape = 21) +
+  geom_smooth(aes(x = drone, y = Landsat8), colour = "#A9A9A9FF",
+              method = "lm", se = F, size = 1) +
+  geom_smooth(aes(x = drone, y = Sentinel.2A), colour = "#414487FF",
+              method = "lm", se = F, size = 1) +
+  geom_smooth(aes(x = drone, y = Sentinel.2B), colour = "#2A788EFF",
+              method = "lm", se = F, size = 1) +
+  geom_smooth(aes(x = drone, y = MODIS), colour = "#FDE725FF",
+              method = "lm", se = F, size = 1) +
   labs(x = "Drone NDVI", y = "Satellite NDVI") +
   scale_x_continuous(limits = c(0.375,0.8), breaks = seq(0.3,0.8,0.1)) +
   scale_y_continuous(limits = c(0.375, 0.8), breaks = seq(0.3,0.8,0.1)) +
@@ -1055,27 +1068,37 @@ weekly_means_plot <- ggplot(weekly_means %>% pivot_wider(names_from = sensor,
   # annotate("text", x= 0.61, y = 0.425, label = "Tussock Sedge Tundra", hjust = 0) +
   # annotate("point", x= 0.6, y = 0.4, shape = 2) +
   # annotate("text", x= 0.61, y = 0.4, label = "Dryas-vetch Tundra", hjust = 0) +
-  annotate("point", x= 0.7, y = 0.475, fill = "#440154FF", colour = "#00000044", size = 1.5, shape = 21) +
-  annotate("text", x= 0.71, y = 0.475, label = paste0("Landsat 8"
-                                                      #, " ρ = ", cor_matrix_for_output[2,2]
-                                                      ), hjust = 0) +
-  annotate("point", x= 0.7, y = 0.45, fill = "#414487FF", colour = "#00000044", size = 1.5, shape = 21) +
-  annotate("text", x= 0.71, y = 0.45, label = paste0("Sentinel-2A" 
-                                                     #, " ρ = ", cor_matrix_for_output[4,2]
-                                                     ), hjust = 0) +
-  annotate("point", x= 0.7, y = 0.425, fill = "#2A788EFF", colour = "#00000044", size = 1.5, shape = 21) +
-  annotate("text", x= 0.71, y = 0.425, label = paste0("Sentinel-2B"
-                                                      #, " ρ = ", cor_matrix_for_output[5,2]
-                                                      ), hjust = 0) +
-  annotate("point", x= 0.7, y = 0.4, fill = "#FDE725FF",  colour = "#00000044", size = 1.5, shape = 21) +
-  annotate("text", x= 0.71, y = 0.4, label = paste0("MODIS" 
-                                                    #," ρ = ", cor_matrix_for_output[3,2]
-                                                    ), hjust = 0) +
+  # annotate("point", x= 0.7, y = 0.4, fill = "#FDE725FF",  colour = "#00000044", size = 1.5, shape = 21) +
+  # annotate("point", x= 0.7, y = 0.475, fill = "#A9A9A9FF", colour = "#00000044", size = 1.5, shape = 21) +
+  # annotate("point", x= 0.8, y = 0.45, fill = "#414487FF", colour = "#00000044", size = 1.5, shape = 21) +
+  # annotate("point", x= 0.7, y = 0.425, fill = "#2A788EFF", colour = "#00000044", size = 1.5, shape = 21) +
+  annotate("text", x= 0.8, y = 0.49, 
+           label = paste0("MODIS",
+                          " ρ = ", cor_matrix_for_output[3,2]), 
+           hjust = 1 #,  colour = "#FDE725FF"
+  ) +
+ annotate("text", x= 0.8, y = 0.46, 
+          label = paste0("Sentinel-2A",
+                         " ρ = ", cor_matrix_for_output[4,2]), 
+          hjust = 1# , colour = "#414487FF"
+  ) +
+  annotate("text", x= 0.8, y = 0.43, 
+           label = paste0("Sentinel-2B",
+                          " ρ = ", cor_matrix_for_output[5,2]), 
+           hjust = 1#, colour = "#2A788EFF"
+  ) +
+  annotate("text", x= 0.8, y = 0.4, 
+           label = paste0("Landsat 8",
+                          " ρ = ", cor_matrix_for_output[2,2]), 
+           hjust = 1#, colour = "#A9A9A9FF"
+  ) +
   theme_cowplot(15) +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        plot.margin = unit(c(1.5,1,0.5,0.5), "cm"))
 
-save_plot("figures/fig_s1a_satellite_drone_weekly.png",
+save_plot("figures/fig_1_ts_plots/satellite_drone_weekly.png",
           weekly_means_plot)
+# Will give a warning of missing values (intended)
 
 # Calculate mean differences per weekly block
 mean_diffs <- bind_rows(apply(
