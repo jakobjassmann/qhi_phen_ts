@@ -145,6 +145,6 @@ data6 <- data5 %>%
       legend.title = element_text(size = 16, colour = x.axis.text.colour),
       legend.text = element_text(size = 14, colour = x.axis.text.colour)))
 
-figure <- ggarrange(composition_plot, species_plot, ncol = 2, nrow = 1, widths = c(0.58, 0.42), labels=c("A. Percent cover of functional groups","B. Percent cover of focal species"), vjust = c(2, 2), hjust = c(-0.2, -0.2), common.legend = TRUE, legend = "bottom") 
+figure <- ggarrange(composition_plot, species_plot, ncol = 2, nrow = 1, widths = c(0.58, 0.42), labels=c("A. Percent cover of functional groups","B. Percent cover of focal phenology species"), vjust = c(2, 2), hjust = c(-0.2, -0.2), common.legend = TRUE, legend = "bottom") 
 
 ggsave("Figures/fig_x_plant_cover/fig_x_plant_cover.pdf", figure, width = 14, height = 8)
