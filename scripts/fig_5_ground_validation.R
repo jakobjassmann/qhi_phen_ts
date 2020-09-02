@@ -1042,7 +1042,7 @@ gb_phen_sent_combos <- bind_rows(lapply(unique(gb_phen_sent_combos$sentinel_obje
 
 # Save for later use
 save(gb_phen_sent_combos, file = "data/fig_5_ground_based_phenology/gb_phen_sentinel/gb_phen_sent_combos.Rda")
-
+load("data/fig_5_ground_based_phenology/gb_phen_sentinel/gb_phen_sent_combos.Rda")
 ggplot(gb_phen_sent_combos, aes(x = gb_doy, y = mean_NDVI, color = gb_site_veg)) +
   geom_point() +
   facet_wrap(~gb_year)
@@ -1082,12 +1082,20 @@ cor_spear_com_sent <- gb_phen_sent_com %>%
     data.frame(
       site_veg_year = y[1],
       cor_coef = cor(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman"),
-      p_value = cor.test(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman")$p.value)
+      p_value = cor.test(x$comm_mean_leaf_stand, x$mean_ndvi, method = "spearman")$p.value,
+      n = x %>% summarise(n = n()) %>% pull(n))
   }) %>%
   bind_rows()
 
 # Calculate mean community correlation across all time-series
 cor_spear_com_mean_sent <- round(mean(cor_spear_com_sent$cor_coef), 2)
+
+# Export tables
+write.csv(cor_spear_com_sent %>%
+            mutate(cor_coef = round(cor_coef, 2),
+                   p_value = formatC(round(p_value, 3), digits = 3)), 
+          paste0(data_out_path, "standard_leaf_length_cor_by_ts_sent.csv"),
+          row.names = F)
 
 # Plot time-series for all sites and years
 colour_scale_sites <- c("#4A44F2FF",
@@ -1103,7 +1111,7 @@ com_mean_leaf_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                                          shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Community mean of\nlongest leaf (standardised)",
+  labs(x = "Mean standardised\nlongest leaf length",
        y = "\nMean NDVI",
        shape = "Vegetation Type",
        linetype = "Year",
@@ -1143,7 +1151,7 @@ com_doy_vs_mean_leaf_plots_sent <- ggplot(gb_phen_sent_com,
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
   labs(x = "Day of year\n",
-       y =  "Community mean of\nlongest leaf (standardised)",
+       y =  "Mean standardised\nlongest leaf length",
        shape = "Vegetation Type",
        linetype = "Year",
        colour = "Site") +
@@ -1203,3 +1211,5 @@ save_plot("figures/fig_5_ground_based_phenology/sent_com_doy_vs_ndvi_plot.png",
           com_doy_vs_ndvi_plot_sent,
           base_height = 5,
           base_aspect_ratio = 1.35)
+
+
