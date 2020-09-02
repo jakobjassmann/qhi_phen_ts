@@ -9,22 +9,46 @@ data <- read.csv("data/plant_cover/qhi_cover_ITEX_1999_2017.csv")
 
 data2 <- data %>%
   filter(year > 2015, !is.na(gfnarrowarft)) %>%
-  mutate(subsite = dplyr::recode(sub_name, 'QHI:HE' = "Tussock Sedge Tundra", 'QHI:KO' = "Dryas-Vetch Tundra")) %>%
+  mutate(subsite = dplyr::recode(
+    sub_name, 
+    'QHI:HE' = "Tussock Sedge Tundra", 
+    'QHI:KO' = "Dryas-Vetch Tundra")) %>%
   rename(species = name) %>% 
-  mutate(functional_group = dplyr::recode(gfnarrowarft, 'OTHER' = "Other", 'ROCK' = "Other", 'WATER' = "Other", 'SOIL' = "Other", 'DUNG' = "Other", 'FUNGI' = "Other", 'FUNGUS' = "Other", 'FORBSV' = "Forbs", 'ESHRUB' = "Evergreen shrub", 'DSHRUB' = "Deciduous shrub", 'GRAMINOID' = "Grasses and sedges", 'LICHEN' = 'Lichen', 'MOSS' = "Moss", 'SHRUBU' = "Deciduous shrub", 'SHRUB' = "Other vegetation", 'LIVER' = "Other vegetation", 'LITTER' = "Litter"))
+  mutate(functional_group = dplyr::recode(
+    gfnarrowarft, 
+    'OTHER' = "Other", 
+    'ROCK' = "Other", 
+    'WATER' = "Other", 
+    'SOIL' = "Other", 
+    'DUNG' = "Other", 
+    'FUNGI' = "Other", 
+    'FUNGUS' = "Other",
+    'FORBSV' = "Forbs", 
+    'ESHRUB' = "Evergreen shrub", 
+    'DSHRUB' = "Deciduous shrub", 
+    'GRAMINOID' = "Grasses and sedges", 
+    'LICHEN' = 'Lichen', 
+    'MOSS' = "Moss", 
+    'SHRUBU' = "Deciduous shrub",
+    'SHRUB' = "Other vegetation", 
+    'LIVER' = "Other vegetation", 
+    'LITTER' = "Litter"))
 
 data3 <- data2 %>%
   filter(functional_group != "Other vegetation") %>%
   group_by(year, subsite, plot, functional_group) %>%
   summarise(plot_cover = sum(cover)) %>%
   ungroup() %>%
-  mutate(plot_cover_max = max(plot_cover), plot_cover_100 = (plot_cover/plot_cover_max)*100)
+  mutate(plot_cover_max = max(plot_cover), 
+         plot_cover_100 = (plot_cover/plot_cover_max)*100)
 
 data4 <- data3 %>% 
   group_by(year, subsite, functional_group) %>% 
-  summarise(mean_cover = mean(plot_cover_100), sd_cover = sd(plot_cover_100)) %>% 
+  summarise(mean_cover = mean(plot_cover_100), 
+            sd_cover = sd(plot_cover_100)) %>% 
   group_by(subsite, functional_group) %>% 
-  summarise(mean_cover2 = mean(mean_cover), sd_cover2 = mean(sd_cover)) %>% 
+  summarise(mean_cover2 = mean(mean_cover), 
+            sd_cover2 = mean(sd_cover)) %>% 
   mutate(functional_group = fct_reorder(functional_group, -mean_cover2))
 
 # figure
@@ -85,20 +109,33 @@ y.axis.text.colour <- "black"
 
 data5 <- data2 %>%
   filter(functional_group != "Other vegetation") %>%
-  filter(species == "Arctagrostis latifolia" | species == "Dryas integrifolia" | species == "Eriophorum vaginatum" | species == "Salix arctica" | species == "Salix pulchra") %>% 
+  filter(species == "Arctagrostis latifolia" | 
+           species == "Dryas integrifolia" |
+           species == "Eriophorum vaginatum" | 
+           species == "Salix arctica" | 
+           species == "Salix pulchra") %>% 
   group_by(year, subsite, plot, species) %>%
   summarise(plot_cover = mean(cover)) %>%
   ungroup() %>%
-  mutate(plot_cover_max = max(plot_cover), plot_cover_100 = (plot_cover/plot_cover_max)*100)
+  mutate(plot_cover_max = max(plot_cover), 
+         plot_cover_100 = (plot_cover/plot_cover_max)*100)
 
 data6 <- data5 %>%
   group_by(year, subsite, species) %>% 
-  summarise(mean_cover = mean(plot_cover_100), sd_cover = sd(plot_cover_100)) %>% 
+  summarise(mean_cover = mean(plot_cover_100), 
+            sd_cover = sd(plot_cover_100)) %>% 
   group_by(subsite, species) %>% 
-  summarise(mean_cover2 = mean(mean_cover), sd_cover2 = mean(sd_cover)) %>% 
+  summarise(mean_cover2 = mean(mean_cover), 
+            sd_cover2 = mean(sd_cover)) %>% 
   ungroup() %>% 
-  add_row(subsite = "Tussock Sedge Tundra", species = "Salix arctica", mean_cover2 = 0, sd_cover2 = NA) %>% 
-  add_row(subsite = "Dryas-Vetch Tundra", species = "Eriophorum vaginatum", mean_cover2 = 0, sd_cover2 = NA) %>% 
+  add_row(subsite = "Tussock Sedge Tundra", 
+          species = "Salix arctica",
+          mean_cover2 = 0, 
+          sd_cover2 = NA) %>% 
+  add_row(subsite = "Dryas-Vetch Tundra", 
+          species = "Eriophorum vaginatum", 
+          mean_cover2 = 0, 
+          sd_cover2 = NA) %>% 
   mutate(species = fct_reorder(species, -mean_cover2))
 
 (species_plot <- ggplot(data6) +
@@ -145,6 +182,18 @@ data6 <- data5 %>%
       legend.title = element_text(size = 16, colour = x.axis.text.colour),
       legend.text = element_text(size = 14, colour = x.axis.text.colour)))
 
-figure <- ggarrange(composition_plot, species_plot, ncol = 2, nrow = 1, widths = c(0.58, 0.42), labels=c("A. Percent cover of functional groups","B. Percent cover of focal phenology species"), vjust = c(2, 2), hjust = c(-0.2, -0.2), common.legend = TRUE, legend = "bottom") 
+figure <- ggarrange(
+  composition_plot, 
+  species_plot, 
+  ncol = 2, 
+  nrow = 1, 
+  widths = c(0.58, 0.42), 
+  labels=c("A. Percent cover of functional groups",
+           "B. Percent cover of focal phenology species"),
+  vjust = c(2, 2), 
+  hjust = c(-0.2, -0.2), 
+  common.legend = TRUE, 
+  legend = "bottom") 
 
-ggsave("Figures/fig_x_plant_cover/fig_x_plant_cover.pdf", figure, width = 14, height = 8)
+ggsave("Figures/fig_x_plant_cover/fig_x_plant_cover.pdf", 
+       figure, width = 14, height = 8)
