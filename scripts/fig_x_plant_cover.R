@@ -196,10 +196,13 @@ figure <- ggarrange(
   nrow = 1, 
   widths = c(0.58, 0.42), 
   labels=c("a  Percent cover of functional groups",
-           "b  Percent cover of focal phenology species"),
-  vjust = c(2, 2), 
-  hjust = c(-0.2, -0.2), 
-  common.legend = TRUE, 
+           "b  Percent cover of focal species"),
+  font.label = list(size = 24),
+  label.x = 0.01,
+  label.y = 0.99,
+  vjust = c(1, 1), 
+  hjust = c(0, 0),
+  common.legend = TRUE,
   legend = "bottom") 
 
 ggsave("Figures/fig_x_plant_cover/fig_x_plant_cover.png", 
