@@ -76,11 +76,13 @@ y.axis.text.colour <- "black"
                       colour = subsite,
                       group = subsite),
                   width = 0.4,
-                  position = position_dodge(0.88)) +
+                  position = position_dodge(0.88),
+                  colour = "black") +
     #annotate("text", x = 2.3, y = 100, label = "A. Percent cover of functional groups", size = 6) +
     scale_colour_manual(values = c("#1e9148FF", "#1e5c91FF")) +
     scale_fill_manual(values = c("#1e9148FF", "#1e5c91FF")) +
     coord_cartesian(ylim = c(0,100)) +
+    labs(fill = "", colour = "") +
     ylab("Functional Group % Cover\n") +
     xlab("") +
     theme_bw() +
@@ -152,11 +154,13 @@ data6 <- data5 %>%
                       colour = subsite,
                       group = subsite),
                   width = 0.4,
-                  position = position_dodge(0.88)) +
+                  position = position_dodge(0.88),
+                  colour = "black") +
     #annotate("text", x = 2.3, y = 100, label = "B. Percent cover of focal species", size = 6) +
     scale_colour_manual(values = c("#1e5c91FF", "#1e9148FF")) +
     scale_fill_manual(values = c("#1e5c91FF", "#1e9148FF")) +
     coord_cartesian(ylim = c(0,100)) +
+    labs(fill = "", colour = "") +
     ylab("Species % Cover\n") +
     xlab("") +
     theme_bw() +
