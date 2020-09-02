@@ -157,7 +157,7 @@ data6 <- data5 %>%
     scale_colour_manual(values = c("#1e5c91FF", "#1e9148FF")) +
     scale_fill_manual(values = c("#1e5c91FF", "#1e9148FF")) +
     coord_cartesian(ylim = c(0,100)) +
-    ylab("Functional Group % Cover\n") +
+    ylab("Species % Cover\n") +
     xlab("") +
     theme_bw() +
     theme(
