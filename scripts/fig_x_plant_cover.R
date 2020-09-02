@@ -85,6 +85,8 @@ y.axis.text.colour <- "black"
     labs(fill = "", colour = "") +
     ylab("Functional Group % Cover\n") +
     xlab("") +
+    guides(fill = guide_legend(title = NULL),
+           colour = "none") +
     theme_bw() +
     theme(
       panel.border = element_blank(),
@@ -160,9 +162,10 @@ data6 <- data5 %>%
     scale_colour_manual(values = c("#1e5c91FF", "#1e9148FF")) +
     scale_fill_manual(values = c("#1e5c91FF", "#1e9148FF")) +
     coord_cartesian(ylim = c(0,100)) +
-    labs(fill = "", colour = "") +
     ylab("Species % Cover\n") +
     xlab("") +
+    guides(fill = guide_legend(title = NULL),
+           colour = "none") +
     theme_bw() +
     theme(
       panel.border = element_blank(),
@@ -192,8 +195,8 @@ figure <- ggarrange(
   ncol = 2, 
   nrow = 1, 
   widths = c(0.58, 0.42), 
-  labels=c("A. Percent cover of functional groups",
-           "B. Percent cover of focal phenology species"),
+  labels=c("a  Percent cover of functional groups",
+           "b  Percent cover of focal phenology species"),
   vjust = c(2, 2), 
   hjust = c(-0.2, -0.2), 
   common.legend = TRUE, 
