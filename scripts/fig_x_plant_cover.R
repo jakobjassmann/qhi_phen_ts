@@ -159,8 +159,8 @@ data6 <- data5 %>%
                   position = position_dodge(0.88),
                   colour = "black") +
     #annotate("text", x = 2.3, y = 100, label = "B. Percent cover of focal species", size = 6) +
-    scale_colour_manual(values = c("#1e5c91FF", "#1e9148FF")) +
-    scale_fill_manual(values = c("#1e5c91FF", "#1e9148FF")) +
+    scale_colour_manual(values = c("#1e9148FF", "#1e5c91FF")) +
+    scale_fill_manual(values = c("#1e9148FF", "#1e5c91FF")) +
     coord_cartesian(ylim = c(0,100)) +
     ylab("Species % Cover\n") +
     xlab("") +
