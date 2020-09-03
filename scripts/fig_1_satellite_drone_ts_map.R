@@ -59,6 +59,16 @@ get_sent_extent <- function(site_veg_id, sent_boundaries) {
   return(extent_object)
 }
 
+# Set point size for plotting points in time-series globally
+point_size <- 4
+# Set alpha for plotting points in time-series globallly
+point_alpha <- 0.7
+
+# Read snowmelt 
+snowmelt_dates <- read.csv("data/auxillary/snowmelt_qhi.csv",
+                           stringsAsFactors = F)
+
+snowmelt_dates$date_snowmelt <- as.Date(snowmelt_dates$date_snowmelt)
 
 ## Function to create satellite + drone time-series plots for 2016
 plot_ts_2016 <- function(site_name, veg_type){
@@ -226,7 +236,7 @@ plot_ts_2016 <- function(site_name, veg_type){
                                          "drone",
                                          "drone_nocalib"))
   meta_data <- meta_data[order(meta_data$sensor),]
-  plot_scale = viridis(6)[c(1,2,6,5)]
+  plot_scale = viridis(6)[c(1,1,6,5)]
   plot_scale[1] <- "#A9A9A9FF" # Landsat 8 to grey set apart from Sentinel 2
   # Set y-axis label
   y_label <- "NDVI"
@@ -250,7 +260,13 @@ plot_ts_2016 <- function(site_name, veg_type){
     aes(x = date, y = mean_NDVI), 
     inherit.aes = F) +
     
-    geom_point() +
+    geom_point(alpha = 0) +
+    
+    geom_vline(
+      aes(xintercept = snowmelt_dates$date_snowmelt[snowmelt_dates$year == 2016]),
+      colour = "#a9a9a9FF",
+      linetype = "11",
+      size = 1.5) +
     
     geom_smooth(
       mapping = aes(x = date, y= mean_NDVI), 
@@ -265,10 +281,11 @@ plot_ts_2016 <- function(site_name, veg_type){
       fullrange = T,
       inherit.aes = F) +
     
-    geom_point() +
+    geom_point(alpha = point_alpha) +
+    
     
     scale_size_manual(
-      values = c(rep(5, 5))) +
+      values = c(rep(point_size, 5))) +
     scale_colour_manual(
       values = rep("black",5)) +
     scale_shape_manual(
@@ -513,7 +530,7 @@ plot_ts_2017 <- function(site_name, veg_type){
                                          "MODIS",
                                          "drone"))
   meta_data <- meta_data[order(meta_data$sensor),]
-  plot_scale = viridis(6)[c(1,2,3,6,5)]
+  plot_scale = viridis(6)[c(1,1,3,6,5)]
   plot_scale[1] <- "#A9A9A9FF" # Landsat 8 to grey set apart from Sentinel 2
   
   # Set y axis label and colour colour
@@ -547,7 +564,13 @@ plot_ts_2017 <- function(site_name, veg_type){
     aes(x = date, y = mean_NDVI), 
     inherit.aes = F) +
     
-    geom_point() +
+    geom_point(alpha = 0) +
+    
+    geom_vline(
+      aes(xintercept = snowmelt_dates$date_snowmelt[snowmelt_dates$year == 2017]),
+      colour = "#a9a9a9FF",
+      linetype = "11",
+      size = 1.5) +
     
     geom_smooth(
       mapping = aes(x = date, y= mean_NDVI), 
@@ -563,9 +586,9 @@ plot_ts_2017 <- function(site_name, veg_type){
       fullrange = T,
       inherit.aes = F) +
     
-    geom_point() +
+    geom_point(alpha = point_alpha) +
     
-    scale_size_manual(values = c(rep(5, 5))) +
+    scale_size_manual(values = c(rep(point_size, 5))) +
     scale_colour_manual(values = rep("black",5)) +
     scale_shape_manual(values = c(21, 21, 21, 21, 21)) +
     scale_fill_manual(values = plot_scale) +
@@ -677,6 +700,8 @@ save_plot(paste0(ts_out_path,"PS1_KOM_2016_tsplot.png"),
           PS1_KOM_tsplot_2016, base_aspect_ratio = 1)
 save_plot(paste0(ts_out_path,"PS2_HER_2016_tsplot.png"), 
           PS2_HER_tsplot_2016, base_aspect_ratio = 1)
+# The above will produce a warning due to a Sentinel-2 value
+# that is NaN (reason currently unkown)
 save_plot(paste0(ts_out_path,"PS2_KOM_2016_tsplot.png"), 
           PS2_KOM_tsplot_2016, base_aspect_ratio = 1)
 
@@ -700,44 +725,46 @@ save_plot(paste0(ts_out_path,"PS4_KOM_2017_tsplot.png"),
 ## 3 Create legend plot ----
 # drone Landsat8 MODIS Sentinel 2A Sentinel 2B
 plot_scale <- viridis(6)
+plot_scale[2] <- plot_scale[1] # Short cut adjustment of Sentinel 2A colour
 plot_scale[1] <- "#A9A9A9FF" # Landsat 8 to black set apart from Sentinel 2
 label_plot <- ggplot() + 
   scale_y_continuous(expand = c(0,0), limits = c(0, 3)) +
   scale_x_continuous(expand = c(0,0), 
                limits = c(0,100)) +
-  annotate("text", x = 8, y = 2, 
-           label = "MODIS", colour = "black" , fontface = "bold", 
+  annotate("text", x = 21, y = 2.4, 
+           label = "MODIS MOD13Q1v6 Terra", colour = "black" , fontface = "bold", 
            size = 15, hjust = 0) +
-  annotate("point", x = 5, y = 2, 
-           shape = 21, colour = "black", 
+  annotate("point", x = 18, y = 2.4, 
+           shape = 21, colour = "black", alpha = 0.7,
            fill = plot_scale[6], size = 15) +
   
-  annotate("text", x = 33, y = 2, 
-           label = "Sentinel 2A", colour = plot_scale[3] , 
-           fontface = "bold",size = 15,  hjust = 0) +
-  annotate("point", x = 30, y = 2,
-           shape = 21, colour = "black", 
-           fill = plot_scale[2], size = 15) +
-  
-  annotate("text", x = 68, y = 2, 
-           label = "Sentinel 2B", colour = plot_scale[4] , 
-           fontface = "bold",size = 15,  hjust = 0) +
-  annotate("point", x = 65, y = 2, 
-           shape = 21, colour = "black", 
-           fill = plot_scale[3], size = 15) +
-  
-  annotate("text", x = 28, y = 1.3, 
-           label = "Landsat 8", colour = plot_scale[1] , 
+  annotate("text",  x = 36, y = 1.8, 
+           label = "Landsat 8 SR", colour = plot_scale[1] , 
            fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 25, y = 1.3, 
-           shape = 21, colour = "black", 
+  annotate("point", x = 33, y = 1.8, 
+           shape = 21, colour = "black", alpha = 0.7,
            fill = plot_scale[1], size = 15) +
   
-  annotate("text", x = 60, y = 1.3, 
+  annotate("text", x = 8, y = 1.2, 
+           label = "Sentinel-2A L2A", colour = plot_scale[2] , 
+           fontface = "bold",size = 15,  hjust = 0) +
+  annotate("point",  x = 5, y = 1.2, 
+           shape = 21, colour = "black", alpha = 0.7,
+           fill = plot_scale[2], size = 15) +
+  
+  annotate("text", x = 56, y = 1.2,
+           label = "Sentinel-2B L2A", colour = plot_scale[4] , 
+           fontface = "bold",size = 15,  hjust = 0) +
+  annotate("point", x = 53, y = 1.2, 
+           shape = 21, colour = "black", alpha = 0.7,
+           fill = plot_scale[3], size = 15) +
+  
+
+  annotate("text", x = 43, y = 0.6,  
            label = "Drone", colour = plot_scale[5] , 
            fontface = "bold", size = 15, hjust = 0) +
-  annotate("point", x = 57, y = 1.3, 
-           shape = 21, colour = "black", 
+  annotate("point",  x = 40, y = 0.6, 
+           shape = 21, colour = "black", alpha = 0.7,
            fill = plot_scale[5], size = 15) +
   
   # annotate("text", x = 39, y = 1.3, 
@@ -1043,24 +1070,24 @@ weekly_means_plot <- ggplot(weekly_means %>%
               size= 1, alpha = 1 ) +
   geom_point(aes(x = drone, y = Landsat8, 
                  #shape = veg_type
-  ), fill = "#A9A9A9FF", colour = "#00000088", size = 2.5, shape = 21) + 
+  ), fill = "#440154FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
   geom_point(aes(x = drone, y = Sentinel.2A, 
                  #shape = veg_type
-  ), fill = "#414487FF", colour = "#00000088", size = 2.5, shape = 21) + 
+  ), fill = "#414487FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
   geom_point(aes(x = drone, y = Sentinel.2B, 
                  #shape = veg_type
-  ), fill = "#2A788EFF", colour = "#00000088", size = 2.5, shape = 21) + 
+  ), fill = "#2A788EFF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
   geom_point(aes(x = drone, y = MODIS, 
                  #shape = veg_type
-  ), fill = "#FDE725FF", colour = "#00000088", size = 2.5, shape = 21) +
+  ), fill = "#FDE725FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) +
   geom_smooth(aes(x = drone, y = Landsat8), colour = "#A9A9A9FF",
-              method = "lm", se = F, size = 1) +
+              method = "lm", se = F, size = 1, alpha = 0.7) +
   geom_smooth(aes(x = drone, y = Sentinel.2A), colour = "#414487FF",
-              method = "lm", se = F, size = 1) +
+              method = "lm", se = F, size = 1, alpha = 0.7) +
   geom_smooth(aes(x = drone, y = Sentinel.2B), colour = "#2A788EFF",
-              method = "lm", se = F, size = 1) +
+              method = "lm", se = F, size = 1, alpha = 0.7) +
   geom_smooth(aes(x = drone, y = MODIS), colour = "#FDE725FF",
-              method = "lm", se = F, size = 1) +
+              method = "lm", se = F, size = 1, alpha = 0.7) +
   labs(x = "Drone NDVI", y = "Satellite NDVI") +
   scale_x_continuous(limits = c(0.375,0.8), breaks = seq(0.3,0.8,0.1)) +
   scale_y_continuous(limits = c(0.375, 0.8), breaks = seq(0.3,0.8,0.1)) +
