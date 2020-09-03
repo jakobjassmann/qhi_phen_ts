@@ -28,15 +28,15 @@ load("data/meta_data.Rda")
 # disappeared however, the output still exists and can be found in:
 # /figures/fig_2_panel_b/PS2_KOM_20170717_RGB_cropped.png
 
-# PS2_KOM_20170717_RGB <- 
-#   brick("/Volumes/BowheadRdge/phen_time_series/2017/RGB/PS2_KOM_2017-07-17_RGB.tif")
+# PS2_KOM_20170717_RGB <-
+#   brick("/Volumes/BowheadRdge/phen_time_series/final_outputs/2017/PS2_KOM/output/rgb/PS2_KOM_2017-07-17_RGB.tif")
 # PS2_KOM_20170717_RGB_cropped <-  crop(PS2_KOM_20170717_RGB, PS2_KOM_extent)
 # 
-# png(paste0(figure_out_path, "/figure_2_panel_bPS2_KOM_20170717_RGB_cropped.png"), 
-#     width = 2,
-#     height = 2, 
-#     units = "in", 
-#     res = 300)
+# png(paste0(figure_out_path, "/figure_2_panel_bPS2_KOM_20170717_RGB_cropped.png"),
+#     width = 4,
+#     height = 4,
+#     units = "in",
+#     res = 800)
 # plotRGB(PS2_KOM_20170717_RGB_cropped, stretch = "hist")
 # dev.off()
 
@@ -156,16 +156,16 @@ native_breaks <- (native_up - native_low) / 100
 resamp_low <- min(scale_limits[1,c(2,4)]) 
 resamp_up <- max(scale_limits[2,c(2,4)])
 resamp_breaks <- (resamp_up - resamp_low) / 100
-resamp_low_ls8 <- min(scale_limits[1,c(3,5)]) 
-resamp_up_ls8 <- max(scale_limits[2,c(3,5)])
+resamp_low_ls8 <- resamp_low #min(scale_limits[1,c(3,5)]) 
+resamp_up_ls8 <- resamp_up  #max(scale_limits[2,c(3,5)])
 resamp_breaks_ls8 <- (resamp_up_ls8 - resamp_low_ls8) / 100
 
 diff_low <- -1* max(c(-1*scale_limits[1,6], scale_limits[2,6]))
 diff_up <- max(c(-1*scale_limits[1,6], scale_limits[2,6]))
 diff_breaks <- (diff_up - diff_low) / 100
-diff_low_ls8 <- -1* max(c(-1*scale_limits[1,7], scale_limits[2,7]))
-diff_up_ls8 <- max(c(-1*scale_limits[1,7], scale_limits[2,7]))
-diff_breaks_ls8 <- (diff_up_ls8 - diff_low_ls8) / 100  
+diff_low_ls8 <- diff_low# -1* max(c(-1*scale_limits[1,7], scale_limits[2,7]))
+diff_up_ls8 <- diff_up #max(c(-1*scale_limits[1,7], scale_limits[2,7]))
+diff_breaks_ls8 <- diff_breaks #(diff_up_ls8 - diff_low_ls8) / 100  
 
 scale_breaks_native <- seq(native_low, native_up, by = native_breaks) 
 scale_breaks_resampled <- seq(resamp_low, resamp_up, by = resamp_breaks)
