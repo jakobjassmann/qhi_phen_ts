@@ -62,7 +62,7 @@ ts_combos <- data.frame(
   stringsAsFactors = F)
 
 # Set aggregation levels for drone data
-agg_levels <- c(0.5, 1,5,10,20,33.3)
+agg_levels <- c(0.5, 1,5,10,20,30)
 # fill in ts_combos data frame!
 ts_combos <- data.frame(
   ts_combos,
@@ -105,7 +105,7 @@ list2env(mapply(function(x, y){create_agg_raster(x, y)},
 list2env(mapply(function(x, y){create_agg_raster(x, y)},
                 setNames(unique(ts_combos$site_veg), 
                          make.names(paste0(unique(ts_combos$site_veg), 
-                                           "_agg_raster_","33.3m"))),
+                                           "_agg_raster_","30.0m"))),
                 30), 
          envir = .GlobalEnv)
 
@@ -180,9 +180,9 @@ resample_agg_rasters <- function(site_veg_es, year_es, agg_level) {
         # if agg_level = 33.3 the division is not even as the pixel size 
         # is 33.25, we re sample to 33.3 exactly using nearest neighbour
         # This "nudges" the pixels into place
-        if(agg_level == 33.3) {
+        if(agg_level == 30) {
           agg_raster <- resample(agg_raster,
-                                 get(paste0(site_veg_es, "_agg_raster_33.3m")),
+                                 get(paste0(site_veg_es, "_agg_raster_30.0m")),
                                  method = "ngb")
         }
         return(agg_raster)

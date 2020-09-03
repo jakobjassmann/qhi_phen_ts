@@ -689,32 +689,53 @@ preds_df$agg_level <- ordered(preds_df$agg_level,
 
 # Set colour ramp 
 col_ramp <- sequential_hcl(5, palette = "Blues3")[1:3]
+col_ramp <- sequential_hcl(3, palette = "Inferno")
 # col_ramp[3] <- "#00dbfe"  
 # Plot predictions
 curve_plots <- ggplot(ndvi_values,
-       aes(x = doy, y = NDVI,
-                      group = cell_id,
-                      colour = agg_level)) +
+                      mapping = aes(x= doy, y= NDVI, 
+                                    group = cell_id,
+                                    colour = agg_level,
+                                    fill = agg_level)) +
   geom_line(data = preds_df[preds_df$agg_level == 0.5,], 
             mapping = aes(x= doy, y= preds, 
-                          group = cell_id,
-                          colour = agg_level),
+                          group = cell_id),
             alpha = 0.01,
-            size = 1) +
+            size = 1,
+            colour = col_ramp[1]) +
   geom_line(data = preds_df[preds_df$agg_level == 10,], 
             mapping = aes(x= doy, y= preds, 
-                          group = cell_id,
-                          colour = agg_level),
+                          group = cell_id),
             alpha = 0.5,
-            size = 1) +
+            size = 1,
+            colour = col_ramp[2]) +
   geom_line(data = preds_df[preds_df$agg_level == 33.3,], 
             mapping = aes(x= doy, y= preds, 
-                          group = cell_id,
-                          colour = agg_level),
+                          group = cell_id),
             alpha = 0.5,
-            size = 1) +
-  geom_point(alpha = 0.5, shape = 16) +
-  scale_color_manual(values = col_ramp) +
+            size = 1,
+            colour = col_ramp[3]) +
+  geom_point(data = ndvi_values[ndvi_values$agg_level == 0.5,], 
+             mapping = aes(x= doy, y= NDVI, 
+                           group = cell_id),
+             alpha = 0.05,
+             size = 1,
+             shape = 16,
+             colour = col_ramp[1]) +
+  geom_point(data = ndvi_values[ndvi_values$agg_level == 10,], 
+             mapping = aes(x= doy, y= NDVI, 
+                           group = cell_id),
+             alpha = 0.5,
+             size = 1,
+             colour = col_ramp[2]) +
+  geom_point(data = ndvi_values[ndvi_values$agg_level == 33.3,],
+             mapping = aes(x= doy, y= NDVI,
+                           group = cell_id),
+             alpha = 0.7,
+             size = 1,
+             shape = 21,
+             colour = "black",
+             fill = col_ramp[3]) +
   scale_y_continuous(limits = c(0.2, 0.9), breaks = seq(0.2, 0.9, 0.1)) +
   xlab("Day of Year") +
   ylab("NDVI") +
@@ -733,8 +754,8 @@ curve_plots <- ggplot(ndvi_values,
            size = 2,
            color = col_ramp[2]) +
   annotate("point", x = 176.5, y = 0.765,
-           size = 2,
-           color = col_ramp[3]) +
+           size = 2, shape = 21, 
+           fill = col_ramp[3]) +
   annotate("text", x = 176.5, y = 0.865,
            size = 5,
            color = col_ramp[1],
@@ -747,7 +768,7 @@ curve_plots <- ggplot(ndvi_values,
            label = "  10 m") +
   annotate("text", x = 176.5, y = 0.765,
            size = 5,
-           color = col_ramp[3],
+           color = "black",
            hjust = 0,
            label = "  33.3 m") +
   theme_cowplot(15) +
