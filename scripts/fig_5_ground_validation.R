@@ -1107,14 +1107,14 @@ com_mean_leaf_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                                          y = mean_ndvi, 
                                          colour = site, 
                                          group = site_veg_year,
-                                         linetype = year,
+                                         linetype = veg_type,
                                          shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
   labs(x = "Mean standardised\nlongest leaf length",
        y = "\nMean NDVI",
        shape = "Vegetation Type",
-       linetype = "Year",
+       linetype = "Vegeation Type",
        colour = "Site") +
   scale_y_continuous(limits = c(0.5, 0.8), breaks = seq(0.4,0.8,0.1)) +
   scale_x_continuous(limits = c(-1.25,1.25), breaks = seq(-2, 2, 0.5)) +
@@ -1122,7 +1122,8 @@ com_mean_leaf_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                      labels = c("Tussock Sedge", "Dryas-Vetch"))+
   scale_color_manual(values = colour_scale_sites,
                      labels = c("Site 1", "Site 2", "Site 3", "Site 4")) +
-  scale_linetype_manual(values = c(2,1)) +
+  scale_linetype_manual(values = c(1,2),
+                        labels = c("Tussock Sedge", "Dryas-Vetch")) +
   guides(color = guide_legend(order = 1,
                               title = NULL),
          linetype = guide_legend(order = 2,
@@ -1146,14 +1147,14 @@ com_doy_vs_mean_leaf_plots_sent <- ggplot(gb_phen_sent_com,
                                         y = comm_mean_leaf_stand, 
                                         colour = site, 
                                         group = site_veg_year,
-                                        linetype = year,
+                                        linetype = veg_type,
                                         shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
   labs(x = "Day of year\n",
        y =  "Mean standardised\nlongest leaf length",
        shape = "Vegetation Type",
-       linetype = "Year",
+       linetype = "Vegetation Type",
        colour = "Site") +
   scale_y_continuous(limits = c(-1.25,1.25), breaks = seq(-2, 2, 0.5)) +
   scale_x_continuous(limits = c(170,230), breaks = seq(170, 230, 10)) +
@@ -1161,7 +1162,8 @@ com_doy_vs_mean_leaf_plots_sent <- ggplot(gb_phen_sent_com,
                      labels = c("Tussock Sedge", "Dryas-Vetch"))+
   scale_color_manual(values = colour_scale_sites,
                      labels = c("Site 1", "Site 2", "Site 3", "Site 4")) +
-  scale_linetype_manual(values = c(2,1)) +
+  scale_linetype_manual(values = c(1,2),
+                        labels = c("Tussock Sedge", "Dryas-Vetch")) +
   guides(color = guide_legend(order = 1,
                               title = NULL),
          linetype = guide_legend(order = 2,
@@ -1182,14 +1184,14 @@ com_doy_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                                    y = mean_ndvi, 
                                    colour = site, 
                                    group = site_veg_year,
-                                   linetype = year,
+                                   linetype = veg_type,
                                    shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
   labs(x = "Day of year\n",
        y =  "\nMean NDVI",
        shape = "Vegetation Type",
-       linetype = "Year",
+       linetype = "Vegetation Type",
        colour = "Site") +
   scale_y_continuous(limits = c(0.4,0.8), breaks = seq(0.4, 0.8, 0.1)) +
   scale_x_continuous(limits = c(170,230), breaks = seq(170, 230, 10)) +
@@ -1197,7 +1199,8 @@ com_doy_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                      labels = c("Tussock Sedge", "Dryas-Vetch"))+
   scale_color_manual(values = colour_scale_sites,
                      labels = c("Area 1", "Area 2", "Area 3", "Area 4")) +
-  scale_linetype_manual(values = c(2,1)) +
+  scale_linetype_manual(values = c(1,2),
+                        labels = c("Tussock Sedge", "Dryas-Vetch")) +
   guides(color = guide_legend(order = 1,
                               title = NULL),
          linetype = guide_legend(order = 2,
