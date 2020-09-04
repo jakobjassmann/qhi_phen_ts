@@ -479,7 +479,7 @@ save_plot(paste0(figure_out_path, "../fig_s4_a_mean_agg.png"), a_mean_plot,
 
 
 
-## Plot PS2 Komakuk coef a aggreation as an example
+## Plot PS2 Komakuk coef a aggreation as an example (panel c)
 site_name <- "PS2"
 veg_type <- "KOM"
 rasters_to_plot <- paste0(site_name, "_",
@@ -534,7 +534,7 @@ plot_list <- lapply(agg_levels, function(agg_level){
 })
 
 grid_matrix <- rbind(c( 1, 2, 3, 4, 5, 6))
-png(paste0(figure_out_path, "fig_4_panel_b.png"), 
+png(paste0(figure_out_path, "fig_4_panel_c.png"), 
     width = 12,
     height = 3, 
     units = "in", 
