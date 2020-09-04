@@ -882,7 +882,7 @@ landsat8_drone_model_full <- MCMCglmm(
   pr = T) 
 summary(landsat8_drone_model_full)
 save(landsat8_drone_model_full, file = paste0(data_out_path, "ls8_model_full.rda"))
-#load(paste0(data_out_path, "model_full.rda"))
+#load(paste0(data_out_path, "ls8_model_full.rda"))
 mcmc_output_to_table(landsat8_drone_model_full, 
                      paste0(data_out_path, "ls8_model_full_table.csv"))
 
