@@ -16,7 +16,7 @@ library(tidyverse)
 library(colorspace)
 
 # Set global parameters / load site boundaries and meta data
-figure_out_path <- "figures/fig_4_curve_fits_resampled/"
+figure_out_path <- "figures/fig_4_s6_s7_s8_curve_fits_resampled/"
 log_path <- "log/"
 data_out_path <- "data/fig_4_curve_resampled/"
 site_boundaries <- read.csv("data/site_boundaries/ps_sent_site_bounds.csv")
@@ -366,7 +366,7 @@ scatter_both <- ggplot(
   theme_cowplot(20) +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-save_plot(paste0(figure_out_path, "../fig_s5_coefs_agg_level.png"), 
+save_plot(paste0(figure_out_path, "../fig_s6_coefs_agg_level.png"), 
           scatter_both, base_aspect_ratio = 1.6, base_height = 10)
 
 cor(coefs_df$a, coefs_df$b, method = "spearman")
@@ -474,7 +474,7 @@ a_mean_plot <- ggplot(coefs_df_sd_summary,
   theme_cowplot(20) +
   theme(legend.position = "none")
 
-save_plot(paste0(figure_out_path, "../fig_s4_a_mean_agg.png"), a_mean_plot, 
+save_plot(paste0(figure_out_path, "../fig_s7_a_mean_agg.png"), a_mean_plot, 
           base_aspect_ratio = 1.6)
 
 
@@ -774,6 +774,11 @@ curve_plots <- ggplot(ndvi_values,
   theme_cowplot(15) +
   theme(legend.position = "none")
 # curve_plots
-system.time(save_plot("figures/fig_4_curve_fits_resampled/fig_4_panel_b.png",
+system.time(save_plot("figures/fig_4_s6_s7_s8_curve_fits_resampled/fig_4_panel_b.png",
           curve_plots,
           base_aspect_ratio = 1.3))
+
+# Finally, figure S8 is assembled from the outputs of this script  
+# sotred in the data/fig_4_curve_resampled/ folder using the
+# fig_s_8_curve_fit_examples_site2.qgz file found in  
+# figures/fig_4_s6_s7_s8_curve_fits_resampled

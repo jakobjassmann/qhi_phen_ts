@@ -205,5 +205,5 @@ figure <- ggarrange(
   common.legend = TRUE,
   legend = "bottom") 
 
-ggsave("Figures/fig_x_plant_cover/fig_x_plant_cover.png", 
+ggsave("Figures/fig_s1_plant_cover/fig_s1_plant_cover.png", 
        figure, width = 14, height = 8)

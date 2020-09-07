@@ -643,12 +643,12 @@ vario_plot_kom <- ggplot(filter(varios, veg == "KOM" & site_veg != "PS3_KOM"),
   theme_cowplot(18) +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0)) 
-save_plot(paste0(figure_out_path, "fig_s1_peak_season_varios.png"),
+save_plot(paste0(figure_out_path, "fig_s3_peak_season_varios.png"),
           plot_grid(vario_plot_her, vario_plot_kom, ncol = 2, labels = "auto",
                     label_size = 26),
           base_aspect_ratio = 2.6)
 
-## _5c) Figure S2 ----
+## _5c) Figure S5 ----
 ## Cross season progression of variograms for ps 1 and ps2
 varios <- varios_all_df %>% 
   mutate(site_name = substr(site_veg, 1,3)) %>%
@@ -788,12 +788,12 @@ cross_season_plots <- plot_grid(vario_plot_ps1_her,
                                 nrow = 2, ncol = 2,
                                 labels = "auto",
                                 label_size = 26)
-save_plot(paste0(figure_out_path, "fig_s2_cross_season_varios.png"),
+save_plot(paste0(figure_out_path, "fig_s5_cross_season_varios.png"),
           cross_season_plots,
           base_height = 8,
           base_aspect_ratio = 1.3)
 
-## _5d) Figure S3 ----
+## _5d) Figure S4 ----
 ### Plot Site 3 variograms 
 site_name <- "PS3"
 site_name_full <- site_names$site_name_full[site_names$site_name == site_name] 
@@ -839,7 +839,7 @@ vario_plot_45m_PS3 <- ggplot(varios,
         plot.title = element_text(hjust = 0)) 
 save_plot(vario_plot_45m_PS3, 
           filename = paste0(figure_out_path, 
-                            "/fig_s3_site3_variograms.png"),
+                            "/fig_s4_site3_variograms.png"),
           base_aspect_ratio = 1.6)
 
 # Back up commands to allow loading of already calculated variograms and fits 

@@ -1215,4 +1215,6 @@ save_plot("figures/fig_5_ground_based_phenology/sent_com_doy_vs_ndvi_plot.png",
           base_height = 5,
           base_aspect_ratio = 1.35)
 
+# Figure 5, S7 and S8 are then assembled from these plots using the
+# fig_5_ground_based_phenology.qgz in figures/fig_5_ground_based_phenology/
 

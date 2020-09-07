@@ -16,9 +16,9 @@ library(gridExtra)
 library(colorspace)
 
 # Set global parameters / load site boundaries and meta data
-figure_out_path <- "figures/fig_4_curve_fits_aggregations/"
+figure_out_path <- "figures/fig_s2_curve_fits_aggregations/"
 log_path <- "log/"
-data_out_path <- "data/fig_4_curve_aggregations/"
+data_out_path <- "data/fig_s2_curve_aggregations/"
 site_boundaries <- read.csv("data/site_boundaries/ps_sent_site_bounds.csv")
 load("data/meta_data.Rda")
 
@@ -482,7 +482,7 @@ a_sd_plot <- ggplot(coefs_df_sd_summary,
   theme_cowplot(20) +
   theme(legend.position = "none") 
 
-save_plot(paste0(figure_out_path, "fig_4_panel_a_aggregation.png"),
+save_plot(paste0(figure_out_path, "fig_s2_panel_a_aggregation.png"),
           a_sd_plot, 
           base_aspect_ratio = 1.3)
 
@@ -571,7 +571,7 @@ plot_list <- lapply(agg_levels, function(agg_level){
 })
 
 grid_matrix <- rbind(c( 1, 2, 3, 4, 5, 6))
-png(paste0(figure_out_path, "fig_4_panel_c_aggregation.png"), 
+png(paste0(figure_out_path, "fig_s2_panel_c_aggregation.png"), 
     width = 12,
     height = 3, 
     units = "in", 
@@ -598,7 +598,7 @@ plot_drone_native <- levelplot(
   at = scale_breaks)
 
 grid_matrix <- rbind(c( 1, 1, 1, 1, 1, 1))
-png(paste0(figure_out_path, "fig_4_scale_bar_aggregation.png"), 
+png(paste0(figure_out_path, "fig_s2_scale_bar_aggregation.png"), 
     width = 12,
     height = 3, 
     units = "in", 
@@ -613,9 +613,9 @@ dev.off()
 ## Panel b) curve samples 
 # Example PS2 KOM
 
-ndvi_stack_0.5m <- brick(paste0("data/fig_4_curve_resampled/2017/PS2_KOM_NDVI_stack_0.5.tif"))
-ndvi_stack_10m <- brick(paste0("data/fig_4_curve_resampled/2017/PS2_KOM_NDVI_stack_10.tif"))
-ndvi_stack_30m <- brick(paste0("data/fig_4_curve_resampled/2017/PS2_KOM_NDVI_stack_30.tif"))
+ndvi_stack_0.5m <- brick(paste0("data/fig_s2_curve_resampled/2017/PS2_KOM_NDVI_stack_0.5.tif"))
+ndvi_stack_10m <- brick(paste0("data/fig_s2_curve_resampled/2017/PS2_KOM_NDVI_stack_10.tif"))
+ndvi_stack_30m <- brick(paste0("data/fig_s2_curve_resampled/2017/PS2_KOM_NDVI_stack_30.tif"))
 doys <- meta_data %>%
   filter(site_veg == "PS2_KOM" & format(date, "%Y") == 2017 & band == "NDVI") %>%
   mutate(doy = format(date, "%j")) %>% 
@@ -811,6 +811,6 @@ curve_plots <- ggplot(ndvi_values,
   theme_cowplot(15) +
   theme(legend.position = "none")
 # curve_plots
-system.time(save_plot(paste0(figure_out_path, "fig_4_panel_b_aggregation.png"),
+system.time(save_plot(paste0(figure_out_path, "fig_s2_panel_b_aggregation.png"),
                       curve_plots,
                       base_aspect_ratio = 1.3))
