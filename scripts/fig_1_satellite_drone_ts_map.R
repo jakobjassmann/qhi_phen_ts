@@ -722,6 +722,11 @@ save_plot(paste0(ts_out_path,"PS4_HER_2017_tsplot.png"),
 save_plot(paste0(ts_out_path,"PS4_KOM_2017_tsplot.png"), 
           PS4_KOM_tsplot_2017, base_aspect_ratio = 1)
 
+# Save meta_data_global to drive
+save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
+     meta_data_global)
+# load(paste0(data_out_path, "meta_data_with_means.Rda"))
+
 ## 3 Create legend plot ----
 # drone Landsat8 MODIS Sentinel 2A Sentinel 2B
 plot_scale <- viridis(6)
@@ -921,9 +926,9 @@ st_write(sites_coords_sf, "data/site_boundaries/ps_site_bounds.shp",
 # write.csv(sensor_peak_season_diff_mean,
 #           file = paste0(data_out_path, "sensor_peak_season_mean_diff.csv"))
 # 
-# save(file = paste0(data_out_path, "meta_data_with_means.Rda"),
-#      meta_data_global)
-# # load(paste0(data_out_path, "meta_data_with_means.Rda"))
+
+
+
 
 # Divide season into 7 day block startin on the Set doy range
 first_march <- c(122, 121) # 2016 was a leap year, 2017
@@ -1070,10 +1075,10 @@ weekly_means_plot <- ggplot(weekly_means %>%
               size= 1, alpha = 1 ) +
   geom_point(aes(x = drone, y = Landsat8, 
                  #shape = veg_type
-  ), fill = "#440154FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
+  ), fill = "#A9A9A9FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
   geom_point(aes(x = drone, y = Sentinel.2A, 
                  #shape = veg_type
-  ), fill = "#414487FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
+  ), fill = "#440154FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
   geom_point(aes(x = drone, y = Sentinel.2B, 
                  #shape = veg_type
   ), fill = "#2A788EFF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) + 
@@ -1082,7 +1087,7 @@ weekly_means_plot <- ggplot(weekly_means %>%
   ), fill = "#FDE725FF", colour = "#00000088", size = 2, shape = 21, alpha = 0.7) +
   geom_smooth(aes(x = drone, y = Landsat8), colour = "#A9A9A9FF",
               method = "lm", se = F, size = 1, alpha = 0.7) +
-  geom_smooth(aes(x = drone, y = Sentinel.2A), colour = "#414487FF",
+  geom_smooth(aes(x = drone, y = Sentinel.2A), colour = "#440154FF",
               method = "lm", se = F, size = 1, alpha = 0.7) +
   geom_smooth(aes(x = drone, y = Sentinel.2B), colour = "#2A788EFF",
               method = "lm", se = F, size = 1, alpha = 0.7) +
