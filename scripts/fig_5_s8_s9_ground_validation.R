@@ -114,6 +114,7 @@ gb_phen_ndvi <- data.frame(site = substr(gbstats_df$site_veg, 1,3),
 gb_phen_ndvi <- mutate(gb_phen_ndvi, veg_type = substr(site_veg, 5,7))
 
 save(gb_phen_ndvi, file = paste0(data_out_path, "gb_phen_ndvi.Rda"))
+# load(paste0(data_out_path, "gb_phen_ndvi.Rda"))
 
 ### 2) Leaf Length vs. NDVI correlation ----
 
@@ -160,8 +161,8 @@ com_mean_leaf_vs_ndvi_plot <- ggplot(gb_phen_ndvi_com,
            shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Mean standardised\nlongest leaf length",
-       y = "\nMean NDVI",
+  labs(x = "Mean longest leaf length",
+       y = "Mean NDVI",
        shape = "Vegetation Type",
        linetype = "Year",
        colour = "Site") +
@@ -199,8 +200,8 @@ com_doy_vs_mean_leaf_plot <- ggplot(gb_phen_ndvi_com,
                                          shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Day of year\n",
-       y =  "Mean standardised\nlongest leaf length",
+  labs(x = "Day of year",
+       y =  "Mean longest leaf length",
        shape = "Vegetation Type",
        linetype = "Year",
        colour = "Site") +
@@ -235,8 +236,8 @@ com_doy_vs_ndvi_plot <- ggplot(gb_phen_ndvi_com,
                                    shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Day of year\n",
-       y =  "\nMean NDVI",
+  labs(x = "Day of year",
+       y =  "Mean NDVI",
        shape = "Vegetation Type",
        linetype = "Year",
        colour = "Site") +
@@ -1111,8 +1112,8 @@ com_mean_leaf_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                                          shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Mean standardised\nlongest leaf length",
-       y = "\nMean NDVI",
+  labs(x = "Mean longest leaf length",
+       y = "Mean NDVI",
        shape = "Vegetation Type",
        linetype = "Vegeation Type",
        colour = "Site") +
@@ -1151,8 +1152,8 @@ com_doy_vs_mean_leaf_plots_sent <- ggplot(gb_phen_sent_com,
                                         shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Day of year\n",
-       y =  "Mean standardised\nlongest leaf length",
+  labs(x = "Day of year",
+       y =  "Mean longest leaf length",
        shape = "Vegetation Type",
        linetype = "Vegetation Type",
        colour = "Site") +
@@ -1188,8 +1189,8 @@ com_doy_vs_ndvi_plot_sent <- ggplot(gb_phen_sent_com,
                                    shape = veg_type)) + 
   geom_point(size = 3) + 
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Day of year\n",
-       y =  "\nMean NDVI",
+  labs(x = "Day of year",
+       y =  "Mean NDVI",
        shape = "Vegetation Type",
        linetype = "Vegetation Type",
        colour = "Site") +
