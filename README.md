@@ -15,7 +15,7 @@ Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe, Ger
 Contact: j.assmann@bios.au.dk
 
 # Citation
-Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. **In prep**. Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites.
+Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. In press. Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites. https://doi.org/10.32942/osf.io/tqekn
 
 [\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
