@@ -1,6 +1,6 @@
 # Qikiqtaruk Phenology Time-Series code repository
 
-This code repository contains the analytical scripts and tabular data required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. The execution of the code also requires the spatial data files found in the accompanying data repository on Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3904258.svg)](https://doi.org/10.5281/zenodo.3904258) and well as the retrival of Landsat data as detailed in the manuscript and the scripts contained in this repository.
+This code repository contains the analytical scripts and tabular data required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. The execution of the code also requires the spatial data files found in the accompanying data repository on Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3904258.svg)](https://doi.org/10.5281/zenodo.3904258), as well as the retrival of Landsat data as detailed in the manuscript and the scripts contained in this repository.
 
 # Content
 1. [Authors](#Authors)
