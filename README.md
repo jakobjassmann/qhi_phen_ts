@@ -1,6 +1,6 @@
 # Qikiqtaruk Phenology Time-Series code repository
 
-This code repository contains the analytical scripts and tabular data required to generate the figures, tables and statistics reported in *Assmann et al. (in prep) - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. The execution of the code also requires the spatial data files found in the accompanying data repository on Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3904258.svg)](https://doi.org/10.5281/zenodo.3904258), as well as the retrival of Landsat data as detailed in the manuscript and the scripts contained in this repository.
+This code repository contains the analytical scripts and tabular data required to generate the figures, tables and statistics reported in *Assmann et al. 2020 - Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites*. The execution of the code also requires the spatial data files found in the accompanying data repository on Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3904258.svg)](https://doi.org/10.5281/zenodo.3904258), as well as the retrival of Landsat data as detailed in the manuscript and the scripts contained in this repository.
 
 # Content
 1. [Authors](#Authors)
@@ -15,7 +15,7 @@ Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe, Ger
 Contact: j.assmann@bios.au.dk
 
 # Citation
-Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. In press. Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites. https://doi.org/10.32942/osf.io/tqekn
+Jakob J. Assmann, Isla H. Myers-Smith, Jeffrey T. Kerby, Andrew M. Cunliffe and Gergana N. Daskalova. 2020. Drone data reveal heterogeneity in tundra greenness and phenology not captured by satellites. Environmental Research Letters. 15. 125002. https://doi.org/10.1088/1748-9326/abbf7d
 
 [\[back to top\]](#Qikiqtaruk-Phenology-Time-Series-Code-Repository)
 
